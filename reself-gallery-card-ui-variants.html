@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Re:Self — 5 Mobile Gallery Card Loop Variants</title>
+    <style>
+      :root {
+        --ink: #111111;
+        --muted: #6b6b6b;
+        --line: #e8e8e8;
+        --paper: #f7f7f7;
+        --chip: #f2f2f2;
+        --accent: #2f6bff;
+      }
+
+      * { box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: 'Manrope', 'Inter', system-ui, sans-serif;
+        color: var(--ink);
+        background: linear-gradient(180deg, #f4f5f8 0%, #eceff4 120%);
+      }
+
+      .page {
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 42px 18px 96px;
+      }
+
+      h1 {
+        margin: 0 0 10px;
+        font-size: clamp(27px, 6vw, 44px);
+        letter-spacing: -0.03em;
+        font-weight: 800;
+      }
+
+      .lede {
+        margin: 0 0 26px;
+        max-width: 84ch;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .note {
+        display: inline-block;
+        font-size: 12px;
+        color: #404040;
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 7px 12px;
+        margin-bottom: 20px;
+      }
+
+      .panel-grid {
+        display: grid;
+        gap: 16px;
+      }
+
+      .variant {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: #fff;
+        padding: 14px;
+        box-shadow: 0 16px 30px rgba(23, 23, 23, 0.08);
+      }
+
+      .variant__head {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: baseline;
+        margin-bottom: 12px;
+      }
+
+      .variant__title {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+
+      .variant__sub {
+        margin: 0;
+        font-size: 12px;
+        color: #6d6d6d;
+      }
+
+      .phone-shell {
+        width: min(320px, 100%);
+        aspect-ratio: 402 / 874;
+        margin: 0 auto;
+        border-radius: 34px;
+        border: 1px solid #ececec;
+        padding: 9px;
+        background: #f1f1f1;
+        box-shadow: 0 20px 45px rgba(17, 17, 17, 0.16);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .phone-stage {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        border-radius: 28px;
+        overflow: hidden;
+        background: #fff;
+        perspective: 900px;
+        perspective-origin: center;
+      }
+
+      .phone-track {
+        position: absolute;
+        inset: 0;
+        transform-style: preserve-3d;
+      }
+
+      .frame {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 28px;
+        opacity: 0;
+        transition: transform 500ms ease, opacity 500ms ease, filter 500ms ease;
+        pointer-events: none;
+      }
+
+      .caption {
+        margin: 10px auto 0;
+        max-width: 320px;
+        min-height: 18px;
+        font-size: 11px;
+        color: #2d2d2d;
+        font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+        letter-spacing: 0.01em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .phone-meta {
+        margin: 8px auto 2px;
+        max-width: 320px;
+        font-size: 11px;
+        color: #707070;
+        font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .focus-wrap {
+        position: absolute;
+        inset: 0;
+        border-radius: 28px;
+        overflow: hidden;
+      }
+
+      .focus-wrap img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 560ms cubic-bezier(0.2, 0.7, 0.2, 1),
+          opacity 560ms ease, filter 560ms ease;
+      }
+
+      .focus-back {
+        filter: blur(18px) saturate(0.7);
+        transform: scale(1.08);
+      }
+
+      .focus-front {
+        transform: scale(1);
+      }
+
+      .focus-front.next {
+        transform: scale(1.01) translateX(6%) translateY(1%);
+        opacity: 0.08;
+      }
+
+      .focus-front.prev {
+        transform: scale(1.01) translateX(-6%) translateY(1%);
+        opacity: 0.08;
+      }
+
+      .screen-label {
+        font-size: 11px;
+        color: #444;
+        text-align: center;
+        margin-top: 7px;
+      }
+
+      .ring-shell {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+      }
+
+      .ring-shell .frame {
+        width: 84%;
+        height: 84%;
+        border-radius: 24px;
+      }
+
+      .ring-shell .frame .frame {
+        position: absolute;
+      }
+
+      .thumb-row {
+        margin-top: 10px;
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 6px;
+        max-width: 320px;
+      }
+
+      .thumb {
+        border: none;
+        background: transparent;
+        padding: 0;
+        border-radius: 9px;
+        overflow: hidden;
+        cursor: pointer;
+        opacity: 0.5;
+        border: 1px solid transparent;
+      }
+
+      .thumb img {
+        width: 100%;
+        height: 56px;
+        object-fit: cover;
+        display: block;
+      }
+
+      .thumb.is-active {
+        opacity: 1;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 1px rgba(47, 107, 255, 0.18);
+      }
+
+      .source {
+        margin-top: 22px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        background: var(--chip);
+        padding: 12px;
+        color: #555;
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .source b {
+        color: #222;
+      }
+
+      @media (min-width: 820px) {
+        .panel-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (min-width: 1220px) {
+        .panel-grid {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .frame,
+        .focus-wrap img {
+          transition: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <span class="note">Gallery card loops · mobile-only playback · Paper source: RESELF</span>
+      <h1>Re:Self — 5 animation variants for the mobile gallery card loop</h1>
+      <p class="lede">
+        Built from <b>all 23 current mobile screens</b> in Paper file <b>RESELF</b>.
+        Each variant uses only that sequence as image-driven motion so the loop stays grounded in your
+        latest design system and copy.
+      </p>
+
+      <section class="panel-grid" aria-live="polite">
+        <article class="variant" data-kind="fade" data-ms="1900">
+          <div class="variant__head">
+            <h2 class="variant__title">Variant 1 — Fade Beat Loop</h2>
+            <span class="variant__sub">clear legibility / clean transitions</span>
+          </div>
+          <div class="phone-shell">
+            <div class="phone-stage">
+              <div class="phone-track" aria-hidden="true"></div>
+            </div>
+          </div>
+          <div class="phone-meta">Beat map: one active frame at a time</div>
+          <div class="caption" data-label></div>
+        </article>
+
+        <article class="variant" data-kind="sweep" data-ms="1900">
+          <div class="variant__head">
+            <h2 class="variant__title">Variant 2 — Swipe Sweep</h2>
+            <span class="variant__sub">mobile feed feel / side-card context</span>
+          </div>
+          <div class="phone-shell">
+            <div class="phone-stage">
+              <div class="phone-track" aria-hidden="true"></div>
+            </div>
+          </div>
+          <div class="phone-meta">Beat map: center + adjacent context cards</div>
+          <div class="caption" data-label></div>
+        </article>
+
+        <article class="variant" data-kind="depth" data-ms="2100">
+          <div class="variant__head">
+            <h2 class="variant__title">Variant 3 — Depth Peel</h2>
+            <span class="variant__sub">stacked 3D reveal / premium</span>
+          </div>
+          <div class="phone-shell">
+            <div class="phone-stage">
+              <div class="phone-track" aria-hidden="true"></div>
+            </div>
+          </div>
+          <div class="phone-meta">Beat map: three depth layers</div>
+          <div class="caption" data-label></div>
+        </article>
+
+        <article class="variant" data-kind="focus" data-ms="2100">
+          <div class="variant__head">
+            <h2 class="variant__title">Variant 4 — Focus Lens</h2>
+            <span class="variant__sub">macro focus / guided attention</span>
+          </div>
+          <div class="phone-shell">
+            <div class="phone-stage">
+              <div class="focus-wrap" aria-hidden="true">
+                <img class="focus-back frame" data-layer="back" />
+                <img class="focus-front frame is-current" data-layer="main" />
+              </div>
+            </div>
+          </div>
+          <div class="phone-meta">Beat map: blurred context with a focused hero frame</div>
+          <div class="caption" data-label></div>
+        </article>
+
+        <article class="variant" data-kind="ring" data-ms="2400">
+          <div class="variant__head">
+            <h2 class="variant__title">Variant 5 — RPG Selector Ring</h2>
+            <span class="variant__sub">character-select orbit / object-led</span>
+          </div>
+          <div class="phone-shell">
+            <div class="phone-stage">
+              <div class="phone-track ring-shell" aria-hidden="true"></div>
+            </div>
+          </div>
+          <div class="thumb-row" data-thumbs aria-label="screen thumbnails"></div>
+          <div class="phone-meta">Beat map: orbiting cards + active pointer</div>
+          <div class="caption" data-label></div>
+        </article>
+      </section>
+
+      <div class="source">
+        <b>Source artboards (RESELF):</b>
+        m1_home, m2_home>getstarted, m3_welcome, m4_tutorial>recorder1,
+        m6_tutorial>listofintentions1, m8_tutorial>journalentries1,
+        m12_turorial>profile1, m14_tutorial>settings1, m13_tutorial>profile2,
+        m15_tutorial>settings2, m7_tutorial>listofintentions2,
+        m9_tutorial>journalentries2, m11_journalentries>deleteentry,
+        m10_journalentries>listenentry, m5_tutorial>recorder2,
+        m16_journaling>talkingvswriting, m18_talking>free-formvsguided,
+        m19_talking>free-formselected, m20_talking>free-form,
+        m22_writing>free-form, m23_writing>guided, m21_talking>guided,
+        m17_journaling>talkingselected.
+      </div>
+    </main>
+
+    <script>
+      const FRAMES = [
+        { key: '1-0', label: 'm1_home', src: './reself-mobile-frames/m1_home.png' },
+        { key: '10-0', label: 'm2_home>getstarted', src: './reself-mobile-frames/m2_home_getstarted.png' },
+        { key: '21-0', label: 'm3_welcome', src: './reself-mobile-frames/m3_welcome.png' },
+        { key: '4H-0', label: 'm4_tutorial>recorder1', src: './reself-mobile-frames/m4_tutorial_recorder1.png' },
+        { key: '6V-0', label: 'm6_tutorial>listofintentions1', src: './reself-mobile-frames/m6_tutorial_listofintentions1.png' },
+        { key: '9A-0', label: 'm8_tutorial>journalentries1', src: './reself-mobile-frames/m8_tutorial_journalentries1.png' },
+        { key: 'BT-0', label: 'm12_turorial>profile1', src: './reself-mobile-frames/m12_turorial_profile1.png' },
+        { key: 'E4-0', label: 'm14_tutorial>settings1', src: './reself-mobile-frames/m14_tutorial_settings1.png' },
+        { key: 'GE-0', label: 'm13_tutorial>profile2', src: './reself-mobile-frames/m13_tutorial_profile2.png' },
+        { key: 'J0-0', label: 'm15_tutorial>settings2', src: './reself-mobile-frames/m15_tutorial_settings2.png' },
+        { key: 'O0-0', label: 'm7_tutorial>listofintentions2', src: './reself-mobile-frames/m7_tutorial_listofintentions2.png' },
+        { key: 'RE-0', label: 'm9_tutorial>journalentries2', src: './reself-mobile-frames/m9_tutorial_journalentries2.png' },
+        { key: 'WQ-0', label: 'm11_journalentries>deleteentry', src: './reself-mobile-frames/m11_journalentries_deleteentry.png' },
+        { key: '129-0', label: 'm10_journalentries>listenentry', src: './reself-mobile-frames/m10_journalentries_listenentry.png' },
+        { key: '17Q-0', label: 'm5_tutorial>recorder2', src: './reself-mobile-frames/m5_tutorial_recorder2.png' },
+        { key: '1AZ-0', label: 'm16_journaling>talkingvswriting', src: './reself-mobile-frames/m16_journaling_talkingvswriting.png' },
+        { key: '1E8-0', label: 'm18_talking>free-formvsguided', src: './reself-mobile-frames/m18_talking_free-formvsguided.png' },
+        { key: '1H7-0', label: 'm19_talking>free-formselected', src: './reself-mobile-frames/m19_talking_free-formselected.png' },
+        { key: '1K6-0', label: 'm20_talking>free-form', src: './reself-mobile-frames/m20_talking_free-form.png' },
+        { key: '1MM-0', label: 'm22_writing>free-form', src: './reself-mobile-frames/m22_writing_free-form.png' },
+        { key: '1Q0-0', label: 'm23_writing>guided', src: './reself-mobile-frames/m23_writing_guided.png' },
+        { key: '1TF-0', label: 'm21_talking>guided', src: './reself-mobile-frames/m21_talking_guided.png' },
+        { key: '1VU-0', label: 'm17_journaling>talkingselected', src: './reself-mobile-frames/m17_journaling_talkingselected.png' }
+      ];
+
+      const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const variants = document.querySelectorAll('.variant');
+
+      const signedDistance = (a, b, n) => {
+        let d = a - b;
+        if (d > n / 2) d -= n;
+        if (d < -n / 2) d += n;
+        return d;
+      };
+
+      function mountLayered(variant, mode) {
+        const track = variant.querySelector('.phone-track');
+        const label = variant.querySelector('.caption');
+        const nodes = FRAMES.map((frame) => {
+          const img = document.createElement('img');
+          img.className = 'frame';
+          img.src = frame.src;
+          img.alt = frame.label;
+          img.loading = 'lazy';
+          track.appendChild(img);
+          return img;
+        });
+        let step = 0;
+
+        const update = () => {
+          const n = FRAMES.length;
+          nodes.forEach((node, idx) => {
+            const d = signedDistance(idx, step, n);
+            const a = Math.abs(d);
+
+            if (mode === 'fade') {
+              node.style.opacity = idx === step ? 1 : 0;
+              node.style.transform = idx === step ? 'scale(1)' : 'scale(1.03)';
+              node.style.zIndex = idx === step ? 3 : 1;
+              node.style.filter = 'none';
+            }
+
+            if (mode === 'sweep') {
+              if (a > 2) {
+                node.style.opacity = 0;
+              } else {
+                const x = d * 48;
+                const s = 1 - a * 0.12;
+                node.style.opacity = (1 - a * 0.28).toFixed(3);
+                node.style.transform = `translate3d(${x}%, 0, ${120 - a * 24}px) rotateY(${-d * 12}deg) scale(${s})`;
+                node.style.zIndex = a === 0 ? 4 : 2;
+                node.style.filter = a === 0 ? 'none' : 'saturate(0.85)';
+              }
+            }
+
+            if (mode === 'depth') {
+              if (a > 3) {
+                node.style.opacity = 0;
+                return;
+              }
+              const s = 1 - a * 0.07;
+              const y = a * 6;
+              const z = 100 - a * 18;
+              node.style.opacity = (1 - a * 0.2).toFixed(3);
+              node.style.transform = `translate3d(${d * 24}px, ${y}px, ${z}px) rotateX(${a * 3}deg) rotateY(${-d * 9}deg) scale(${s})`;
+              node.style.zIndex = 5 - a;
+              node.style.filter = a === 0 ? 'none' : 'blur(0.2px)';
+            }
+          });
+
+          const current = FRAMES[step % FRAMES.length];
+          label.textContent = `${step + 1}/${FRAMES.length} · ${current.label}`;
+          step = reduceMotion ? 0 : (step + 1) % FRAMES.length;
+        };
+
+        update();
+        if (!reduceMotion) {
+          const ms = Number(variant.dataset.ms) || 1800;
+          setInterval(update, ms);
+        }
+      }
+
+      function mountFocus(variant) {
+        const label = variant.querySelector('.caption');
+        const back = variant.querySelector('[data-layer="back"]');
+        const main = variant.querySelector('[data-layer="main"]');
+        let step = 0;
+
+        const update = () => {
+          const n = FRAMES.length;
+          const prev = (step - 1 + n) % n;
+          const next = (step + 1) % n;
+
+          back.src = FRAMES[prev].src;
+          main.src = FRAMES[step].src;
+          back.alt = FRAMES[prev].label;
+          main.alt = FRAMES[step].label;
+
+          main.dataset.state = 'current';
+
+          if (n > 1) {
+            setTimeout(() => {
+              back.src = FRAMES[next].src;
+              back.alt = FRAMES[next].label;
+            }, 400);
+          }
+
+          label.textContent = `${step + 1}/${FRAMES.length} · ${FRAMES[step].label}`;
+          if (!reduceMotion) {
+            step = (step + 1) % n;
+          }
+        };
+
+        update();
+        if (!reduceMotion) {
+          const ms = Number(variant.dataset.ms) || 1900;
+          setInterval(update, ms);
+        }
+      }
+
+      function mountRing(variant) {
+        const track = variant.querySelector('.phone-track');
+        const label = variant.querySelector('.caption');
+        const thumbRow = variant.querySelector('[data-thumbs]');
+        const nodes = FRAMES.map((frame) => {
+          const img = document.createElement('img');
+          img.className = 'frame';
+          img.src = frame.src;
+          img.loading = 'lazy';
+          img.decoding = 'async';
+          img.alt = frame.label;
+          track.appendChild(img);
+          return img;
+        });
+
+        const thumbs = FRAMES.filter((_, i) => i % 3 === 0).slice(0, 6).map((frame) => {
+          const b = document.createElement('button');
+          b.className = 'thumb';
+          const img = document.createElement('img');
+          img.src = frame.src;
+          img.alt = frame.label;
+          b.appendChild(img);
+          thumbRow.appendChild(b);
+          return b;
+        });
+
+        let step = 0;
+
+        const update = () => {
+          const n = FRAMES.length;
+          nodes.forEach((node, idx) => {
+            const d = signedDistance(idx, step, n);
+            const a = Math.abs(d);
+
+            if (a > 4) {
+              node.style.opacity = 0;
+              return;
+            }
+
+            const x = d * 20;
+            const s = 1 - a * 0.08;
+            const rotY = d * 18;
+            const z = 160 - a * 28;
+            const y = a * 8;
+            node.style.opacity = (d === 0 ? 1 : 0.9 - a * 0.18).toFixed(3);
+            node.style.transform = `translate3d(${x}%, ${y}px, ${z}px) rotateY(${rotY}deg) scale(${s})`;
+            node.style.zIndex = 20 - a;
+            node.style.filter = d === 0 ? 'none' : 'saturate(0.84) contrast(0.92)';
+          });
+
+          label.textContent = `${step + 1}/${FRAMES.length} · ${FRAMES[step].label}`;
+          const pick = Math.floor(((step / n) * thumbs.length) % thumbs.length);
+          thumbs.forEach((t, i) => t.classList.toggle('is-active', i === pick));
+
+          if (!reduceMotion) {
+            step = (step + 1) % FRAMES.length;
+          }
+        };
+
+        thumbs.forEach((t, idx) => {
+          t.addEventListener('click', () => {
+            const value = idx * 3;
+            step = value;
+            update();
+          });
+          t.addEventListener('focus', () => {
+            t.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+          });
+        });
+
+        update();
+        if (!reduceMotion) {
+          const ms = Number(variant.dataset.ms) || 2300;
+          setInterval(update, ms);
+        }
+      }
+
+      for (const variant of variants) {
+        const kind = variant.dataset.kind;
+        if (kind === 'focus') {
+          mountFocus(variant);
+          continue;
+        }
+        if (kind === 'ring') {
+          mountRing(variant);
+          continue;
+        }
+        mountLayered(variant, kind);
+      }
+    </script>
+  </body>
+</html>

@@ -279,14 +279,16 @@ async function writeIndex(entries) {
       * { box-sizing: border-box; }
       body {
         margin: 0;
+        min-height: 100vh;
         font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
         background: var(--bg);
         color: var(--text);
+        display: grid;
+        place-items: center start;
       }
       .wrap {
-        margin: 0 auto;
-        max-width: 1100px;
-        padding: 20px;
+        width: min(1100px, calc(100% - 40px));
+        padding: clamp(16px, 3vw, 32px) 0;
       }
       h1 { margin: 0; }
       .muted { color: var(--muted); }

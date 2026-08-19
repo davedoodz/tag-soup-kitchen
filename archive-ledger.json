@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-19T06:39:12.357Z",
+  "generatedAt": "2026-08-19T06:52:47.935Z",
   "repository": "Tag Soup Kitchen",
   "sourceRoot": "../final-portfolio",
   "entries": [
@@ -715,6 +715,20 @@
       "size": 29002,
       "state": "live",
       "port": 4229,
+      "inSource": true
+    },
+    {
+      "path": "reself-gallery-card-ui-variants.html",
+      "sourcePath": "public/reself-gallery-card-ui-variants.html",
+      "createdAt": "2026-08-19T06:46:44.618Z",
+      "updatedAt": "2026-08-19T06:46:44.618Z",
+      "size": 20478,
+      "sourceHash": "0d451d9a943b1cf0859b70269379fb6123eb5925",
+      "title": "Re:Self — 5 Mobile Gallery Card Loop Variants",
+      "description": "Re:Self — 5 Mobile Gallery Card Loop Variants :root { --ink: #111111; --muted: #6b6b6b; --line: #e8e8e8; --paper: #f7f7f7; --chip: #f2f2f2; --accent: #2f6bff; }",
+      "state": "standalone",
+      "port": null,
+      "sequence": 52,
       "inSource": true
     }
   ]

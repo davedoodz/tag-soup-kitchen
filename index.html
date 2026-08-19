@@ -15,14 +15,16 @@
       * { box-sizing: border-box; }
       body {
         margin: 0;
+        min-height: 100vh;
         font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
         background: var(--bg);
         color: var(--text);
+        display: grid;
+        place-items: center start;
       }
       .wrap {
-        margin: 0 auto;
-        max-width: 1100px;
-        padding: 20px;
+        width: min(1100px, calc(100% - 40px));
+        padding: clamp(16px, 3vw, 32px) 0;
       }
       h1 { margin: 0; }
       .muted { color: var(--muted); }
@@ -78,8 +80,8 @@
       <h1>Tag Soup Kitchen (a.k.a. HTML Lab)</h1>
       <p class="muted">A minimalist long-term archive of every HTML surface.</p>
       <p class="meta">
-        <span>Entries: <strong>51</strong></span>
-        <span>Generated at: <strong>2026-08-19T06:39:12.357Z</strong></span>
+        <span>Entries: <strong>52</strong></span>
+        <span>Generated at: <strong>2026-08-19T06:52:47.935Z</strong></span>
         <span>Source: <strong>../final-portfolio</strong></span>
       </p>
       <table>
@@ -656,6 +658,17 @@
           <td>The hidecs2.davidlafond.xyz project page: CSS-3D reenactment machine whose screen is the live project record, drawn with HTML-in-canvas when the browser has it.</td>
           <td><span class="muted">public/hidecs2/index.html</span></td>
           <td><code>4229</code></td>
+        </tr>
+
+        <tr>
+          <td>0052</td>
+          <td><time datetime="2026-08-19T06:46:44.618Z">2026-08-19</time></td>
+          <td><span class="badge badge">standalone</span></td>
+          <td><a href="./reself-gallery-card-ui-variants.html">reself-gallery-card-ui-variants.html</a></td>
+          <td>Re:Self — 5 Mobile Gallery Card Loop Variants</td>
+          <td>Re:Self — 5 Mobile Gallery Card Loop Variants :root { --ink: #111111; --muted: #6b6b6b; --line: #e8e8e8; --paper: #f7f7f7; --chip: #f2f2f2; --accent: #2f6bff; }</td>
+          <td><span class="muted">public/reself-gallery-card-ui-variants.html</span></td>
+          <td>-</td>
         </tr>
         </tbody>
       </table>
