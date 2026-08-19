@@ -12,7 +12,7 @@ const SOURCE = (() => {
   return path.resolve(ROOT, sourceArg || '../final-portfolio');
 })();
 
-const OUTPUT = ROOT;
+const OUTPUT = path.resolve(arg('out') || ROOT);
 const SKIP_DIRS = new Set(['.git', 'node_modules', '.vite', '.obsidian', 'dist']);
 const EXCLUDED_ROOT_HTML = new Set(['index.html']);
 const CONFIG_PATH = path.join(SOURCE, 'scripts', 'sites.config.mjs');
@@ -25,12 +25,16 @@ const LEDGER_PATH = path.join(OUTPUT, 'archive-ledger.json');
 const INDEX_PATH = path.join(OUTPUT, 'index.html');
 
 function arg(name) {
-  const needle = `--${name}=`;
-  for (const item of process.argv.slice(2)) {
-    if (item.startsWith(needle)) return item.slice(needle.length);
-    if (item === `--${name}`) return true;
-  }
-  return undefined;
+  const equals = process.argv.find((item) => item.startsWith(`--${name}=`));
+  if (equals) return equals.slice(name.length + 3);
+
+  const found = process.argv.indexOf(`--${name}`);
+  if (found === -1) return undefined;
+
+  const next = process.argv[found + 1];
+  if (next && !next.startsWith('--')) return next;
+
+  return true;
 }
 
 const toPosix = (p) => p.split(path.sep).join('/');
