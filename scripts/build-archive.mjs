@@ -264,84 +264,97 @@ async function writeIndex(entries) {
 
   const output = `<!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>${escapeHtml(NAME)}</title>
-    <style>
-      :root {
-        color-scheme: light;
-        --bg: #f6f7f8;
-        --line: #d8dde3;
-        --text: #17191e;
-        --muted: #60636b;
-      }
-      * { box-sizing: border-box; }
-      body {
-        margin: 0;
-        min-height: 100vh;
-        padding: 0 20px;
-        font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
-        background: var(--bg);
-        color: var(--text);
-      }
-      .wrap {
-        width: 100%;
-        max-width: 1100px;
-        margin: 0 auto;
-        padding: clamp(16px, 3vw, 32px) 0;
-      }
-      h1 { margin: 0; }
-      .muted { color: var(--muted); }
-      table {
-        width: 100%;
-        table-layout: fixed;
-        border-collapse: collapse;
-        border: 1px solid var(--line);
-      }
-      th,
-      td {
-        border-bottom: 1px solid var(--line);
-        text-align: left;
-        vertical-align: top;
-        padding: 10px 8px;
-        overflow-wrap: anywhere;
-      }
-      th {
-        position: sticky;
-        top: 0;
-        z-index: 2;
-        background: #eaf0f8;
-      }
-      thead th { font-weight: 700; }
-      a { color: #1f56d6; }
-      .badge {
-        border: 1px solid #cfd5de;
-        border-radius: 999px;
-        padding: 2px 6px;
-        white-space: nowrap;
-        font-size: 11px;
-        text-transform: uppercase;
-      }
-      .badge-live { background: #eaf8ee; color: #0e5f29; border-color: #b7dfbf; }
-      .badge-archive { background: #fff6e7; color: #7a4a00; border-color: #f0d4a7; }
-      .meta {
-        margin: 8px 0 16px;
-        display: grid;
-        gap: 4px;
-      }
-      .footer {
-        margin-top: 16px;
-        color: var(--muted);
-      }
-      code {
-        font-size: 12px;
-        background: #edf2f9;
-        border-radius: 4px;
-        padding: 1px 5px;
-      }
-    </style>
-  </head>
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <meta name="color-scheme" content="dark" />
+      <title>${escapeHtml(NAME)}</title>
+      <style>
+        :root {
+          color-scheme: dark;
+          --bg: #0b1018;
+          --panel: #111824;
+          --line: #2a3749;
+          --text: #eef2f8;
+          --muted: #9ea8b8;
+          --accent: #6ea8ff;
+          --live: #2de6a2;
+          --live-bg: #11251f;
+          --archive: #ffd37a;
+          --archive-bg: #2d2512;
+          --code: #1a2432;
+        }
+        * { box-sizing: border-box; }
+        body {
+          margin: 0;
+          min-height: 100vh;
+          padding: 0 20px;
+          font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+          background: radial-gradient(circle at 20% 0%, #111d2c 0%, #0b1018 45%, #0b1018 100%);
+          color: var(--text);
+        }
+        .wrap {
+          width: 100%;
+          max-width: 1100px;
+          margin: 0 auto;
+          padding: clamp(16px, 3vw, 32px) 0;
+        }
+        h1 { margin: 0; }
+        .muted { color: var(--muted); }
+        table {
+          width: 100%;
+          table-layout: fixed;
+          border-collapse: collapse;
+          border: 1px solid var(--line);
+          border-radius: 8px;
+          overflow: hidden;
+          box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05), inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+        }
+        th,
+        td {
+          border-bottom: 1px solid var(--line);
+          text-align: left;
+          vertical-align: top;
+          padding: 10px 8px;
+          overflow-wrap: anywhere;
+        }
+        th {
+          position: sticky;
+          top: 0;
+          z-index: 2;
+          color: var(--text);
+          background: var(--panel);
+        }
+        thead th { font-weight: 700; }
+        a { color: var(--accent); }
+        .badge {
+          border: 1px solid #415166;
+          border-radius: 999px;
+          padding: 2px 6px;
+          white-space: nowrap;
+          font-size: 11px;
+          text-transform: uppercase;
+        }
+        .badge-live { background: var(--live-bg); color: var(--live); border-color: #1a4c41; }
+        .badge-archive { background: var(--archive-bg); color: #ffe08b; border-color: #7f6846; }
+        .meta {
+          margin: 8px 0 16px;
+          display: grid;
+          gap: 4px;
+        }
+        .footer {
+          margin-top: 16px;
+          color: var(--muted);
+        }
+        code {
+          font-size: 12px;
+          background: var(--code);
+          border-radius: 4px;
+          color: #b2f2ff;
+          padding: 1px 5px;
+        }
+      </style>
+    </head>
   <body>
     <main class="wrap">
       <h1>${escapeHtml(TITLE)}</h1>

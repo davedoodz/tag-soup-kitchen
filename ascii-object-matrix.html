@@ -1,0 +1,1768 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ASCII asset matrix — Montreal chill studio kit</title>
+    <style>
+      :root {
+        --bg: #060a06;
+        --ink: #8cff66;
+        --muted: #7bcf74;
+        --line: #1a3a24;
+        --surface: #08120b;
+        --surface-strong: #0a1c11;
+        --radius: 16px;
+        --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      }
+
+      * { box-sizing: border-box; }
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+      }
+
+      body {
+        background: radial-gradient(circle at 20% 0%, #0b1f15 0%, #060a06 44%, #040806 100%);
+        color: var(--ink);
+        font-family: var(--mono);
+        font-size: 14px;
+        line-height: 1.45;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .studio {
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 20px;
+        display: grid;
+        gap: 16px;
+      }
+
+      .mast {
+        display: grid;
+        gap: 6px;
+      }
+
+      .eyebrow {
+        color: var(--muted);
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        font-size: 12px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(22px, 2.7vw, 34px);
+        line-height: 1.1;
+        letter-spacing: -0.01em;
+      }
+
+      .lede {
+        margin: 0;
+        max-width: 92ch;
+        color: var(--muted);
+      }
+
+      .status {
+        margin: 0;
+        padding: 8px 10px;
+        border: 1px solid var(--line);
+        color: #a3ff86;
+        background: var(--surface);
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+        gap: 16px;
+        align-items: start;
+      }
+
+      .library {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 14px;
+      }
+
+      .controls {
+        border: 1px solid var(--line);
+        background: var(--surface-strong);
+        padding: 12px;
+        display: grid;
+        gap: 12px;
+        position: sticky;
+        top: 12px;
+      }
+
+      .control {
+        display: grid;
+        gap: 6px;
+      }
+
+      .control__row {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        align-items: baseline;
+      }
+
+      .control__label {
+        margin: 0;
+        font-weight: 600;
+        color: var(--ink);
+      }
+
+      output {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      label {
+        user-select: none;
+      }
+
+      input[type="range"] {
+        width: 100%;
+        accent-color: var(--ink);
+      }
+
+      select {
+        width: 100%;
+        border: 1px solid var(--line);
+        background: #070f0a;
+        color: var(--ink);
+        padding: 6px;
+        font: inherit;
+        font-size: 13px;
+      }
+
+      .model-card {
+        min-height: 360px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        overflow: hidden;
+        background: var(--surface);
+        padding: 10px;
+        display: grid;
+        gap: 8px;
+      }
+
+      .model-card[aria-busy="true"] {
+        border-color: #2ec84f;
+        box-shadow: 0 0 0 1px #2ec84f40;
+      }
+
+      .model-card__head {
+        display: grid;
+        gap: 4px;
+      }
+
+      .model-card h2 {
+        margin: 0;
+        font-size: 14px;
+      }
+
+      .model-card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .model-card__meta {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .model-tag {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .ascii-wrap {
+        position: relative;
+        min-height: 230px;
+        border: 1px solid var(--line);
+        background: #040b08;
+        overflow: hidden;
+        touch-action: none;
+        user-select: none;
+      }
+
+      .ascii-art {
+        margin: 0;
+        white-space: pre;
+        font-family: var(--mono);
+        color: var(--ink);
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        line-height: 1.05;
+        letter-spacing: 0;
+        pointer-events: none;
+        display: block;
+        font-size: var(--cell-size, 8px);
+      }
+
+      .model-card__hint {
+        color: #5d8c5f;
+        font-size: 10px;
+      }
+
+      .hint {
+        border: 1px solid var(--line);
+        padding: 10px;
+        color: var(--muted);
+      }
+
+      .hint h3 {
+        margin: 0 0 4px;
+        color: #9dffa4;
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .hint p {
+        margin: 0;
+        font-size: 12px;
+      }
+
+      @media (max-width: 1040px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+
+        .controls {
+          position: static;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          transition: none !important;
+          animation: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="studio">
+      <header class="mast">
+        <p class="eyebrow">3D asset library · ASCII renderer</p>
+        <h1>Montreal chill lab matrix</h1>
+        <p class="lede">
+          Objects a late-night Montréal designer might actually buy/own: architecture study pieces,
+          drafting tools, guitar geometry, coding hardware, books, running gear, and a few nightlife
+          artifacts. Every tile is real-time ASCII projection and can be rotated by grabbing the art.
+        </p>
+      </header>
+
+      <p id="status" class="status" role="status" aria-live="polite">
+        Loading ascii models…
+      </p>
+
+      <div class="layout">
+        <section id="library" class="library" aria-label="ASCII model matrix"></section>
+
+        <aside class="controls" aria-label="ASCII effect controls">
+          <div class="control">
+            <div class="control__row">
+              <label class="control__label" for="cell-size">Cell size</label>
+              <output id="cell-size-value">7</output>
+            </div>
+            <input id="cell-size" type="range" min="4" max="12" step="1" value="7" />
+          </div>
+
+          <div class="control">
+            <div class="control__row">
+              <label class="control__label" for="sample-budget">Sample budget</label>
+              <output id="sample-budget-value">760</output>
+            </div>
+            <input id="sample-budget" type="range" min="180" max="1500" step="20" value="760" />
+          </div>
+
+          <div class="control">
+            <div class="control__row">
+              <label class="control__label" for="contrast">Contrast</label>
+              <output id="contrast-value">1.18</output>
+            </div>
+            <input id="contrast" type="range" min="0.5" max="2.4" step="0.01" value="1.18" />
+          </div>
+
+          <div class="control">
+            <div class="control__row">
+              <label class="control__label" for="depth">Perspective depth</label>
+              <output id="depth-value">3.8</output>
+            </div>
+            <input id="depth" type="range" min="2.2" max="5.4" step="0.1" value="3.8" />
+          </div>
+
+          <div class="control">
+            <div class="control__row">
+              <label class="control__label" for="noise">Dither noise</label>
+              <output id="noise-value">0.12</output>
+            </div>
+            <input id="noise" type="range" min="0" max="0.4" step="0.01" value="0.12" />
+          </div>
+
+          <div class="control">
+            <div class="control__row">
+              <label class="control__label" for="light-angle">Light azimuth</label>
+              <output id="light-angle-value">74°</output>
+            </div>
+            <input id="light-angle" type="range" min="0" max="360" step="1" value="74" />
+          </div>
+
+          <div class="control">
+            <label class="control__label" for="glyph-set">Glyph set</label>
+            <select id="glyph-set">
+              <option value="dense">Dense · .:-=+*#%@</option>
+              <option value="soft">Soft · .,_-:;=+*#%@</option>
+              <option value="blocks">Blocks · ▁▂▃▄▅▆▇█</option>
+              <option value="technical">Technical · .`^,":;Il!i~+_-?][}{1)(|\/tfjrxnuvczXYZO#&@</option>
+            </select>
+          </div>
+
+          <div class="hint">
+            <h3>How to use</h3>
+            <p>
+              Click/tap any tile and drag to spin the model. Sliders tune the ASCII filter globally for all
+              cards while keeping the matrix layout intact.
+            </p>
+          </div>
+        </aside>
+      </div>
+    </main>
+
+    <script>
+      (() => {
+        const TAU = Math.PI * 2;
+
+        const glyphSets = {
+          dense: ' .:-=+*#%@',
+          soft: ' .,_-:;=+*#%@',
+          blocks: ' ▁▂▃▄▅▆▇█',
+          technical: ' .`^",:;Il!i~+_-?][}{1)(|\\/tfjrxnuvczXYZO#&@',
+        };
+
+        const state = {
+          cellSize: 7,
+          sampleBudget: 760,
+          contrast: 1.18,
+          depth: 3.8,
+          noise: 0.12,
+          lightAngleDeg: 74,
+          glyphSetKey: 'dense',
+          reduced: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+          frameDirty: true,
+          raf: null,
+          last: performance.now(),
+        };
+
+        const refs = {
+          library: document.getElementById('library'),
+          status: document.getElementById('status'),
+          cellSize: document.getElementById('cell-size'),
+          sampleBudget: document.getElementById('sample-budget'),
+          contrast: document.getElementById('contrast'),
+          depth: document.getElementById('depth'),
+          noise: document.getElementById('noise'),
+          lightAngle: document.getElementById('light-angle'),
+          glyphSet: document.getElementById('glyph-set'),
+          outCell: document.getElementById('cell-size-value'),
+          outSamples: document.getElementById('sample-budget-value'),
+          outContrast: document.getElementById('contrast-value'),
+          outDepth: document.getElementById('depth-value'),
+          outNoise: document.getElementById('noise-value'),
+          outAngle: document.getElementById('light-angle-value'),
+        };
+
+        const models = [];
+
+        function clamp(value, min, max) {
+          return Math.min(Math.max(value, min), max);
+        }
+
+        function randBetween(rng, min, max) {
+          return min + rng() * (max - min);
+        }
+
+        function hashSeed(input) {
+          let h = 2166136261;
+          for (let i = 0; i < input.length; i++) {
+            h ^= input.charCodeAt(i);
+            h = Math.imul(h, 16777619);
+            h >>>= 0;
+          }
+          return h >>> 0;
+        }
+
+        function seededRandom(seed) {
+          let value = seed >>> 0 || 2463534242;
+          return () => {
+            value = (Math.imul(value, 1664525) + 1013904223) >>> 0;
+            return value / 0x100000000;
+          };
+        }
+
+        function pushPoint(out, x, y, z, nx, ny, nz) {
+          out.push(x, y, z, nx, ny, nz);
+        }
+
+        function addEllipsoidPoints(out, rng, config = {}) {
+          const {
+            radiusX = 1,
+            radiusY = 1,
+            radiusZ = 1,
+            count = 300,
+            cx = 0,
+            cy = 0,
+            cz = 0,
+          } = config;
+
+          for (let i = 0; i < count; i++) {
+            const v = rng() * 2 - 1;
+            const theta = rng() * TAU;
+            const sinPhi = Math.sqrt(Math.max(0, 1 - v * v));
+
+            const x = cx + radiusX * Math.cos(theta) * sinPhi;
+            const y = cy + radiusY * v;
+            const z = cz + radiusZ * Math.sin(theta) * sinPhi;
+
+            let nx = x - cx;
+            let ny = y - cy;
+            let nz = z - cz;
+
+            nx /= radiusX || 1;
+            ny /= radiusY || 1;
+            nz /= radiusZ || 1;
+            const nLen = Math.hypot(nx, ny, nz) || 1;
+            pushPoint(out, x, y, z, nx / nLen, ny / nLen, nz / nLen);
+          }
+        }
+
+        function addBoxShellPoints(out, rng, config = {}) {
+          const {
+            width = 1,
+            height = 1,
+            depth = 1,
+            count = 180,
+            cx = 0,
+            cy = 0,
+            cz = 0,
+          } = config;
+
+          const hw = width / 2;
+          const hh = height / 2;
+          const hd = depth / 2;
+
+          for (let i = 0; i < count; i++) {
+            const face = (rng() * 6) | 0;
+            const u = rng() - 0.5;
+            const v = rng() - 0.5;
+            let x = 0;
+            let y = 0;
+            let z = 0;
+            let nx = 0;
+            let ny = 0;
+            let nz = 0;
+
+            if (face === 0) {
+              x = hw;
+              y = u * height;
+              z = v * depth;
+              nx = 1;
+            } else if (face === 1) {
+              x = -hw;
+              y = u * height;
+              z = v * depth;
+              nx = -1;
+            } else if (face === 2) {
+              x = u * width;
+              y = hh;
+              z = v * depth;
+              ny = 1;
+            } else if (face === 3) {
+              x = u * width;
+              y = -hh;
+              z = v * depth;
+              ny = -1;
+            } else if (face === 4) {
+              x = u * width;
+              y = v * height;
+              z = hd;
+              nz = 1;
+            } else {
+              x = u * width;
+              y = v * height;
+              z = -hd;
+              nz = -1;
+            }
+
+            const nLen = Math.hypot(nx, ny, nz) || 1;
+            pushPoint(
+              out,
+              x + cx,
+              y + cy,
+              z + cz,
+              nx / nLen,
+              ny / nLen,
+              nz / nLen,
+            );
+          }
+        }
+
+        function addCylinderShellPoints(out, rng, config = {}) {
+          const {
+            radius = 0.5,
+            height = 1,
+            count = 240,
+            axis = 'y',
+            cx = 0,
+            cy = 0,
+            cz = 0,
+          } = config;
+
+          const half = height / 2;
+
+          for (let i = 0; i < count; i++) {
+            const theta = rng() * TAU;
+            const side = rng() * height - half;
+            const a = Math.cos(theta);
+            const b = Math.sin(theta);
+            let x;
+            let y;
+            let z;
+            let nx;
+            let ny;
+            let nz;
+
+            if (axis === 'x') {
+              x = side;
+              y = radius * b;
+              z = radius * a;
+              nx = 0;
+              ny = b;
+              nz = a;
+            } else if (axis === 'z') {
+              x = radius * a;
+              y = radius * b;
+              z = side;
+              nx = a;
+              ny = b;
+              nz = 0;
+            } else {
+              x = radius * a;
+              y = side;
+              z = radius * b;
+              nx = a;
+              ny = 0;
+              nz = b;
+            }
+
+            const n = Math.hypot(nx, ny, nz) || 1;
+            pushPoint(out, x + cx, y + cy, z + cz, nx / n, ny / n, nz / n);
+          }
+        }
+
+        function addTorusShellPoints(out, rng, config = {}) {
+          const {
+            majorRadius = 0.8,
+            minorRadius = 0.2,
+            count = 320,
+            cx = 0,
+            cy = 0,
+            cz = 0,
+          } = config;
+
+          for (let i = 0; i < count; i++) {
+            const theta = rng() * TAU;
+            const phi = rng() * TAU;
+            const c = Math.cos(phi);
+            const s = Math.sin(phi);
+
+            const mx = Math.cos(theta);
+            const mz = Math.sin(theta);
+
+            const x = (majorRadius + minorRadius * c) * mx;
+            const y = minorRadius * s;
+            const z = (majorRadius + minorRadius * c) * mz;
+
+            const nx = c * mx;
+            const ny = s;
+            const nz = c * mz;
+
+            const nLen = Math.hypot(nx, ny, nz) || 1;
+            pushPoint(
+              out,
+              x + cx,
+              y + cy,
+              z + cz,
+              nx / nLen,
+              ny / nLen,
+              nz / nLen,
+            );
+          }
+        }
+
+        function addLineCloud(out, rng, config = {}) {
+          const {
+            x0 = 0,
+            y0 = 0,
+            z0 = 0,
+            x1 = 0,
+            y1 = 0,
+            z1 = 0,
+            count = 180,
+            jitter = 0,
+          } = config;
+
+          const dx = x1 - x0;
+          const dy = y1 - y0;
+          const dz = z1 - z0;
+          const length = Math.hypot(dx, dy, dz) || 1;
+          const nx = dx / length;
+          const ny = dy / length;
+          const nz = dz / length;
+
+          for (let i = 0; i < count; i++) {
+            const t = rng();
+            const w = (rng() - 0.5) * jitter;
+            const x = x0 + dx * t + w;
+            const y = y0 + dy * t + w;
+            const z = z0 + dz * t + w;
+            pushPoint(out, x, y, z, nx, ny, nz);
+          }
+        }
+
+        function rotateAndShade(
+          x,
+          y,
+          z,
+          nx,
+          ny,
+          nz,
+          rotX,
+          rotY,
+          lightX,
+          lightY,
+          lightZ,
+          settings,
+          now,
+        ) {
+          const cosX = Math.cos(rotX);
+          const sinX = Math.sin(rotX);
+          const cosY = Math.cos(rotY);
+          const sinY = Math.sin(rotY);
+
+          // X rotation
+          const y1 = y * cosX - z * sinX;
+          const z1 = y * sinX + z * cosX;
+          const ny1 = ny * cosX - nz * sinX;
+          const nz1 = ny * sinX + nz * cosX;
+
+          // Y rotation
+          const x2 = x * cosY + z1 * sinY;
+          const z2 = -x * sinY + z1 * cosY;
+          const nx2 = nx * cosY + nz1 * sinY;
+          const nz2 = -nx * sinY + nz1 * cosY;
+
+          const invDepth = settings.depth - z2;
+          if (invDepth <= 0.05) return null;
+
+          const scale = settings.depth / invDepth;
+          const px = x2 * scale;
+          const py = y1 * scale;
+
+          const depthNorm = clamp((z2 + 0.8) / 1.6, 0, 1);
+          const light = nx2 * lightX + ny1 * lightY + nz2 * lightZ;
+          const lambert = clamp(light, 0, 1);
+          let intensity = lambert * 0.82 + depthNorm * 0.18;
+
+          if (settings.noise > 0) {
+            const jitter = Math.sin((x2 * 23.3 + y1 * 17.1 + z2 * 7.2 + now * 0.18) * 13.37) * 0.5 + 0.5;
+            intensity += (jitter - 0.5) * settings.noise;
+          }
+
+          intensity = clamp(intensity, 0, 1);
+          intensity = Math.pow(intensity, settings.contrast);
+
+          return {
+            x: px,
+            y: py,
+            z: z2,
+            intensity,
+          };
+        }
+
+        function buildUrbanMassing(rng) {
+          const p = [];
+          addBoxShellPoints(p, rng, { width: 1.2, height: 0.15, depth: 1.05, count: 260, cy: -0.5 });
+          addBoxShellPoints(p, rng, { width: 0.44, height: 0.58, depth: 0.44, count: 120, cx: -0.35, cy: -0.14, cz: -0.22 });
+          addBoxShellPoints(p, rng, { width: 0.34, height: 0.6, depth: 0.34, count: 110, cx: 0.22, cy: -0.06, cz: 0.18 });
+          addBoxShellPoints(p, rng, { width: 0.26, height: 0.45, depth: 0.26, count: 130, cx: 0.42, cy: 0.04, cz: -0.35 });
+          addBoxShellPoints(p, rng, { width: 0.3, height: 0.48, depth: 0.3, count: 100, cx: -0.45, cy: 0.05, cz: 0.32 });
+
+          for (let i = 0; i < 5; i++) {
+            const cx = randBetween(rng, -0.55, 0.55);
+            const cz = randBetween(rng, -0.48, 0.48);
+            const h = randBetween(rng, 0.06, 0.2);
+            addBoxShellPoints(p, rng, {
+              width: randBetween(rng, 0.04, 0.1),
+              height: randBetween(rng, 0.22, 0.7),
+              depth: randBetween(rng, 0.04, 0.1),
+              count: 50,
+              cx,
+              cy: h / 2 + 0.01,
+              cz,
+            });
+          }
+
+          addCylinderShellPoints(p, rng, { radius: 0.042, height: 1.1, count: 110, cx: -0.45, cy: -0.01, cz: -0.52, axis: 'z' });
+          addCylinderShellPoints(p, rng, { radius: 0.042, height: 1.05, count: 110, cx: 0.45, cy: -0.01, cz: -0.52, axis: 'z' });
+          return p;
+        }
+
+        function buildCodingRig(rng) {
+          const p = [];
+          addBoxShellPoints(p, rng, {
+            width: 1.3,
+            height: 0.18,
+            depth: 0.78,
+            count: 230,
+            cy: -0.54,
+          });
+          addBoxShellPoints(p, rng, {
+            width: 0.42,
+            height: 0.22,
+            depth: 0.22,
+            count: 140,
+            cx: 0.26,
+            cy: -0.08,
+            cz: 0,
+          });
+          addBoxShellPoints(p, rng, {
+            width: 0.16,
+            height: 0.1,
+            depth: 0.58,
+            count: 130,
+            cx: -0.16,
+            cy: -0.07,
+            cz: 0,
+          });
+
+          for (let i = 0; i < 9; i++) {
+            addBoxShellPoints(p, rng, {
+              width: 0.08,
+              height: 0.02,
+              depth: 0.6,
+              count: 28,
+              cx: -0.52 + i * 0.11,
+              cy: -0.23 + (i % 3) * -0.04,
+              cz: (i % 2) * 0.01,
+            });
+          }
+
+          addCylinderShellPoints(p, rng, {
+            radius: 0.18,
+            height: 0.08,
+            count: 120,
+            cx: -0.2,
+            cy: -0.25,
+            cz: 0.16,
+            axis: 'x',
+          });
+          addEllipsoidPoints(p, rng, {
+            radiusX: 0.09,
+            radiusY: 0.12,
+            radiusZ: 0.23,
+            count: 90,
+            cx: 0.26,
+            cy: -0.17,
+            cz: 0.26,
+          });
+
+          for (let i = 0; i < 90; i++) {
+            addCylinderShellPoints(p, rng, {
+              radius: 0.03,
+              height: 0.12,
+              count: 22,
+              cx: -0.42 + rng() * 0.84,
+              cy: -0.24,
+              cz: -0.16 + rng() * 0.32,
+              axis: 'x',
+            });
+          }
+
+          return p;
+        }
+
+        function buildGuitar(rng) {
+          const p = [];
+          addEllipsoidPoints(p, rng, {
+            radiusX: 0.82,
+            radiusY: 0.42,
+            radiusZ: 0.33,
+            count: 350,
+            cx: -0.02,
+            cy: 0.06,
+          });
+          addCylinderShellPoints(p, rng, {
+            radius: 0.065,
+            height: 1.55,
+            count: 180,
+            cx: -0.2,
+            cy: 0.04,
+            cz: 0.0,
+            axis: 'x',
+          });
+          addCylinderShellPoints(p, rng, {
+            radius: 0.03,
+            height: 0.2,
+            count: 60,
+            cx: 0.62,
+            cy: 0.22,
+            cz: 0.28,
+            axis: 'x',
+          });
+
+          for (let i = 0; i < 8; i++) {
+            addLineCloud(p, rng, {
+              x0: -0.45 + i * 0.02,
+              y0: 0.06 + i * 0.004,
+              z0: 0.08,
+              x1: 0.95,
+              y1: 0.14,
+              z1: 0.08,
+              count: 15,
+              jitter: 0.005,
+            });
+          }
+
+          addLineCloud(p, rng, {
+            x0: 0.82,
+            y0: 0.06,
+            z0: -0.13,
+            x1: 1,
+            y1: 0.2,
+            z1: -0.08,
+            count: 45,
+            jitter: 0.01,
+          });
+          addEllipsoidPoints(p, rng, {
+            radiusX: 0.14,
+            radiusY: 0.05,
+            radiusZ: 0.19,
+            count: 75,
+            cx: -0.7,
+            cy: 0.01,
+            cz: 0.0,
+          });
+          return p;
+        }
+
+        function buildBookStack(rng) {
+          const p = [];
+          for (let i = 0; i < 12; i++) {
+            const w = randBetween(rng, 0.18, 0.72);
+            const d = randBetween(rng, 0.2, 0.62);
+            const h = randBetween(rng, 0.04, 0.1);
+            addBoxShellPoints(p, rng, {
+              width: w,
+              height: h,
+              depth: d,
+              count: 90,
+              cx: randBetween(rng, -0.25, 0.3),
+              cy: -0.55 + i * 0.075,
+              cz: randBetween(rng, -0.22, 0.2),
+            });
+          }
+
+          addCylinderShellPoints(p, rng, {
+            radius: 0.03,
+            height: 0.7,
+            count: 40,
+            cx: -0.4,
+            cy: -0.2,
+            cz: 0.3,
+            axis: 'y',
+          });
+          addCylinderShellPoints(p, rng, {
+            radius: 0.03,
+            height: 0.9,
+            count: 40,
+            cx: -0.15,
+            cy: -0.1,
+            cz: 0.42,
+            axis: 'y',
+          });
+          addCylinderShellPoints(p, rng, {
+            radius: 0.03,
+            height: 0.9,
+            count: 40,
+            cx: 0.08,
+            cy: -0.1,
+            cz: 0.34,
+            axis: 'y',
+          });
+
+          addEllipsoidPoints(p, rng, {
+            radiusX: 0.08,
+            radiusY: 0.08,
+            radiusZ: 0.08,
+            count: 80,
+            cx: 0.52,
+            cy: -0.16,
+            cz: 0.37,
+          });
+          return p;
+        }
+
+        function buildSojuSet(rng) {
+          const p = [];
+          addEllipsoidPoints(p, rng, {
+            radiusX: 0.19,
+            radiusY: 0.58,
+            radiusZ: 0.19,
+            count: 390,
+            cx: 0,
+            cy: -0.02,
+          });
+          addCylinderShellPoints(p, rng, {
+            radius: 0.11,
+            height: 0.26,
+            count: 160,
+            cx: 0,
+            cy: 0.58,
+            cz: 0,
+            axis: 'y',
+          });
+          addTorusShellPoints(p, rng, {
+            majorRadius: 0.21,
+            minorRadius: 0.032,
+            count: 120,
+            cx: 0,
+            cy: 0.45,
+            cz: 0,
+          });
+          addLineCloud(p, rng, {
+            x0: -0.08,
+            y0: 0.7,
+            z0: 0,
+            x1: 0.08,
+            y1: 0.85,
+            z1: 0,
+            count: 50,
+            jitter: 0.008,
+          });
+          addBoxShellPoints(p, rng, {
+            width: 0.2,
+            height: 0.09,
+            depth: 0.2,
+            count: 110,
+            cx: 0,
+            cy: -0.64,
+            cz: 0,
+          });
+          return p;
+        }
+
+        function buildDumbbell(rng) {
+          const p = [];
+          addEllipsoidPoints(p, rng, {
+            radiusX: 0.38,
+            radiusY: 0.33,
+            radiusZ: 0.38,
+            count: 240,
+            cx: -0.85,
+            cy: 0,
+            cz: 0,
+          });
+          addEllipsoidPoints(p, rng, {
+            radiusX: 0.38,
+            radiusY: 0.33,
+            radiusZ: 0.38,
+            count: 240,
+            cx: 0.85,
+            cy: 0,
+            cz: 0,
+          });
+          addCylinderShellPoints(p, rng, {
+            radius: 0.12,
+            height: 2.0,
+            count: 290,
+            axis: 'x',
+          });
+          addTorusShellPoints(p, rng, {
+            majorRadius: 0.2,
+            minorRadius: 0.08,
+            count: 130,
+            cx: -0.85,
+            cy: 0,
+            cz: 0,
+          });
+          addTorusShellPoints(p, rng, {
+            majorRadius: 0.2,
+            minorRadius: 0.08,
+            count: 130,
+            cx: 0.85,
+            cy: 0,
+            cz: 0,
+          });
+          return p;
+        }
+
+        function buildBicycle(rng) {
+          const p = [];
+          addTorusShellPoints(p, rng, {
+            majorRadius: 0.55,
+            minorRadius: 0.08,
+            count: 450,
+            cx: -0.62,
+            cy: -0.1,
+            cz: 0,
+          });
+          addTorusShellPoints(p, rng, {
+            majorRadius: 0.55,
+            minorRadius: 0.08,
+            count: 450,
+            cx: 0.6,
+            cy: -0.1,
+            cz: 0,
+          });
+          addLineCloud(p, rng, {
+            x0: -0.62,
+            y0: -0.1,
+            z0: 0,
+            x1: 0.6,
+            y1: -0.1,
+            z1: 0,
+            count: 120,
+          });
+          addLineCloud(p, rng, {
+            x0: -0.62,
+            y0: -0.1,
+            z0: 0,
+            x1: -0.05,
+            y1: 0.32,
+            z1: 0.05,
+            count: 160,
+          });
+          addLineCloud(p, rng, {
+            x0: 0.6,
+            y0: -0.1,
+            z0: 0,
+            x1: -0.05,
+            y1: 0.32,
+            z1: -0.05,
+            count: 160,
+          });
+          addLineCloud(p, rng, {
+            x0: -0.05,
+            y0: 0.32,
+            z0: 0,
+            x1: 0.55,
+            y1: 0.18,
+            z1: 0.17,
+            count: 110,
+          });
+          addLineCloud(p, rng, {
+            x0: -0.05,
+            y0: 0.32,
+            z0: 0,
+            x1: 0.02,
+            y1: -0.24,
+            z1: 0.0,
+            count: 140,
+          });
+          return p;
+        }
+
+        function buildKeyboard(rng) {
+          const p = [];
+          addBoxShellPoints(p, rng, {
+            width: 1.1,
+            height: 0.1,
+            depth: 0.48,
+            count: 220,
+            cy: -0.58,
+          });
+          addBoxShellPoints(p, rng, {
+            width: 1.05,
+            height: 0.08,
+            depth: 0.38,
+            count: 220,
+            cy: -0.45,
+          });
+
+          for (let i = 0; i < 36; i++) {
+            const row = Math.floor(i / 12);
+            const col = i % 12;
+            addEllipsoidPoints(p, rng, {
+              radiusX: 0.035,
+              radiusY: 0.01,
+              radiusZ: 0.018,
+              count: 20,
+              cx: -0.51 + col * 0.09,
+              cy: -0.46 - row * 0.05,
+              cz: (rng() - 0.5) * 0.26,
+            });
+          }
+
+          addTorusShellPoints(p, rng, {
+            majorRadius: 0.24,
+            minorRadius: 0.02,
+            count: 130,
+            cx: -0.44,
+            cy: -0.45,
+            cz: 0.0,
+          });
+          addCylinderShellPoints(p, rng, {
+            radius: 0.06,
+            height: 0.14,
+            count: 70,
+            cx: 0.4,
+            cy: -0.44,
+            cz: 0.22,
+            axis: 'x',
+          });
+          return p;
+        }
+
+        function buildDeskLamp(rng) {
+          const p = [];
+          addCylinderShellPoints(p, rng, {
+            radius: 0.08,
+            height: 0.26,
+            count: 150,
+            cx: 0,
+            cy: -0.35,
+            axis: 'y',
+          });
+          addCylinderShellPoints(p, rng, {
+            radius: 0.028,
+            height: 0.8,
+            count: 120,
+            cx: 0,
+            cy: -0.17,
+            cz: 0.22,
+            axis: 'y',
+          });
+          addBoxShellPoints(p, rng, {
+            width: 0.05,
+            height: 0.45,
+            depth: 0.12,
+            count: 120,
+            cx: 0,
+            cy: 0.18,
+            cz: 0.02,
+          });
+          addEllipsoidPoints(p, rng, {
+            radiusX: 0.5,
+            radiusY: 0.28,
+            radiusZ: 0.08,
+            count: 270,
+            cx: 0,
+            cy: 0.45,
+            cz: -0.06,
+          });
+          addTorusShellPoints(p, rng, {
+            majorRadius: 0.15,
+            minorRadius: 0.1,
+            count: 120,
+            cx: 0,
+            cy: 0.44,
+            cz: -0.06,
+          });
+          return p;
+        }
+
+        function buildVinylRig(rng) {
+          const p = [];
+          addTorusShellPoints(p, rng, {
+            majorRadius: 0.48,
+            minorRadius: 0.09,
+            count: 460,
+          });
+          addCylinderShellPoints(p, rng, {
+            radius: 0.09,
+            height: 0.06,
+            count: 120,
+            cx: 0,
+            cy: 0,
+            cz: 0,
+            axis: 'x',
+          });
+          addCylinderShellPoints(p, rng, {
+            radius: 0.02,
+            height: 0.38,
+            count: 110,
+            cx: 0.15,
+            cy: 0,
+            cz: 0,
+            axis: 'x',
+          });
+          addLineCloud(p, rng, {
+            x0: -0.5,
+            y0: 0.02,
+            z0: 0,
+            x1: 0.2,
+            y1: -0.16,
+            z1: 0.09,
+            count: 120,
+            jitter: 0.01,
+          });
+          addBoxShellPoints(p, rng, {
+            width: 0.62,
+            height: 0.11,
+            depth: 0.04,
+            count: 160,
+            cx: -0.3,
+            cy: 0.1,
+            cz: 0.18,
+          });
+          return p;
+        }
+
+        function buildUrbanPlannerPad(rng) {
+          const p = [];
+          addBoxShellPoints(p, rng, {
+            width: 1.1,
+            height: 0.15,
+            depth: 0.78,
+            count: 180,
+            cy: -0.4,
+          });
+
+          for (let i = 0; i < 5; i++) {
+            addBoxShellPoints(p, rng, {
+              width: 0.06,
+              height: randBetween(rng, 0.08, 0.22),
+              depth: 0.06,
+              count: 45,
+              cx: -0.35 + i * 0.17,
+              cy: -0.3 + i * 0.01,
+              cz: -0.02,
+            });
+            addCylinderShellPoints(p, rng, {
+              radius: 0.02,
+              height: randBetween(rng, 0.14, 0.28),
+              count: 30,
+              cx: -0.35 + i * 0.17,
+              cy: -0.35 + i * 0.01,
+              cz: -0.22,
+              axis: 'z',
+            });
+          }
+
+          addLineCloud(p, rng, {
+            x0: -0.6,
+            y0: -0.4,
+            z0: 0.18,
+            x1: 0.55,
+            y1: -0.4,
+            z1: -0.18,
+            count: 150,
+          });
+          addLineCloud(p, rng, {
+            x0: -0.5,
+            y0: -0.25,
+            z0: 0,
+            x1: 0.44,
+            y1: 0.03,
+            z1: 0,
+            count: 180,
+          });
+          return p;
+        }
+
+        const definitions = [
+          {
+            id: 'urban-maze',
+            name: 'Urban massing kit',
+            source: 'arch model pack',
+            scale: 1.1,
+            desc: 'City block study with towers and light poles.',
+            build: buildUrbanMassing,
+          },
+          {
+            id: 'coding-rig',
+            name: 'Coding rig',
+            source: 'studio reference',
+            scale: 1,
+            desc: 'Monospace monitor and tactile keyboard footprint.',
+            build: buildCodingRig,
+          },
+          {
+            id: 'urban-guitar',
+            name: 'Acoustic guitar body',
+            source: 'instrument scan',
+            scale: 1,
+            desc: 'Stratified mesh captures body, neck, and strings.',
+            build: buildGuitar,
+          },
+          {
+            id: 'book-stack',
+            name: 'Reading block stack',
+            source: 'asset shelf',
+            scale: 1.45,
+            desc: 'Book tower geometry for reading mode.',
+            build: buildBookStack,
+          },
+          {
+            id: 'soju-slab',
+            name: 'Soju cut-glass set',
+            source: 'lifestyle pack',
+            scale: 1.1,
+            desc: 'Night-out bottle geometry with glass ring and cap.',
+            build: buildSojuSet,
+          },
+          {
+            id: 'gym-ball',
+            name: 'Workout dumbbell',
+            source: 'fitness kit',
+            scale: 1,
+            desc: 'Two weighted spheres with central bar.',
+            build: buildDumbbell,
+          },
+          {
+            id: 'city-bike',
+            name: 'Urban bike',
+            source: 'city model sample',
+            scale: 1.1,
+            desc: 'Bicycle frame and twin wheels, all line/mesh.',
+            build: buildBicycle,
+          },
+          {
+            id: 'keyboard',
+            name: 'Mechanical keyboard',
+            source: 'desk hardware',
+            scale: 1.1,
+            desc: 'Small key lattice and board body points.',
+            build: buildKeyboard,
+          },
+          {
+            id: 'desk-lamp',
+            name: 'Desk lamp',
+            source: 'industrial form',
+            scale: 1.15,
+            desc: 'Drafting lamp with shade geometry and slim arm.',
+            build: buildDeskLamp,
+          },
+          {
+            id: 'vinyl-rig',
+            name: 'Vinyl rig',
+            source: 'music stack',
+            scale: 1,
+            desc: 'Turntable, arm, and tone stack profile.',
+            build: buildVinylRig,
+          },
+          {
+            id: 'planner-pad',
+            name: 'Plan trace pad',
+            source: 'urban sketches',
+            scale: 1.05,
+            desc: 'Plotter-style plan with guide lines and stubs.',
+            build: buildUrbanPlannerPad,
+          },
+        ];
+
+        function initializeModels() {
+          for (const def of definitions) {
+            const rng = seededRandom(hashSeed(def.id));
+            const points = def.build(rng);
+
+            const card = document.createElement('article');
+            card.className = 'model-card';
+            card.setAttribute('aria-label', `${def.name}. Drag to rotate.`);
+            card.setAttribute('tabindex', '0');
+
+            const head = document.createElement('div');
+            head.className = 'model-card__head';
+            const title = document.createElement('h2');
+            title.textContent = def.name;
+            const meta = document.createElement('p');
+            meta.className = 'model-card__meta';
+            const source = document.createElement('span');
+            source.className = 'model-tag';
+            source.textContent = def.source;
+            const sample = document.createElement('span');
+            sample.className = 'model-tag';
+            sample.textContent = `${Math.round(points.length / 6)} points`;
+            meta.append(source, sample);
+            head.append(title, meta);
+
+            const desc = document.createElement('p');
+            desc.textContent = def.desc;
+
+            const artWrap = document.createElement('div');
+            artWrap.className = 'ascii-wrap';
+            const art = document.createElement('pre');
+            art.className = 'ascii-art';
+            artWrap.append(art);
+
+            const hint = document.createElement('p');
+            hint.className = 'model-card__hint';
+            hint.textContent = 'drag the surface → rotate';
+
+            card.append(head, desc, artWrap, hint);
+            refs.library.append(card);
+
+            const stateModel = {
+              def,
+              card,
+              art,
+              pre: art,
+              points,
+              rotX: (rng() - 0.5) * 0.7,
+              rotY: (rng() - 0.5) * 0.7,
+              velX: 0,
+              velY: 0,
+              dragging: false,
+              dragId: null,
+              lastX: 0,
+              lastY: 0,
+              dirty: true,
+              cols: 0,
+              rows: 0,
+            };
+
+            artWrap.addEventListener('pointerdown', (event) => beginDrag(event, stateModel));
+            artWrap.addEventListener('pointermove', (event) => onDrag(event, stateModel));
+            artWrap.addEventListener('pointerup', (event) => endDrag(event, stateModel));
+            artWrap.addEventListener('pointercancel', (event) => endDrag(event, stateModel));
+            artWrap.addEventListener('pointerleave', (event) => {
+              if (event.pointerType === 'touch' && stateModel.dragging && event.buttons === 0) {
+                endDrag(event, stateModel);
+              }
+            });
+
+            models.push(stateModel);
+          }
+        }
+
+        function beginDrag(event, model) {
+          model.dragging = true;
+          model.dragId = event.pointerId;
+          model.lastX = event.clientX;
+          model.lastY = event.clientY;
+          model.velX = 0;
+          model.velY = 0;
+          model.card.setAttribute('aria-busy', 'true');
+          model.card.classList.add('active');
+          event.preventDefault();
+          model.card.focus({ preventScroll: true });
+          event.currentTarget.setPointerCapture(event.pointerId);
+          model.dirty = true;
+          schedule();
+        }
+
+        function onDrag(event, model) {
+          if (!model.dragging || model.dragId !== event.pointerId) return;
+          const dx = event.clientX - model.lastX;
+          const dy = event.clientY - model.lastY;
+          model.lastX = event.clientX;
+          model.lastY = event.clientY;
+
+          const sensitivity = 0.0065;
+          model.rotY += dx * sensitivity;
+          model.rotX += dy * sensitivity;
+
+          model.velY = dx * 0.0008;
+          model.velX = dy * 0.0008;
+
+          model.dirty = true;
+          model.card.setAttribute('aria-label', `${model.def.name}. Rotating.`);
+          schedule();
+          event.preventDefault();
+        }
+
+        function endDrag(event, model) {
+          if (model.dragId !== event.pointerId) return;
+          model.dragging = false;
+          model.dragId = null;
+          model.card.removeAttribute('aria-busy');
+          model.card.classList.remove('active');
+          model.card.setAttribute('aria-label', `${model.def.name}. Drag to rotate.`);
+          schedule();
+        }
+
+        function schedule() {
+          if (state.raf) cancelAnimationFrame(state.raf);
+          state.last = performance.now();
+          state.raf = requestAnimationFrame(tick);
+        }
+
+        function updateControlsFromDom() {
+          state.cellSize = Number(refs.cellSize.value);
+          state.sampleBudget = Number(refs.sampleBudget.value);
+          state.contrast = Number(refs.contrast.value);
+          state.depth = Number(refs.depth.value);
+          state.noise = Number(refs.noise.value);
+          state.lightAngleDeg = Number(refs.lightAngle.value);
+          state.glyphSetKey = refs.glyphSet.value;
+
+          refs.outCell.textContent = `${state.cellSize}px`;
+          refs.outSamples.textContent = `${state.sampleBudget}`;
+          refs.outContrast.textContent = state.contrast.toFixed(2);
+          refs.outDepth.textContent = state.depth.toFixed(1);
+          refs.outNoise.textContent = state.noise.toFixed(2);
+          refs.outAngle.textContent = `${state.lightAngleDeg}°`;
+
+          state.frameDirty = true;
+          for (const m of models) {
+            m.dirty = true;
+          }
+          schedule();
+          updateStatus();
+        }
+
+        function updateStatus() {
+          const glyphName = state.glyphSetKey;
+          const readyCount = models.length;
+          refs.status.textContent = `${readyCount} models in the library • ${glyphName} glyphs • point budget ${state.sampleBudget} • ${state.reduced ? 'reduced-motion: on' : 'interactive'}.`;
+        }
+
+        function projectModel(model, now) {
+          const bounds = model.pre.getBoundingClientRect();
+          const cols = Math.max(24, Math.floor((bounds.width - 12) / state.cellSize));
+          const rows = Math.max(16, Math.floor((bounds.height - 12) / (state.cellSize * 1.82)));
+
+          if (cols !== model.cols || rows !== model.rows || model.dirty || state.frameDirty) {
+            model.cols = cols;
+            model.rows = rows;
+            const font = Math.max(4, Math.min(state.cellSize, Math.floor((bounds.height - 10) / rows)));
+            model.pre.style.setProperty('--cell-size', `${font}px`);
+          }
+
+          const total = cols * rows;
+          if (total <= 0) return;
+
+          const glyphs = glyphSets[state.glyphSetKey] || glyphSets.dense;
+          const depthBuf = new Float32Array(total);
+          const outIdx = new Uint16Array(total);
+          for (let i = 0; i < total; i++) {
+            depthBuf[i] = -1e9;
+            outIdx[i] = 0;
+          }
+
+          const angle = (state.lightAngleDeg / 360) * Math.PI * 2;
+          const light = {
+            x: Math.cos(angle) * 0.75,
+            y: 0.62,
+            z: Math.sin(angle) * 0.75,
+          };
+
+          const points = model.points;
+          const totalPoints = points.length / 6;
+          const stride = Math.max(1, Math.floor(totalPoints / state.sampleBudget));
+          const sX = 0.62;
+          const sY = 0.84;
+
+          const cosX = Math.cos(model.rotX);
+          const sinX = Math.sin(model.rotX);
+          const cosY = Math.cos(model.rotY);
+          const sinY = Math.sin(model.rotY);
+
+          for (let i = 0; i < points.length; i += stride * 6) {
+            let x = points[i] * model.def.scale;
+            let y = points[i + 1] * model.def.scale;
+            let z = points[i + 2] * model.def.scale;
+            let nx = points[i + 3];
+            let ny = points[i + 4];
+            let nz = points[i + 5];
+
+            // X rotation
+            const y1 = y * cosX - z * sinX;
+            const z1 = y * sinX + z * cosX;
+            const ny1 = ny * cosX - nz * sinX;
+            const nz1 = ny * sinX + nz * cosX;
+
+            // Y rotation
+            const x2 = x * cosY + z1 * sinY;
+            const z2 = -x * sinY + z1 * cosY;
+            const nx2 = nx * cosY + nz1 * sinY;
+            const nz2 = -nx * sinY + nz1 * cosY;
+
+            const rotated = rotateAndShade(
+              x2,
+              y1,
+              z2,
+              nx2,
+              ny1,
+              nz2,
+              0,
+              0,
+              light.x,
+              light.y,
+              light.z,
+              {
+                depth: state.depth,
+                noise: state.noise,
+                contrast: state.contrast,
+              },
+              now,
+            );
+
+            if (!rotated) continue;
+
+            const cx = rotated.x * sX + 0.5;
+            const cy = -rotated.y * sY + 0.5;
+
+            const col = (cx * cols) | 0;
+            const row = (cy * rows) | 0;
+
+            if (col < 0 || col >= cols || row < 0 || row >= rows) continue;
+
+            const index = row * cols + col;
+            if (rotated.z > depthBuf[index]) {
+              depthBuf[index] = rotated.z;
+
+              const glyphIndex = Math.min(
+                glyphs.length - 1,
+                Math.max(0, (glyphs.length - 1) * rotated.intensity | 0),
+              );
+              outIdx[index] = glyphIndex;
+            }
+          }
+
+          const lines = new Array(rows);
+          for (let r = 0; r < rows; r++) {
+            let row = '';
+            const base = r * cols;
+            for (let c = 0; c < cols; c++) {
+              const idx = outIdx[base + c];
+              row += glyphs[idx] || glyphs[0];
+            }
+            lines[r] = row;
+          }
+
+          model.pre.textContent = lines.join('\n');
+          model.dirty = false;
+        }
+
+        function tick(now) {
+          const dt = Math.max(16, now - state.last);
+          state.last = now;
+
+          const decay = Math.exp(-dt * (state.reduced ? 0 : 0.0025));
+          let active = false;
+
+          for (const model of models) {
+            if (model.dirty || state.frameDirty || model.dragging) {
+              projectModel(model, now);
+            }
+
+            if (!state.reduced) {
+              if (!model.dragging) {
+                model.rotX += model.velX * (dt / 16.6667);
+                model.rotY += model.velY * (dt / 16.6667);
+                model.velX *= decay;
+                model.velY *= decay;
+
+                if (Math.abs(model.velX) > 0.00012 || Math.abs(model.velY) > 0.00012) {
+                  model.dirty = true;
+                }
+              }
+
+              if (model.dragging || Math.abs(model.velX) > 0.00012 || Math.abs(model.velY) > 0.00012) {
+                active = true;
+              }
+            }
+          }
+
+          if (state.frameDirty) state.frameDirty = false;
+
+          if (!state.reduced && active) {
+            state.raf = requestAnimationFrame(tick);
+            return;
+          }
+
+          // single-frame updates can happen while everything is settled
+          const anyDirty = models.some((m) => m.dirty);
+          if (anyDirty) {
+            state.raf = requestAnimationFrame(tick);
+            return;
+          }
+
+          state.raf = null;
+        }
+
+        function onResize() {
+          for (const model of models) {
+            model.dirty = true;
+          }
+          schedule();
+        }
+
+        function onKeyDown(event) {
+          const delta = 0.09;
+          const model = models.find((entry) => entry.card === document.activeElement);
+          if (!model) return;
+
+          if (event.key === 'ArrowLeft') {
+            model.rotY -= delta;
+            model.dirty = true;
+          } else if (event.key === 'ArrowRight') {
+            model.rotY += delta;
+            model.dirty = true;
+          } else if (event.key === 'ArrowUp') {
+            model.rotX -= delta;
+            model.dirty = true;
+          } else if (event.key === 'ArrowDown') {
+            model.rotX += delta;
+            model.dirty = true;
+          }
+
+          if (model.dirty) {
+            event.preventDefault();
+            schedule();
+          }
+        }
+
+        function bindInputs() {
+          const all = [
+            refs.cellSize,
+            refs.sampleBudget,
+            refs.contrast,
+            refs.depth,
+            refs.noise,
+            refs.lightAngle,
+            refs.glyphSet,
+          ];
+
+          for (const control of all) {
+            control.addEventListener('input', updateControlsFromDom);
+          }
+
+          window.addEventListener('keydown', onKeyDown);
+          window.addEventListener('resize', onResize);
+          window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', (event) => {
+            state.reduced = event.matches;
+            updateStatus();
+            for (const model of models) {
+              model.dirty = true;
+            }
+            schedule();
+          });
+        }
+
+        function bootstrap() {
+          initializeModels();
+          bindInputs();
+          updateControlsFromDom();
+          updateStatus();
+          schedule();
+        }
+
+        bootstrap();
+      })();
+    </script>
+  </body>
+</html>

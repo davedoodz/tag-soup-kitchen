@@ -1,0 +1,2416 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Repertoire | Figma Motion + Product Interaction Patterns</title>
+    <style>
+      :root {
+        --bg: #f2efe5;
+        --paper: #fff;
+        --ink: #111;
+        --muted: #5e6370;
+        --line: #dfdfdf;
+        --line-2: #ececef;
+        --chip: #f0f0f4;
+        --accent: #2f6bff;
+        --accent-soft: #d8e3ff;
+        --accent-alt: #ff6f4f;
+        --danger: #bb2f2f;
+        --success: #0b8a5f;
+        --radius: 16px;
+        --radius-xl: 20px;
+
+        --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+        --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+        --dur-fast: 120ms;
+        --dur-mid: 220ms;
+        --dur-slow: 360ms;
+        --dur-emph: 560ms;
+        --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+        --ease-enter: cubic-bezier(0.16, 1, 0.3, 1);
+        --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+        --ease-snap: cubic-bezier(0.22, 1, 0.36, 1);
+        --shadow-soft: 0 16px 40px rgb(17 17 17 / 12%);
+        --shadow-strong: 0 16px 54px rgb(17 17 17 / 20%);
+        --motion-scale: 1;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+      }
+
+      body {
+        min-height: 100vh;
+        color: var(--ink);
+        background: var(--bg);
+        font-family: var(--font-sans);
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+      }
+
+      :focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 3px;
+      }
+
+      .wrap {
+        max-width: 1240px;
+        margin-inline: auto;
+        padding: 42px 22px 84px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        color: var(--muted);
+        text-transform: uppercase;
+        margin-bottom: 8px;
+      }
+
+      .eyebrow::before {
+        content: "";
+        width: 8px;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 0 4px var(--accent-soft);
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(32px, 5vw, 62px);
+        line-height: 0.94;
+        letter-spacing: -0.035em;
+        font-weight: 800;
+      }
+
+      .lede {
+        margin: 14px 0 0;
+        max-width: 78ch;
+        color: var(--muted);
+        font-size: clamp(15px, 2vw, 17px);
+        line-height: 1.5;
+      }
+
+      .status-strip {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 20px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 10px 12px;
+        background: #fff;
+      }
+
+      .status-strip__left {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .pill {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--muted);
+        border: 1px solid var(--line);
+        background: var(--chip);
+        border-radius: 999px;
+        padding: 6px 10px;
+      }
+
+      .section-grid {
+        margin-top: 28px;
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .card {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: var(--radius-xl);
+        padding: 18px;
+        box-shadow: 0 1px 0 rgb(17 17 17 / 4%);
+        min-width: 0;
+      }
+
+      .card--narrow {
+        grid-column: span 4;
+      }
+
+      .card--wide {
+        grid-column: span 8;
+      }
+
+      .card h2 {
+        margin: 0;
+        font-size: clamp(18px, 2.2vw, 24px);
+        letter-spacing: -0.02em;
+      }
+
+      .card h3 {
+        margin: 10px 0 0;
+        font-size: 16px;
+        letter-spacing: -0.01em;
+      }
+
+      .subtle {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
+      .dot {
+        width: 8px;
+        aspect-ratio: 1;
+        border-radius: 999px;
+        background: var(--accent);
+        box-shadow: 0 0 0 4px var(--accent-soft);
+      }
+
+      .muted-list {
+        margin: 12px 0 0;
+        padding-left: 0;
+        list-style: none;
+        display: grid;
+        gap: 8px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
+      .muted-list a {
+        color: inherit;
+      }
+
+      .token-table {
+        margin-top: 10px;
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+      }
+
+      .token-table th,
+      .token-table td {
+        padding: 8px 10px;
+        text-align: left;
+        border-bottom: 1px solid var(--line-2);
+      }
+
+      .token-table th {
+        color: var(--muted);
+        font-weight: 500;
+        width: 44%;
+      }
+
+      .token-table code {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        background: var(--chip);
+        border-radius: 8px;
+        padding: 2px 6px;
+      }
+
+      .toolbar {
+        margin-top: 26px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .filter-btn {
+        appearance: none;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 9px 12px;
+        background: #fff;
+        color: var(--ink);
+        cursor: pointer;
+        font: inherit;
+        font-size: 13px;
+        transition: background-color calc(var(--dur-mid) * var(--motion-scale)) var(--ease-standard),
+          color calc(var(--dur-mid) * var(--motion-scale)) var(--ease-standard),
+          border-color calc(var(--dur-mid) * var(--motion-scale)) var(--ease-standard);
+      }
+
+      .filter-btn[aria-pressed='true'] {
+        background: var(--ink);
+        color: #fff;
+        border-color: var(--ink);
+      }
+
+      .control {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--muted);
+        font-size: 12px;
+        font-family: var(--font-mono);
+      }
+
+      .demo-grid {
+        margin-top: 20px;
+        display: grid;
+        gap: 14px;
+        grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+      }
+
+      .pattern-card {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: #fff;
+        display: grid;
+        min-height: 100%;
+        overflow: clip;
+        position: relative;
+      }
+
+      .pattern-head {
+        padding: 16px;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .pattern-head h4 {
+        margin: 0;
+        font-size: 18px;
+      }
+
+      .meta {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .meta-badge {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        padding: 4px 8px;
+      }
+
+      .pattern-body {
+        padding: 16px;
+        display: grid;
+        gap: 12px;
+      }
+
+      .pattern-meta {
+        font-size: 12px;
+        color: var(--muted);
+        background: #fafafa;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 10px 12px;
+        display: grid;
+        gap: 8px;
+      }
+
+      .pattern-meta dt {
+        color: #8b8f98;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+      }
+
+      .pattern-meta dd {
+        margin: 2px 0 0;
+        color: var(--ink);
+      }
+
+      .pattern-meta dl {
+        margin: 0;
+        display: grid;
+        gap: 8px;
+      }
+
+      .demo-stage {
+        border: 1px dashed var(--line);
+        border-radius: 12px;
+        min-height: 190px;
+        padding: 14px;
+        display: grid;
+        place-items: center;
+        position: relative;
+        overflow: hidden;
+        background:
+          radial-gradient(circle at 18% 18%, rgb(47 107 255 / 12%), transparent 42%),
+          #fbfbfc;
+      }
+
+      .demo-stage button,
+      .demo-stage input {
+        touch-action: manipulation;
+      }
+
+      .demo-copy {
+        margin: 0;
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.45;
+      }
+
+      /* Pattern 1 · Shared-element / detail morph */
+      .morph-list {
+        width: 100%;
+        display: grid;
+        gap: 10px;
+      }
+
+      .morph-item {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: #fff;
+        padding: 12px;
+        text-align: left;
+        cursor: pointer;
+        transition: transform calc(var(--dur-fast) * var(--motion-scale)) var(--ease-enter),
+          box-shadow calc(var(--dur-mid) * var(--motion-scale)) var(--ease-enter);
+      }
+
+      .morph-item:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-soft);
+      }
+
+      .morph-item:active {
+        transform: translateY(0);
+      }
+
+      .morph-detail {
+        width: 100%;
+        display: none;
+      }
+
+      .morph-detail.is-visible,
+      .morph-list.is-hidden {
+        display: none;
+      }
+
+      .morph-detail.is-visible {
+        display: grid;
+        gap: 10px;
+      }
+
+      .morph-detail-card {
+        border-radius: 12px;
+        padding: 12px;
+        background: #f5f7ff;
+        border: 1px solid #d6e0ff;
+      }
+
+      .morph-detail-title {
+        margin: 0;
+        font-size: 16px;
+      }
+
+      .morph-detail p {
+        margin: 0;
+        font-size: 13px;
+        color: #3a4250;
+        line-height: 1.35;
+      }
+
+      .ghost-btn {
+        border: 0;
+        padding: 8px 10px;
+        border-radius: 999px;
+        font: inherit;
+        background: #111;
+        color: #fff;
+        width: max-content;
+        cursor: pointer;
+        font-size: 13px;
+      }
+
+      /* Pattern 2 · directional tabs */
+      .tab-track {
+        width: 100%;
+        position: relative;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        display: flex;
+        gap: 6px;
+        padding: 6px;
+        background: #fff;
+      }
+
+      .tab-btn {
+        border: 0;
+        background: transparent;
+        border-radius: 8px;
+        padding: 10px 10px;
+        cursor: pointer;
+        font: inherit;
+        position: relative;
+        color: var(--muted);
+        flex: 1 1 auto;
+        min-width: 0;
+      }
+
+      .tab-indicator {
+        position: absolute;
+        inset: 6px auto auto 0;
+        height: calc(100% - 12px);
+        border-radius: 8px;
+        background: var(--ink);
+        transition: transform calc(var(--dur-mid) * var(--motion-scale)) var(--ease-standard),
+          width calc(var(--dur-mid) * var(--motion-scale)) var(--ease-standard),
+          left calc(var(--dur-mid) * var(--motion-scale)) var(--ease-standard);
+      }
+
+      .tab-btn[aria-selected='true'] {
+        color: #fff;
+      }
+
+      .tab-panel {
+        margin-top: 10px;
+        border-radius: 10px;
+        border: 1px solid var(--line);
+        padding: 10px;
+        min-height: 102px;
+        background: #fff;
+        font-size: 13px;
+        color: #3f4553;
+      }
+
+      .tab-panel p {
+        margin: 0;
+      }
+
+      /* Pattern 3 · magnetic */
+      .magnet-shell {
+        width: 100%;
+        display: grid;
+        place-items: center;
+      }
+
+      .magnet {
+        border: 1px solid var(--line);
+        background: linear-gradient(170deg, #222 0%, #111 100%);
+        color: #fff;
+        border-radius: 999px;
+        min-width: 220px;
+        min-height: 62px;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        transition: transform calc(var(--dur-fast) * var(--motion-scale)) var(--ease-standard),
+          box-shadow calc(var(--dur-mid) * var(--motion-scale)) var(--ease-standard);
+      }
+
+      .magnet:hover {
+        box-shadow: var(--shadow-soft);
+      }
+
+      .magnet span {
+        position: relative;
+        z-index: 1;
+        pointer-events: none;
+      }
+
+      .magnet::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, 0.32), transparent 46%);
+        opacity: 0.88;
+        transition: opacity calc(var(--dur-fast) * var(--motion-scale)) var(--ease-standard);
+      }
+
+      /* Pattern 4 · hold to action */
+      .hold-shell {
+        width: 100%;
+        display: grid;
+        gap: 10px;
+      }
+
+      .hold-btn {
+        position: relative;
+        border: 1px solid var(--line);
+        background: #111;
+        color: #fff;
+        padding: 12px 14px;
+        border-radius: 12px;
+        min-height: 56px;
+        cursor: pointer;
+        overflow: hidden;
+        font: inherit;
+      }
+
+      .hold-ring {
+        position: absolute;
+        inset: 8px;
+        border-radius: 999px;
+        border: 2px solid rgb(255 255 255 / 28%);
+        transform: scale(1);
+      }
+
+      .hold-ring::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        border: 3px solid #fff;
+        border-color: transparent;
+        transform: rotate(-90deg);
+      }
+
+      .hold-meter {
+        color: #ddd;
+        font-size: 12px;
+        font-family: var(--font-mono);
+      }
+
+      .hold-btn.is-complete {
+        background: #1437c8;
+      }
+
+      .hold-btn.is-complete .hold-ring {
+        border-color: #8fc3ff;
+      }
+
+      .hold-progress {
+        transition: width calc(var(--dur-mid) * var(--motion-scale)) var(--ease-standard);
+        height: 4px;
+        background: #6dc8ff;
+        border-radius: 4px;
+        width: 0;
+      }
+
+      /* Pattern 5 · async pipeline */
+      .pipeline {
+        width: 100%;
+        display: grid;
+        gap: 10px;
+      }
+
+      .pipeline button {
+        appearance: none;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: #fff;
+        cursor: pointer;
+        padding: 9px 11px;
+        width: max-content;
+        font: inherit;
+      }
+
+      .pipeline-steps {
+        display: grid;
+        gap: 8px;
+      }
+
+      .pipeline-step {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        font-size: 12px;
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        padding: 8px 10px;
+      }
+
+      .pipeline-step[data-state='done'] {
+        border-color: #c7ddc9;
+        background: #edf7ef;
+        color: #13552f;
+      }
+
+      .pipeline-step[data-state='active'] {
+        border-color: #b6c8ff;
+        background: #edf1ff;
+      }
+
+      .pipeline-step .dot {
+        width: 7px;
+      }
+
+      /* Pattern 6 · reorder list */
+      .priority-shell {
+        width: 100%;
+      }
+
+      .priority-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        display: grid;
+        gap: 8px;
+      }
+
+      .priority-item {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 9px 11px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        cursor: grab;
+        user-select: none;
+        background: #fff;
+      }
+
+      .priority-item:active {
+        cursor: grabbing;
+      }
+
+      .priority-item.is-dragging {
+        opacity: 0.72;
+        z-index: 2;
+        box-shadow: var(--shadow-strong);
+      }
+
+      .priority-item.is-placeholder {
+        opacity: 0.55;
+      }
+
+      .priority-reset {
+        margin-top: 8px;
+        border: 1px solid var(--line);
+        background: #fff;
+        border-radius: 8px;
+        padding: 7px 10px;
+        cursor: pointer;
+        font: inherit;
+      }
+
+      .row {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+      }
+
+      .drag-handle {
+        opacity: 0.72;
+        width: 12px;
+      }
+
+      /* Pattern 7 · RESELF frame gallery */
+      .frame-shell {
+        width: 100%;
+        display: grid;
+        gap: 10px;
+      }
+
+      .frame-view {
+        height: 180px;
+        border-radius: 14px;
+        overflow: hidden;
+        position: relative;
+        background: #111;
+        border: 1px solid #1d1d1d;
+        display: grid;
+      }
+
+      .frame-view img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: opacity calc(var(--dur-slow) * var(--motion-scale)) var(--ease-standard),
+          transform calc(var(--dur-slow) * var(--motion-scale)) var(--ease-standard);
+      }
+
+      .frame-zoom {
+        position: absolute;
+        inset: 0;
+        backdrop-filter: blur(7px);
+        pointer-events: none;
+      }
+
+      .frame-thumbs {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 6px;
+      }
+
+      .frame-thumb {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        overflow: hidden;
+        padding: 0;
+        cursor: pointer;
+        background: #fff;
+        min-width: 0;
+      }
+
+      .frame-thumb img {
+        width: 100%;
+        height: 50px;
+        object-fit: cover;
+        display: block;
+      }
+
+      .frame-thumb.is-active {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 2px rgb(47 107 255 / 30%);
+      }
+
+      .frame-caption {
+        color: #4a5060;
+        font-size: 12px;
+      }
+
+      /* Pattern 8 · before-after slider */
+      .ba-shell {
+        width: 100%;
+        display: grid;
+        gap: 10px;
+      }
+
+      .ba-frame {
+        position: relative;
+        width: 100%;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        background: #111;
+        aspect-ratio: 16 / 9;
+      }
+
+      .ba-before,
+      .ba-after {
+        position: absolute;
+        inset: 0;
+        background-size: cover;
+        background-position: center;
+      }
+
+      .ba-after {
+        clip-path: inset(0 50% 0 0);
+        transition: clip-path calc(var(--dur-mid) * var(--motion-scale)) ease;
+      }
+
+      .ba-slider {
+        width: 100%;
+      }
+
+      .ba-tick {
+        margin: 0;
+        color: var(--muted);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      /* Pattern 9 · metric interpolation */
+      .metric-shell {
+        width: 100%;
+        display: grid;
+        gap: 12px;
+      }
+
+      .metric-row {
+        display: grid;
+        grid-template-columns: 90px 1fr;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .metric-label {
+        font-size: 12px;
+        color: #677183;
+      }
+
+      .metric-bar {
+        position: relative;
+        height: 8px;
+        border-radius: 999px;
+        background: #e7e9f2;
+        overflow: hidden;
+      }
+
+      .metric-fill {
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        transform-origin: left;
+        transform: scaleX(var(--progress, 0));
+        background: linear-gradient(90deg, #2f6bff, #6ec8ff);
+        transition: transform calc(var(--dur-slow) * var(--motion-scale)) cubic-bezier(0.2, 1, 0.36, 1);
+      }
+
+      .metric-value {
+        margin: 0;
+        font-size: 34px;
+        letter-spacing: -0.04em;
+      }
+
+      .metric-btn {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: #fff;
+        padding: 8px 11px;
+        width: max-content;
+        font: inherit;
+        cursor: pointer;
+      }
+
+      .metric-dial {
+        width: 94px;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        place-self: center;
+        display: grid;
+        place-items: center;
+        background: conic-gradient(var(--accent) calc(var(--pct, 0%) * 1%), #d9def0 0);
+        border: 1px solid #d6dcf2;
+        color: var(--ink);
+        font-weight: 700;
+        font-size: 18px;
+        position: relative;
+      }
+
+      .metric-dial::after {
+        content: '';
+        position: absolute;
+        inset: 10px;
+        border-radius: 50%;
+        background: #fff;
+      }
+
+      .metric-dial span {
+        position: relative;
+        z-index: 2;
+      }
+
+      /* Pattern 10 · command palette */
+      .palette-open {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: #fff;
+        width: 100%;
+        padding: 10px 12px;
+        text-align: left;
+        cursor: pointer;
+        font: inherit;
+      }
+
+      .palette-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 30;
+        background: rgb(15 17 24 / 56%);
+        display: none;
+        place-items: center;
+        padding: 20px;
+      }
+
+      .palette-overlay[aria-hidden='false'] {
+        display: grid;
+      }
+
+      .palette-panel {
+        width: min(680px, 100%);
+        background: #fff;
+        border-radius: 14px;
+        padding: 12px;
+        box-shadow: 0 30px 80px rgb(11 12 15 / 35%);
+      }
+
+      .palette-input {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        padding: 10px 10px;
+        font: inherit;
+      }
+
+      .palette-list {
+        margin: 10px 0 0;
+        padding: 0;
+        list-style: none;
+        max-height: 300px;
+        overflow: auto;
+      }
+
+      .palette-item {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        margin-bottom: 6px;
+      }
+
+      .palette-item button {
+        text-align: left;
+        width: 100%;
+        border: 0;
+        background: transparent;
+        padding: 9px 10px;
+        font: inherit;
+        cursor: pointer;
+      }
+
+      .palette-item button:hover,
+      .palette-item button:focus-visible,
+      .palette-item.is-active button {
+        background: #f3f6ff;
+      }
+
+      /* Pattern 11 · tilt */
+      .tilt-card {
+        width: 100%;
+        min-height: 160px;
+        border-radius: 16px;
+        border: 1px solid var(--line);
+        padding: 14px;
+        display: grid;
+        gap: 8px;
+        color: #fff;
+        background: radial-gradient(circle at 30% 20%, #3f67ff, #12131c 55%);
+        transform-style: preserve-3d;
+        transition: transform calc(var(--dur-mid) * var(--motion-scale)) var(--ease-snap);
+      }
+
+      .tilt-card h4,
+      .tilt-card p {
+        margin: 0;
+      }
+
+      /* Pattern 12 · toast */
+      .toast-shell {
+        width: 100%;
+      }
+
+      .toast-stack {
+        min-height: 100px;
+        margin-top: 10px;
+        display: grid;
+        gap: 6px;
+      }
+
+      .toast-add {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 8px 10px;
+        background: #fff;
+        cursor: pointer;
+        font: inherit;
+      }
+
+      .toast {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 8px 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        background: #fff;
+        animation: toastIn calc(var(--dur-mid) * var(--motion-scale)) var(--ease-enter) forwards;
+      }
+
+      .toast[data-state='leaving'] {
+        animation: toastOut calc(var(--dur-mid) * var(--motion-scale)) var(--ease-exit) forwards;
+      }
+
+      @keyframes toastIn {
+        from { opacity: 0; transform: translateY(-6px) scale(0.98);} 
+        to { opacity: 1; transform: translateY(0) scale(1);} 
+      }
+
+      @keyframes toastOut {
+        to { opacity: 0; transform: translateY(6px) scale(0.98);} 
+      }
+
+      .toast small {
+        color: #5e6778;
+      }
+
+      .toast button {
+        border: 0;
+        background: transparent;
+        color: #111;
+        cursor: pointer;
+        text-decoration: underline;
+        font: inherit;
+        font-size: 12px;
+        padding: 0;
+      }
+
+      /* Pattern 13 · scroll scrub rail */
+      .scrub-shell {
+        width: 100%;
+      }
+
+      .story {
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: 78%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        gap: 10px;
+        scrollbar-width: none;
+        padding-bottom: 4px;
+      }
+
+      .story::-webkit-scrollbar {
+        display: none;
+      }
+
+      .chapter {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        min-height: 90px;
+        padding: 10px;
+        background: #f8f9fd;
+      }
+
+      .scrub-wrap {
+        margin-top: 10px;
+      }
+
+      .scrub-range {
+        width: 100%;
+      }
+
+      .scrub-meter {
+        display: flex;
+        justify-content: space-between;
+        color: #596071;
+        font-family: var(--font-mono);
+        font-size: 11px;
+      }
+
+      .reveal {
+        border-radius: var(--radius);
+        border: 1px dashed var(--line);
+        min-height: 62px;
+        padding: 8px;
+        color: #434a58;
+        font-size: 12px;
+        display: grid;
+        align-content: center;
+      }
+
+      .references {
+        margin-top: 30px;
+      }
+
+      .references h2 {
+        margin: 0 0 10px;
+        font-size: 22px;
+      }
+
+      .ref-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 10px;
+      }
+
+      .ref-card {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 12px;
+      }
+
+      .ref-card h3 {
+        margin: 0;
+        font-size: 15px;
+      }
+
+      .ref-card p {
+        margin: 6px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.35;
+      }
+
+      .ref-card a {
+        font-size: 12px;
+      }
+
+      .foot {
+        margin-top: 26px;
+        color: #6e7481;
+        font-size: 12px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+      }
+
+      @media (max-width: 960px) {
+        .card--wide,
+        .card--narrow {
+          grid-column: span 12;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          animation: none !important;
+          transition: none !important;
+        }
+
+        :root {
+          --motion-scale: 0.000001;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <p class="eyebrow">Motion systems + product interaction repertoire</p>
+      <h1>Award-inspired motion patterns for product UX in code</h1>
+      <p class="lede">
+        Built for product surfaces that ship weekly, not yearly. This page cross-checks motion instincts from
+        Figma workflows (Smart Animate, variables, variants, and prototype transitions), then translates them into
+        accessible, dependency-free interactions that run in-browser with progressive fallback.
+      </p>
+
+      <div class="status-strip" role="status" aria-live="polite">
+        <div class="status-strip__left">
+          <span class="pill">Research scope: interaction motifs for onboarding, commerce, control surfaces, and review actions</span>
+          <span class="pill">Evidence baseline: Figma docs + award showcases (Awwwards / CSSWinner)</span>
+          <span class="pill">Data-backed claim scope: motion quality and implementation clarity, not conversion claims</span>
+        </div>
+        <label class="control" for="reducedMotion">
+          <span>Reduced motion</span>
+          <input type="checkbox" id="reducedMotion" />
+        </label>
+      </div>
+
+      <section class="section-grid" aria-label="Research map and motion system">
+        <article class="card card--wide">
+          <h2>Figma to code skill map</h2>
+          <p class="subtle">These are the practical motion skills that scale in product systems and map cleanly to implementation:</p>
+          <ol class="muted-list">
+            <li>
+              <strong>Smart Animate discipline</strong> — keep matching layer names and anchor points for stable transitions.
+            </li>
+            <li>
+              <strong>Variant + property architecture</strong> — isolate intent state, then map each state to tokens.
+            </li>
+            <li>
+              <strong>Variables-first motion tokens</strong> — speed and easing are authored as tokens, not ad-hoc CSS values.
+            </li>
+            <li>
+              <strong>Prototype semantics</strong> — navigation direction, overlays, and focus order shape timing choice.
+            </li>
+            <li>
+              <strong>Motion QA</strong> — test reduced-motion, keyboard, and fallback paths from day one.
+            </li>
+          </ol>
+        </article>
+        <article class="card card--narrow">
+          <h2>Motion timing tokens</h2>
+          <table class="token-table" aria-label="motion timing tokens">
+            <tbody>
+              <tr>
+                <th>Instant</th>
+                <td>120ms, <code>cubic-bezier(.22,1,.36,1)</code></td>
+              </tr>
+              <tr>
+                <th>Micro settle</th>
+                <td>220ms, <code>cubic-bezier(.2,.8,.2,1)</code></td>
+              </tr>
+              <tr>
+                <th>State handoff</th>
+                <td>360ms, <code>cubic-bezier(.16,1,.3,1)</code></td>
+              </tr>
+              <tr>
+                <th>Spatial morph</th>
+                <td>560ms, <code>cubic-bezier(.22,1,.36,1)</code></td>
+              </tr>
+              <tr>
+                <th>Exit</th>
+                <td>180ms, <code>cubic-bezier(.4,0,1,1)</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </article>
+        <article class="card card--wide">
+          <h2>Production rubric</h2>
+          <p class="subtle">
+            Use this when deciding if a motion pattern is “high-performing” enough to ship: it must preserve orientation,
+            improve confidence, and not block completion. Bad motion = decorative churn. Good motion = orientation, feedback,
+            and low-risk task progress.
+          </p>
+          <ul class="muted-list">
+            <li><strong>Orientation:</strong> does the user know where they are now and where they are going?</li>
+            <li><strong>Predictability:</strong> can they infer result before motion ends?</li>
+            <li><strong>Control:</strong> can they interrupt, reverse, or proceed without waiting?</li>
+            <li><strong>Accessibility:</strong> passes reduced-motion and keyboard traversal.</li>
+          </ul>
+        </article>
+      </section>
+
+      <div class="toolbar" aria-label="Pattern filters">
+        <div class="filters" role="tablist" aria-label="Filter categories">
+          <button class="filter-btn" role="tab" aria-pressed="true" data-filter="all">All</button>
+          <button class="filter-btn" role="tab" aria-pressed="false" data-filter="navigation">Navigation</button>
+          <button class="filter-btn" role="tab" aria-pressed="false" data-filter="feedback">Feedback</button>
+          <button class="filter-btn" role="tab" aria-pressed="false" data-filter="input">Input</button>
+          <button class="filter-btn" role="tab" aria-pressed="false" data-filter="state">State</button>
+          <button class="filter-btn" role="tab" aria-pressed="false" data-filter="figma">Figma workflow</button>
+          <button class="filter-btn" role="tab" aria-pressed="false" data-filter="content">Content flow</button>
+        </div>
+        <span id="resultCount" class="pill" aria-live="polite">0 patterns</span>
+      </div>
+
+      <section class="demo-grid" id="patternGrid" aria-live="polite">
+
+        <article class="pattern-card" data-category="navigation figma state">
+          <header class="pattern-head">
+            <h4>1) Shared element route transition</h4>
+            <div class="meta">
+              <span class="meta-badge">Navigation continuity</span>
+              <span class="meta-badge">View Transitions</span>
+            </div>
+          </header>
+          <div class="pattern-body">
+            <div class="demo-stage">
+              <div id="smartMorph" class="demo-stage-inner" style="width:100%;">
+                <div class="morph-list" data-state="list">
+                  <button class="morph-item" data-key="focus" type="button">Focus mode onboarding</button>
+                  <button class="morph-item" data-key="journal" type="button">Journal flow</button>
+                  <button class="morph-item" data-key="review" type="button">Review panel</button>
+                </div>
+                <div class="morph-detail" aria-live="polite">
+                  <div class="morph-detail-card">
+                    <h5 class="morph-detail-title"></h5>
+                    <p></p>
+                  </div>
+                  <button class="ghost-btn" data-action="close" type="button">Back to menu</button>
+                </div>
+              </div>
+            </div>
+            <p class="demo-copy">
+              Keep the hero object identity across screen changes. A shared element stays visible while shape/content evolves.
+            </p>
+            <div class="pattern-meta">
+              <dl>
+                <dt>Figma primitive</dt>
+                <dd>Frame swaps with matching layers + Smart Animate pairing</dd>
+                <dt>Code primitive</dt>
+                <dd>`document.startViewTransition`, shared transition names, DOM swap</dd>
+                <dt>Primary timing</dt>
+                <dd>360ms standard, one easing curve per transition type</dd>
+                <dt>Use when</dt>
+                <dd>Item enters detail, list ↔ detail, route transitions with high cognitive load</dd>
+                <dt>Avoid when</dt>
+                <dd>Motion direction is ambiguous or content is instantly actionable</dd>
+              </dl>
+            </div>
+          </div>
+        </article>
+
+        <article class="pattern-card" data-category="navigation figma state">
+          <header class="pattern-head">
+            <h4>2) Directional tabs with spatial indicator</h4>
+            <div class="meta">
+              <span class="meta-badge">Navigation</span>
+              <span class="meta-badge">State hinting</span>
+            </div>
+          </header>
+          <div class="pattern-body">
+            <div class="demo-stage">
+              <div class="tab-track" data-demo="tabs">
+                <div class="tab-indicator" aria-hidden="true"></div>
+                <button class="tab-btn" type="button" data-index="0">Overview</button>
+                <button class="tab-btn" type="button" data-index="1">Tracks</button>
+                <button class="tab-btn" type="button" data-index="2">Export</button>
+              </div>
+              <div class="tab-panel" aria-live="polite"></div>
+            </div>
+            <div class="pattern-meta">
+              <dl>
+                <dt>Figma primitive</dt>
+                <dd>Variants for active/inactive tabs + selected frame states</dd>
+                <dt>Code primitive</dt>
+                <dd>Measured indicator translate/width + `aria-selected` syncing</dd>
+                <dt>Primary timing</dt>
+                <dd>220ms micro settle</dd>
+                <dt>Use when</dt>
+                <dd>Switching tabs has hierarchy and spatial consequence</dd>
+                <dt>Avoid when</dt>
+                <dd>More than 6 tabs in one surface; split content instead</dd>
+              </dl>
+            </div>
+          </div>
+        </article>
+
+        <article class="pattern-card" data-category="input state">
+          <header class="pattern-head">
+            <h4>3) Magnetic CTA (intent capture)</h4>
+            <div class="meta">
+              <span class="meta-badge">Input</span>
+              <span class="meta-badge">Pointer physics</span>
+            </div>
+          </header>
+          <div class="pattern-body">
+            <div class="demo-stage">
+              <div class="magnet-shell">
+                <button class="magnet" type="button" data-demo="magnet"><span>Start guided tour</span></button>
+              </div>
+            </div>
+            <p class="demo-copy">When you pause over a focus action, motion amplifies the target but keeps layout stable.</p>
+            <div class="pattern-meta">
+              <dl>
+                <dt>Figma primitive</dt>
+                <dd>Hover/prototype state + interaction map with offset variants</dd>
+                <dt>Code primitive</dt>
+                <dd>Pointer distance-driven transform + radial sheen shader</dd>
+                <dt>Primary timing</dt>
+                <dd>120ms press, 220ms release</dd>
+                <dt>Use when</dt>
+                <dd>Important primary action with uncertain cursor intent</dd>
+                <dt>Avoid when</dt>
+                <dd>Touch-only tasks where hover is not available</dd>
+              </dl>
+            </div>
+          </div>
+        </article>
+
+        <article class="pattern-card" data-category="input state">
+          <header class="pattern-head">
+            <h4>4) Press-and-hold confirmation</h4>
+            <div class="meta">
+              <span class="meta-badge">Input integrity</span>
+              <span class="meta-badge">Destructive actions</span>
+            </div>
+          </header>
+          <div class="pattern-body">
+            <div class="demo-stage hold-shell">
+              <button class="hold-btn" data-demo="hold" type="button">
+                <span>Hold for 900ms to publish</span>
+                <span class="hold-ring" aria-hidden="true"></span>
+              </button>
+              <div class="hold-progress"></div>
+              <div class="hold-meter" data-hold-meter>Status: ready</div>
+            </div>
+            <div class="pattern-meta">
+              <dl>
+                <dt>Figma primitive</dt>
+                <dd>Prototype trigger + delay state transitions</dd>
+                <dt>Code primitive</dt>
+                <dd>Timeout guard + cancellation + visual progress ring</dd>
+                <dt>Primary timing</dt>
+                <dd>900ms hold threshold + immediate rollback on cancel</dd>
+                <dt>Use when</dt>
+                <dd>Irreversible actions with clear safety rails</dd>
+                <dt>Avoid when</dt>
+                <dd>Primary actions that are frequent and low risk</dd>
+              </dl>
+            </div>
+          </div>
+        </article>
+
+        <article class="pattern-card" data-category="state feedback content">
+          <header class="pattern-head">
+            <h4>5) Async feedback pipeline</h4>
+            <div class="meta">
+              <span class="meta-badge">State</span>
+              <span class="meta-badge">Progress</span>
+            </div>
+          </header>
+          <div class="pattern-body">
+            <div class="demo-stage">
+              <div class="pipeline" data-demo="pipeline">
+                <button type="button">Run generator</button>
+                <div class="pipeline-steps" role="list">
+                  <div class="pipeline-step" data-state="idle" role="listitem"><span>Validate</span><span class="dot"></span></div>
+                  <div class="pipeline-step" data-state="idle" role="listitem"><span>Build</span><span class="dot"></span></div>
+                  <div class="pipeline-step" data-state="idle" role="listitem"><span>Render</span><span class="dot"></span></div>
+                  <div class="pipeline-step" data-state="idle" role="listitem"><span>Deliver</span><span class="dot"></span></div>
+                </div>
+              </div>
+            </div>
+            <div class="pattern-meta">
+              <dl>
+                <dt>Figma primitive</dt>
+                <dd>Prototype delays and component states for queued/ready/error</dd>
+                <dt>Code primitive</dt>
+                <dd>Sequential async simulation with `setTimeout`, ARIA-state updates</dd>
+                <dt>Primary timing</dt>
+                <dd>4 x 340ms staggered phase timings</dd>
+                <dt>Use when</dt>
+                <dd>Any async operation with visible multi-stage work</dd>
+                <dt>Avoid when</dt>
+                <dd>Low latency operations that complete instantly</dd>
+              </dl>
+            </div>
+          </div>
+        </article>
+
+        <article class="pattern-card" data-category="input feedback">
+          <header class="pattern-head">
+            <h4>6) Sortable priority list</h4>
+            <div class="meta">
+              <span class="meta-badge">Input</span>
+              <span class="meta-badge">Reordering</span>
+            </div>
+          </header>
+          <div class="pattern-body">
+            <div class="demo-stage">
+              <div class="priority-shell" data-demo="sortable">
+                <ul class="priority-list">
+                  <li class="priority-item" tabindex="0" data-order="1"><span>Capture user preference</span><span class="drag-handle">⇅</span></li>
+                  <li class="priority-item" tabindex="0" data-order="2"><span>Generate timeline</span><span class="drag-handle">⇅</span></li>
+                  <li class="priority-item" tabindex="0" data-order="3"><span>Publish update</span><span class="drag-handle">⇅</span></li>
+                  <li class="priority-item" tabindex="0" data-order="4"><span>Verify completion</span><span class="drag-handle">⇅</span></li>
+                </ul>
+                <button class="priority-reset" type="button">Reset order</button>
+              </div>
+            </div>
+            <div class="pattern-meta">
+              <dl>
+                <dt>Figma primitive</dt>
+                <dd>Editable variants for sequence states</dd>
+                <dt>Code primitive</dt>
+                <dd>Pointer events + live DOM re-ordering</dd>
+                <dt>Primary timing</dt>
+                <dd>220ms settle after drop</dd>
+                <dt>Use when</dt>
+                <dd>Task ordering is user-defined and must remain tactile</dd>
+                <dt>Avoid when</dt>
+                <dd>Ordered compliance workflows where reorder could break logic</dd>
+              </dl>
+            </div>
+          </div>
+        </article>
+
+        <article class="pattern-card" data-category="content figma">
+          <header class="pattern-head">
+            <h4>7) RESELF mobile frame progression</h4>
+            <div class="meta">
+              <span class="meta-badge">Content flow</span>
+              <span class="meta-badge">Gallery motion</span>
+            </div>
+          </header>
+          <div class="pattern-body">
+            <div class="demo-stage">
+              <div class="frame-shell" data-demo="frames">
+                <div class="frame-view">
+                  <img id="frameImage" src="/reself-mobile-frames/m1_home.png" alt="Re:Self screen" />
+                  <div class="frame-zoom"></div>
+                </div>
+                <div class="frame-thumbs" id="frameThumbs"></div>
+                <p class="frame-caption">Use real product frames to validate transition feel against shipped content.</p>
+              </div>
+            </div>
+            <div class="pattern-meta">
+              <dl>
+                <dt>Figma primitive</dt>
+                <dd>Image stack/flow study with componentized card states</dd>
+                <dt>Code primitive</dt>
+                <dd>Timer-driven frame loop + thumbnail selection</dd>
+                <dt>Primary timing</dt>
+                <dd>2.2s cycle, crossfade + slight zoom</dd>
+                <dt>Use when</dt>
+                <dd>Validating interaction tempo against real screens</dd>
+                <dt>Avoid when</dt>
+                <dd>Content is static and user never scrubs state</dd>
+              </dl>
+            </div>
+          </div>
+        </article>
+
+        <article class="pattern-card" data-category="content interaction">
+          <header class="pattern-head">
+            <h4>8) Before/after reveal slider</h4>
+            <div class="meta">
+              <span class="meta-badge">Content comparison</span>
+              <span class="meta-badge">Direct manipulation</span>
+            </div>
+          </header>
+          <div class="pattern-body">
+            <div class="demo-stage">
+              <div class="ba-shell">
+                <div class="ba-frame">
+                  <div class="ba-before" style="background-image: url('/reself-mobile-frames/m2_home_getstarted.png');"></div>
+                  <div class="ba-after" id="baAfter" style="background-image: url('/reself-mobile-frames/m3_welcome.png');"></div>
+                </div>
+                <input class="ba-slider" type="range" min="0" max="100" value="50" aria-label="comparison slider" />
+                <p class="ba-tick"><span>Old state</span><span>New state</span></p>
+              </div>
+            </div>
+            <div class="pattern-meta">
+              <dl>
+                <dt>Figma primitive</dt>
+                <dd>Overlay + frame blend behavior</dd>
+                <dt>Code primitive</dt>
+                <dd>`clip-path` reveal mapped to range input</dd>
+                <dt>Primary timing</dt>
+                <dd>Drag-driven</dd>
+                <dt>Use when</dt>
+                <dd>Showing changes, before/after states, edit diff</dd>
+                <dt>Avoid when</dt>
+                <dd>High contrast visual differences that need explanation text first</dd>
+              </dl>
+            </div>
+          </div>
+        </article>
+
+        <article class="pattern-card" data-category="data feedback state">
+          <header class="pattern-head">
+            <h4>9) Animated metrics + confidence bars</h4>
+            <div class="meta">
+              <span class="meta-badge">Data storytelling</span>
+              <span class="meta-badge">Micro feedback</span>
+            </div>
+          </header>
+          <div class="pattern-body">
+            <div class="demo-stage">
+              <div class="metric-shell" data-demo="metrics">
+                <div class="metric-dial" style="--pct: 0;"><span id="dialValue">0%</span></div>
+                <button class="metric-btn" type="button">Resync numbers</button>
+                <div>
+                  <div class="metric-row">
+                    <div class="metric-label">Conversion confidence</div>
+                    <div class="metric-bar" aria-label="conversion confidence"><span class="metric-fill" style="--progress: 0.58"></span></div>
+                  </div>
+                  <div class="metric-row">
+                    <div class="metric-label">Task completion</div>
+                    <div class="metric-bar" aria-label="task completion"><span class="metric-fill" style="--progress: 0.82"></span></div>
+                  </div>
+                </div>
+                <p class="demo-copy">Numbers do not appear instantly; easing makes progress legible without exaggeration.</p>
+              </div>
+            </div>
+            <div class="pattern-meta">
+              <dl>
+                <dt>Figma primitive</dt>
+                <dd>Component variants for empty/loading/loaded states</dd>
+                <dt>Code primitive</dt>
+                <dd>requestAnimationFrame number tween + CSS progress scale</dd>
+                <dt>Primary timing</dt>
+                <dd>560ms number settle + bar progress</dd>
+                <dt>Use when</dt>
+                <dd>KPI display surfaces and status cards</dd>
+                <dt>Avoid when</dt>
+                <dd>Critical numeric precision where constant changes are distracting</dd>
+              </dl>
+            </div>
+          </div>
+        </article>
+
+        <article class="pattern-card" data-category="input figma">
+          <header class="pattern-head">
+            <h4>10) Command palette keyboard flow</h4>
+            <div class="meta">
+              <span class="meta-badge">Navigation</span>
+              <span class="meta-badge">Accessibility</span>
+            </div>
+          </header>
+          <div class="pattern-body">
+            <div class="demo-stage">
+              <button class="palette-open" type="button" data-open-palette>Open command palette (⌘K)</button>
+            </div>
+            <div class="pattern-meta">
+              <dl>
+                <dt>Figma primitive</dt>
+                <dd>Prototype shortcuts and interaction variants for command-like actions</dd>
+                <dt>Code primitive</dt>
+                <dd>Modal overlay + filtered list + keyboard navigation</dd>
+                <dt>Primary timing</dt>
+                <dd>220ms open/close</dd>
+                <dt>Use when</dt>
+                <dd>Frequent command entry and command discoverability</dd>
+                <dt>Avoid when</dt>
+                <dd>Single-purpose screens with one clear action</dd>
+              </dl>
+            </div>
+          </div>
+        </article>
+
+        <article class="pattern-card" data-category="input state figma">
+          <header class="pattern-head">
+            <h4>11) 3D product hover card</h4>
+            <div class="meta">
+              <span class="meta-badge">Input</span>
+              <span class="meta-badge">Product feel</span>
+            </div>
+          </header>
+          <div class="pattern-body">
+            <div class="demo-stage">
+              <div class="tilt-card" data-demo="tilt">
+                <h4>Momentum recorder</h4>
+                <p>This card tilts and reveals depth without changing layout.</p>
+                <p class="demo-copy">Goal: micro-lift attention without stealing focus from the task.</p>
+              </div>
+            </div>
+            <div class="pattern-meta">
+              <dl>
+                <dt>Figma primitive</dt>
+                <dd>Depth variants for object states</dd>
+                <dt>Code primitive</dt>
+                <dd>Pointer-driven `rotateX/rotateY` and perspective</dd>
+                <dt>Primary timing</dt>
+                <dd>360ms settle, 120ms press down</dd>
+                <dt>Use when</dt>
+                <dd>Feature cards, product showcases, media thumbnails</dd>
+                <dt>Avoid when</dt>
+                <dd>Dense data tables with strict readability requirements</dd>
+              </dl>
+            </div>
+          </div>
+        </article>
+
+        <article class="pattern-card" data-category="feedback state">
+          <header class="pattern-head">
+            <h4>12) Toast + undo queue</h4>
+            <div class="meta">
+              <span class="meta-badge">Feedback</span>
+              <span class="meta-badge">Action recovery</span>
+            </div>
+          </header>
+          <div class="pattern-body">
+            <div class="demo-stage">
+              <div class="toast-shell" data-demo="toast">
+                <button class="toast-add" type="button">Add feedback item</button>
+                <div class="toast-stack" id="toastStack"></div>
+              </div>
+            </div>
+            <div class="pattern-meta">
+              <dl>
+                <dt>Figma primitive</dt>
+                <dd>Variant set for idle / success / dismissed state</dd>
+                <dt>Code primitive</dt>
+                <dd>Transient nodes with enter/exit animation and auto-expiry</dd>
+                <dt>Primary timing</dt>
+                <dd>600ms visible, 220ms dismiss</dd>
+                <dt>Use when</dt>
+                <dd>Any action that benefits from confirm-and-correct loop</dd>
+                <dt>Avoid when</dt>
+                <dd>Critical full-viewport actions where toast could obscure controls</dd>
+              </dl>
+            </div>
+          </div>
+        </article>
+
+        <article class="pattern-card" data-category="navigation content">
+          <header class="pattern-head">
+            <h4>13) Scroll scrub progress rail</h4>
+            <div class="meta">
+              <span class="meta-badge">Content flow</span>
+              <span class="meta-badge">Context mapping</span>
+            </div>
+          </header>
+          <div class="pattern-body">
+            <div class="demo-stage">
+              <div class="scrub-shell" data-demo="scrub">
+                <div class="story" id="storyScroller" aria-label="feature journey">
+                  <article class="chapter">Step 1 · Discover</article>
+                  <article class="chapter">Step 2 · Configure</article>
+                  <article class="chapter">Step 3 · Play</article>
+                  <article class="chapter">Step 4 · Share</article>
+                </div>
+                <div class="scrub-wrap">
+                  <input class="scrub-range" type="range" min="0" max="100" value="0" aria-label="scrub progress" />
+                </div>
+                <div class="scrub-meter"><span>0%</span><span>100%</span></div>
+                <div class="reveal" id="scrubReveal">Scrub controls chapter progression while preserving scroll context.</div>
+              </div>
+            </div>
+            <div class="pattern-meta">
+              <dl>
+                <dt>Figma primitive</dt>
+                <dd>Scrollable content frame + explicit section names</dd>
+                <dt>Code primitive</dt>
+                <dd>Scroll-linked slider sync with `scrollLeft`</dd>
+                <dt>Primary timing</dt>
+                <dd>Direct mapping (no fixed duration)</dd>
+                <dt>Use when</dt>
+                <dd>Long narratives with chapter landmarks and quick jumps</dd>
+                <dt>Avoid when</dt>
+                <dd>Simple static pages or where scroll jank risk is high</dd>
+              </dl>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="references" id="references">
+        <h2>Reference set (award + motion sources)</h2>
+        <div class="ref-grid">
+          <article class="ref-card">
+            <h3>Figma motion foundations</h3>
+            <p>Smart Animate, variables, prototyping behavior, and newer Motion feature docs are the operating system for the Figma-to-code pattern map.</p>
+            <a href="https://help.figma.com/hc/en-us/articles/360039818874-Smart-animate-layers-between-frames" target="_blank" rel="noreferrer">Smart Animate</a><br />
+            <a href="https://help.figma.com/hc/en-us/articles/15339657135383-Guide-to-variables-in-Figma" target="_blank" rel="noreferrer">Variables</a><br />
+            <a href="https://help.figma.com/hc/en-us/articles/360040314193-Guide-to-prototyping-in-Figma" target="_blank" rel="noreferrer">Prototyping guide</a>
+          </article>
+          <article class="ref-card">
+            <h3>Awarded interaction reference set</h3>
+            <p>Motion-led interfaces selected from major award curation pages and execution-heavy showcases.</p>
+            <a href="https://www.awwwards.com/websites/motion/" target="_blank" rel="noreferrer">Awwwards Motion</a><br />
+            <a href="https://www.awwwards.com/websites/web-interactive/" target="_blank" rel="noreferrer">Awwwards Interactive</a><br />
+            <a href="https://www.csswinner.com/details/motioned/17201" target="_blank" rel="noreferrer">CSSWinner · Motion.ed</a>
+          </article>
+          <article class="ref-card">
+            <h3>Runtime + performance guidance</h3>
+            <p>Motion implementation notes for view transitions, scroll interactions, and reduced-motion-safe behavior.</p>
+            <a href="https://motion.dev/docs/react" target="_blank" rel="noreferrer">Motion React docs</a><br />
+            <a href="https://developer.apple.com/design/human-interface-guidelines/motion" target="_blank" rel="noreferrer">Apple HIG motion</a><br />
+            <a href="https://www.figma.com/blog/introducing-figma-motion/" target="_blank" rel="noreferrer">Figma Motion introduction</a>
+          </article>
+        </div>
+      </section>
+
+      <p class="foot">
+        Saved output: all source and demo code is local, dependency-free, and can be copied into React/Vite components without style drift.
+      </p>
+    </main>
+
+    <div class="palette-overlay" id="paletteOverlay" aria-hidden="true">
+      <div class="palette-panel">
+        <label>
+          <span class="subtle">Command search</span>
+          <input class="palette-input" id="paletteInput" type="text" placeholder="Find command (eg publish, focus, retry)" />
+        </label>
+        <ul id="paletteList" class="palette-list"></ul>
+      </div>
+    </div>
+
+    <script>
+      (() => {
+        const mqReduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+        const toggle = document.getElementById('reducedMotion');
+
+        const setMotionMode = (reduced) => {
+          document.documentElement.dataset.motion = reduced ? 'reduced' : 'full';
+          toggle.checked = reduced;
+        };
+
+        const rootReducedDefault = mqReduced.matches;
+        setMotionMode(rootReducedDefault);
+        mqReduced.addEventListener('change', () => setMotionMode(mqReduced.matches));
+
+        toggle.addEventListener('change', () => {
+          setMotionMode(toggle.checked);
+        });
+
+        const reduced = () => document.documentElement.dataset.motion === 'reduced';
+
+        const runViewTransition = (callback) => {
+          if (!reduced() && 'startViewTransition' in document) {
+            const transition = document.startViewTransition(callback);
+            return transition && transition.finished ? transition.finished : Promise.resolve();
+          }
+          callback();
+          return Promise.resolve();
+        };
+
+        const filterButtons = [...document.querySelectorAll('.filter-btn')];
+        const patternCards = [...document.querySelectorAll('.pattern-card')];
+        const resultCount = document.getElementById('resultCount');
+
+        const updateCount = () => {
+          const visible = patternCards.filter((card) => card.style.display !== 'none').length;
+          resultCount.textContent = `${visible} patterns`;
+        };
+
+        const applyFilter = (filter) => {
+          filterButtons.forEach((btn) => {
+            btn.setAttribute('aria-pressed', String(btn.dataset.filter === filter));
+          });
+
+          patternCards.forEach((card) => {
+            const cats = card.dataset.category || '';
+            card.style.display = filter === 'all' || cats.split(' ').includes(filter) ? '' : 'none';
+          });
+          updateCount();
+        };
+
+        filterButtons.forEach((btn) => {
+          btn.addEventListener('click', () => {
+            applyFilter(btn.dataset.filter);
+          });
+        });
+
+        applyFilter('all');
+
+        // Pattern 1: shared element route transition
+        const morphData = {
+          focus: {
+            title: 'Focus mode onboarding',
+            text: 'Start with one-tap entry. The context card keeps identity while the details become specific.'
+          },
+          journal: {
+            title: 'Journal entry details',
+            text: 'A compact object expands into detail by preserving core shape and semantic position.'
+          },
+          review: {
+            title: 'Review action surface',
+            text: 'A list item becomes a contextual modal while the original container remains recognizable.'
+          }
+        };
+
+        const smartMorph = document.getElementById('smartMorph');
+        const morphList = smartMorph.querySelector('.morph-list');
+        const morphDetail = smartMorph.querySelector('.morph-detail');
+        const morphTitle = smartMorph.querySelector('.morph-detail-title');
+        const morphText = smartMorph.querySelector('.morph-detail p');
+
+        const showSmartDetail = (key) => {
+          const run = () => {
+            const next = morphData[key];
+            morphTitle.textContent = next.title;
+            morphText.textContent = next.text;
+            morphList.style.display = 'none';
+            morphDetail.classList.add('is-visible');
+          };
+
+          smartMorph.querySelectorAll('.morph-item').forEach((item) => {
+            item.style.viewTransitionName = '';
+          });
+          smartMorph.querySelector(`[data-key="${key}"]`).style.viewTransitionName = 'morph-shell';
+          morphDetail.style.viewTransitionName = 'morph-shell';
+
+          runViewTransition(run);
+        };
+
+        const closeSmart = () => {
+          const run = () => {
+            morphList.style.display = 'grid';
+            morphDetail.classList.remove('is-visible');
+          };
+          runViewTransition(run);
+        };
+
+        smartMorph.querySelector('.morph-list').addEventListener('click', (event) => {
+          const button = event.target.closest('.morph-item');
+          if (!button) {
+            return;
+          }
+          showSmartDetail(button.dataset.key);
+        });
+
+        smartMorph.querySelector('[data-action="close"]').addEventListener('click', closeSmart);
+
+        // Pattern 2: directional tabs
+        const tabTrack = document.querySelector('[data-demo="tabs"]');
+        const tabButtons = [...tabTrack.querySelectorAll('.tab-btn')];
+        const tabPanel = tabTrack.parentElement.querySelector('.tab-panel');
+        const indicator = tabTrack.querySelector('.tab-indicator');
+        const tabCopy = [
+          'Overview gives context before action and keeps cognitive load low.',
+          'Tracks show progression and provide a direct path to next steps.',
+          'Export surfaces should be calm, but clearly terminal.'
+        ];
+
+        const syncIndicator = (btn) => {
+          const rect = btn.getBoundingClientRect();
+          const parentRect = tabTrack.getBoundingClientRect();
+          indicator.style.width = `${rect.width}px`;
+          indicator.style.transform = `translateX(${rect.left - parentRect.left}px)`;
+        };
+
+        const setActiveTab = (btn) => {
+          const idx = Number(btn.dataset.index);
+          tabButtons.forEach((button) => button.setAttribute('aria-selected', 'false'));
+          btn.setAttribute('aria-selected', 'true');
+          syncIndicator(btn);
+          if (!reduced()) {
+            tabPanel.animate(
+              [
+                { opacity: 1, transform: 'translateY(0)' },
+                { opacity: 0, transform: 'translateY(4px)' },
+                { opacity: 1, transform: 'translateY(0)' }
+              ],
+              {
+                duration: 220,
+                easing: 'cubic-bezier(.2,.8,.2,1)',
+                fill: 'forwards'
+              }
+            );
+          }
+          tabPanel.textContent = tabCopy[idx];
+        };
+
+        syncIndicator(tabButtons[0]);
+        setActiveTab(tabButtons[0]);
+
+        tabButtons.forEach((btn) => {
+          btn.addEventListener('click', () => {
+            setActiveTab(btn);
+          });
+        });
+
+        const resizeObserver = new ResizeObserver(() => {
+          const active = tabButtons.find((btn) => btn.getAttribute('aria-selected') === 'true') || tabButtons[0];
+          syncIndicator(active);
+        });
+        resizeObserver.observe(tabTrack);
+
+        // Pattern 3: magnetic CTA
+        const magnet = document.querySelector('.magnet');
+        const magnetShell = document.querySelector('.magnet-shell');
+        let rafId = 0;
+
+        const moveMagnet = (event) => {
+          if (reduced()) {
+            magnet.style.transform = '';
+            return;
+          }
+          cancelAnimationFrame(rafId);
+          rafId = requestAnimationFrame(() => {
+            const rect = magnetShell.getBoundingClientRect();
+            const x = ((event.clientX - rect.left) / rect.width - 0.5) * 12;
+            const y = ((event.clientY - rect.top) / rect.height - 0.5) * 12;
+            magnet.style.transform = `translate(${x}px, ${y}px)`;
+            magnet.style.setProperty('--mx', `${((event.clientX - rect.left) / rect.width) * 100}%`);
+            magnet.style.setProperty('--my', `${((event.clientY - rect.top) / rect.height) * 100}%`);
+          });
+        };
+
+        const resetMagnet = () => {
+          magnet.style.transform = '';
+          magnet.style.removeProperty('--mx');
+          magnet.style.removeProperty('--my');
+        };
+
+        magnet.addEventListener('pointermove', moveMagnet);
+        magnet.addEventListener('pointerleave', resetMagnet);
+
+        // Pattern 4: hold action
+        const holdButton = document.querySelector('[data-demo="hold"]');
+        const holdMeter = document.querySelector('[data-hold-meter]');
+        const holdProgress = document.querySelector('.hold-progress');
+        let holdTimer;
+        let holdStart = 0;
+
+        const clearHold = () => {
+          clearTimeout(holdTimer);
+          holdButton.classList.remove('is-complete');
+          holdProgress.style.width = '0%';
+          holdMeter.textContent = 'Status: ready';
+        };
+
+        const completeHold = () => {
+          holdButton.classList.add('is-complete');
+          holdMeter.textContent = 'Status: action confirmed';
+        };
+
+        holdButton.addEventListener('pointerdown', (event) => {
+          event.preventDefault();
+          holdButton.setPointerCapture(event.pointerId);
+          holdStart = performance.now();
+          const total = 900;
+          holdMeter.textContent = 'Status: holding...';
+
+          holdTimer = setTimeout(() => {
+            completeHold();
+          }, total);
+
+          const tick = () => {
+            const elapsed = performance.now() - holdStart;
+            const pct = Math.min(100, (elapsed / total) * 100);
+            holdProgress.style.width = `${pct}%`;
+            if (elapsed < total) {
+              requestAnimationFrame(tick);
+            }
+          };
+
+          requestAnimationFrame(tick);
+        });
+
+        ['pointerup', 'pointercancel', 'pointerleave'].forEach((eventName) => {
+          holdButton.addEventListener(eventName, () => {
+            clearHold();
+          });
+        });
+
+        // Pattern 5: pipeline state
+        const pipelineButtons = document.querySelector('[data-demo="pipeline"] button');
+        const pipelineSteps = [...document.querySelectorAll('[data-demo="pipeline"] .pipeline-step')];
+
+        pipelineButtons.addEventListener('click', async () => {
+          pipelineSteps.forEach((step) => {
+            step.dataset.state = 'idle';
+          });
+
+          for (const [index, step] of pipelineSteps.entries()) {
+            step.dataset.state = 'active';
+            await new Promise((resolve) => setTimeout(resolve, 280));
+            step.dataset.state = 'done';
+          }
+        });
+
+        // Pattern 6: sortable pointer reorder
+        const priorityList = document.querySelector('.priority-list');
+        const priorityReset = document.querySelector('.priority-reset');
+        const initialPriorityOrder = ['Capture user preference', 'Generate timeline', 'Publish update', 'Verify completion'];
+
+        let dragItem = null;
+        let pointerYStart = 0;
+
+        priorityList.addEventListener('pointerdown', (event) => {
+          if (!event.target.closest('.priority-item')) return;
+          const item = event.target.closest('.priority-item');
+          dragItem = item;
+          pointerYStart = event.clientY;
+          item.setPointerCapture(event.pointerId);
+          item.classList.add('is-dragging');
+
+          const moveHandler = (moveEvent) => {
+            const items = [...priorityList.children];
+            if (!dragItem) return;
+
+            const moveY = moveEvent.clientY - pointerYStart;
+            dragItem.style.transform = `translateY(${moveY}px)`;
+
+            const midpoint = moveEvent.clientY;
+            const after = items.find((candidate) => {
+              if (candidate === dragItem) return false;
+              const rect = candidate.getBoundingClientRect();
+              return midpoint < rect.top + rect.height / 2;
+            });
+
+            if (after) {
+              priorityList.insertBefore(dragItem, after);
+            } else if (priorityList.lastElementChild !== dragItem) {
+              priorityList.append(dragItem);
+            }
+          };
+
+          const upHandler = () => {
+            if (!dragItem) return;
+            dragItem.classList.remove('is-dragging');
+            dragItem.style.transform = '';
+            dragItem = null;
+            priorityList.removeEventListener('pointermove', moveHandler);
+            priorityList.removeEventListener('pointerup', upHandler);
+            priorityList.removeEventListener('pointercancel', upHandler);
+          };
+
+          priorityList.addEventListener('pointermove', moveHandler);
+          priorityList.addEventListener('pointerup', upHandler);
+          priorityList.addEventListener('pointercancel', upHandler);
+        });
+
+        priorityReset.addEventListener('click', () => {
+          const nodes = [...priorityList.children];
+          initialPriorityOrder.forEach((text) => {
+            const row = nodes.find((node) => node.textContent.includes(text));
+            if (row) {
+              priorityList.append(row);
+            }
+          });
+        });
+
+        // Pattern 7: RESELF frame progression
+        const framePaths = [
+          '/reself-mobile-frames/m1_home.png',
+          '/reself-mobile-frames/m2_home_getstarted.png',
+          '/reself-mobile-frames/m3_welcome.png',
+          '/reself-mobile-frames/m4_tutorial_recorder1.png',
+          '/reself-mobile-frames/m5_tutorial_recorder2.png',
+          '/reself-mobile-frames/m6_tutorial_listofintentions1.png',
+          '/reself-mobile-frames/m7_tutorial_listofintentions2.png',
+          '/reself-mobile-frames/m8_tutorial_journalentries1.png',
+          '/reself-mobile-frames/m9_tutorial_journalentries2.png',
+          '/reself-mobile-frames/m10_journalentries_listenentry.png'
+        ];
+        const frameImage = document.getElementById('frameImage');
+        const frameThumbs = document.getElementById('frameThumbs');
+
+        let frameIndex = 0;
+        let frameInterval = null;
+
+        framePaths.slice(0, 8).forEach((path, index) => {
+          const button = document.createElement('button');
+          button.className = 'frame-thumb';
+          button.type = 'button';
+          button.setAttribute('aria-label', `frame ${index + 1}`);
+          button.innerHTML = `<img src="${path}" alt="Re:Self frame ${index + 1}"/>`;
+          if (index === 0) button.classList.add('is-active');
+          button.addEventListener('click', () => {
+            frameIndex = index;
+            switchFrame();
+          });
+          frameThumbs.append(button);
+        });
+
+        const thumbNodes = () => [...frameThumbs.querySelectorAll('.frame-thumb')];
+
+        const switchFrame = () => {
+          frameImage.style.opacity = '0.8';
+          frameImage.style.transform = 'scale(1.02)';
+          frameImage.src = framePaths[frameIndex];
+          const updateThumb = () => {
+            const thumb = thumbNodes();
+            thumb.forEach((node, i) => {
+              node.classList.toggle('is-active', i === frameIndex);
+            });
+            frameImage.style.opacity = '';
+            frameImage.style.transform = '';
+          };
+          frameImage.addEventListener('load', updateThumb, { once: true });
+        };
+
+        const tickFrame = () => {
+          frameIndex = (frameIndex + 1) % framePaths.length;
+          switchFrame();
+        };
+
+        frameInterval = setInterval(tickFrame, 2200);
+        frameImage.addEventListener('mouseenter', () => clearInterval(frameInterval));
+        frameImage.addEventListener('mouseleave', () => {
+          frameInterval = setInterval(tickFrame, 2200);
+        });
+        frameImage.addEventListener('error', () => {
+          frameImage.src = '/reself-mobile-frames/m1_home.png';
+        });
+
+        // Pattern 8: before/after slider
+        const baAfter = document.getElementById('baAfter');
+        const baSlider = document.querySelector('.ba-slider');
+
+        baSlider.addEventListener('input', (event) => {
+          const value = Number(event.target.value);
+          baAfter.style.clipPath = `inset(0 ${100 - value}% 0 0)`;
+        });
+
+        // Pattern 9: metrics
+        const metricDial = document.querySelector('.metric-dial');
+        const metricBtn = document.querySelector('.metric-btn');
+        const dialValue = document.getElementById('dialValue');
+        const metricFills = Array.from(document.querySelectorAll('[data-demo="metrics"] .metric-fill'));
+
+        const nextFrame = (typeof requestAnimationFrame === 'function'
+          ? requestAnimationFrame
+          : (cb) => setTimeout(() => cb(performance.now()), 16));
+
+        const animateValue = (element, start, end, ms, cb) => {
+          const startAt = performance.now();
+          const run = (now) => {
+            const elapsed = now - startAt;
+            const progress = Math.min(1, elapsed / ms);
+            const eased = 1 - Math.pow(1 - progress, 2.5);
+            const value = Math.round(start + (end - start) * eased);
+            cb(value);
+            if (progress < 1) nextFrame(run);
+          };
+          nextFrame(run);
+        };
+        // keep fallback for non-RAF contexts
+
+        const refreshMetrics = () => {
+          const newTargets = [
+            Math.floor(50 + Math.random() * 50),
+            58 + Math.floor(Math.random() * 40)
+          ];
+
+          const currentDial = Number(dialValue.textContent.replace('%', '')) || 0;
+          animateValue(dialValue, currentDial, newTargets[0], 560, (value) => {
+            dialValue.textContent = `${value}%`;
+            metricDial.style.setProperty('--pct', `${value}`);
+          });
+
+          metricFills.forEach((bar, index) => {
+            const target = (newTargets[index] / 100).toFixed(2);
+            bar.style.setProperty('--progress', target);
+            if (!reduced()) {
+              bar.style.transform = `scaleX(${target})`;
+            } else {
+              bar.style.transform = `scaleX(${target})`;
+            }
+          });
+        };
+
+        metricBtn.addEventListener('click', refreshMetrics);
+
+        // Pattern 10: command palette
+        const paletteOverlay = document.getElementById('paletteOverlay');
+        const paletteOpen = document.querySelector('[data-open-palette]');
+        const paletteInput = document.getElementById('paletteInput');
+        const paletteList = document.getElementById('paletteList');
+        const paletteData = [
+          'Start focus mode',
+          'Open timeline',
+          'Save draft',
+          'Publish update',
+          'Retry validation',
+          'Invite collaborator',
+          'Clear filters',
+          'Export motion pack',
+          'Open settings'
+        ];
+        let activePaletteIndex = 0;
+
+        const renderPaletteItems = (query = '') => {
+          const filtered = paletteData.filter((item) => item.toLowerCase().includes(query.toLowerCase()));
+          paletteList.innerHTML = '';
+          filtered.forEach((item, index) => {
+            const li = document.createElement('li');
+            li.className = 'palette-item';
+            li.innerHTML = `<button type="button" data-command="${item}">${item}</button>`;
+            paletteList.appendChild(li);
+            if (index === activePaletteIndex) li.classList.add('is-active');
+          });
+          activePaletteIndex = Math.min(activePaletteIndex, Math.max(filtered.length - 1, 0));
+        };
+
+        const openPalette = () => {
+          paletteOverlay.setAttribute('aria-hidden', 'false');
+          paletteInput.focus();
+          renderPaletteItems('');
+        };
+
+        const closePalette = () => {
+          paletteOverlay.setAttribute('aria-hidden', 'true');
+          paletteInput.value = '';
+          paletteList.innerHTML = '';
+          paletteOpen.focus();
+        };
+
+        const pickCommand = (value) => {
+          alert(`Command selected: ${value}`);
+          closePalette();
+        };
+
+        paletteOpen.addEventListener('click', openPalette);
+        paletteInput.addEventListener('input', (event) => {
+          renderPaletteItems(event.target.value);
+        });
+
+        paletteList.addEventListener('click', (event) => {
+          const button = event.target.closest('button[data-command]');
+          if (!button) return;
+          pickCommand(button.dataset.command);
+        });
+
+        document.addEventListener('keydown', (event) => {
+          const paletteOpenNow = paletteOverlay.getAttribute('aria-hidden') === 'false';
+          if (event.key === 'k' && (event.metaKey || event.ctrlKey)) {
+            event.preventDefault();
+            openPalette();
+          }
+
+          if (!paletteOpenNow) return;
+
+          const items = [...paletteList.querySelectorAll('.palette-item')];
+          if (event.key === 'Escape') {
+            closePalette();
+            return;
+          }
+
+          if (event.key === 'ArrowDown') {
+            event.preventDefault();
+            activePaletteIndex = Math.min(activePaletteIndex + 1, items.length - 1);
+          }
+          if (event.key === 'ArrowUp') {
+            event.preventDefault();
+            activePaletteIndex = Math.max(activePaletteIndex - 1, 0);
+          }
+          if (event.key === 'Enter' && items[activePaletteIndex]) {
+            const command = items[activePaletteIndex].querySelector('button[data-command]').dataset.command;
+            pickCommand(command);
+          }
+
+          items.forEach((item, index) => {
+            item.classList.toggle('is-active', index === activePaletteIndex);
+          });
+        });
+
+        renderPaletteItems('');
+
+        // Pattern 11: tilt card
+        const tiltCard = document.querySelector('.tilt-card');
+        tiltCard.addEventListener('pointermove', (event) => {
+          if (reduced()) return;
+          const rect = tiltCard.getBoundingClientRect();
+          const x = ((event.clientX - rect.left) / rect.width - 0.5) * 16;
+          const y = ((event.clientY - rect.top) / rect.height - 0.5) * 16;
+          tiltCard.style.transform = `rotateX(${-y}deg) rotateY(${x}deg)`;
+        });
+
+        tiltCard.addEventListener('pointerleave', () => {
+          tiltCard.style.transform = '';
+        });
+
+        // Pattern 12: toast queue
+        const toastAdd = document.querySelector('.toast-add');
+        const toastStack = document.getElementById('toastStack');
+
+        const makeToast = () => {
+          const id = String(Date.now());
+          const toast = document.createElement('div');
+          toast.className = 'toast';
+          toast.dataset.id = id;
+          toast.dataset.state = 'live';
+          toast.innerHTML = `<strong>Saved state ${id.slice(-4)}</strong> <small>undo before auto-dismiss</small> <button type="button" data-id="${id}">Undo</button>`;
+          toastStack.append(toast);
+
+          const remove = () => {
+            toast.dataset.state = 'leaving';
+            setTimeout(() => toast.remove(), 180);
+          };
+
+          const undo = toast.querySelector('button');
+          undo.addEventListener('click', () => {
+            remove();
+          });
+
+          toast.addEventListener('animationend', () => {
+            if (toast.dataset.state === 'leaving') {
+              toast.remove();
+            }
+          }, { passive: true });
+
+          setTimeout(remove, 2500);
+        };
+
+        toastAdd.addEventListener('click', makeToast);
+
+        // Pattern 13: scroll scrub
+        const scrubRange = document.querySelector('.scrub-range');
+        const storyScroller = document.getElementById('storyScroller');
+        const scrubReveal = document.getElementById('scrubReveal');
+
+        storyScroller.addEventListener('scroll', () => {
+          const max = Math.max(1, storyScroller.scrollWidth - storyScroller.clientWidth);
+          const pct = Math.round((storyScroller.scrollLeft / max) * 100);
+          scrubRange.value = String(pct);
+          scrubReveal.textContent = `Progress position: ${pct}%`;
+        });
+
+        scrubRange.addEventListener('input', (event) => {
+          const max = storyScroller.scrollWidth - storyScroller.clientWidth;
+          storyScroller.scrollLeft = (Number(event.target.value) / 100) * max;
+        });
+
+        // Initial states
+        refreshMetrics();
+        const tabButtonsContainerObserver = new ResizeObserver(() => setActiveTab(tabButtons.find((btn) => btn.getAttribute('aria-selected') === 'true') || tabButtons[0]));
+        tabButtonsContainerObserver.observe(tabTrack);
+      })();
+    </script>
+  </body>
+</html>
