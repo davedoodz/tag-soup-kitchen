@@ -280,20 +280,22 @@ async function writeIndex(entries) {
       body {
         margin: 0;
         min-height: 100vh;
+        padding: 0 20px;
         font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
         background: var(--bg);
         color: var(--text);
-        display: grid;
-        place-items: center start;
       }
       .wrap {
-        width: min(1100px, calc(100% - 40px));
+        width: 100%;
+        max-width: 1100px;
+        margin: 0 auto;
         padding: clamp(16px, 3vw, 32px) 0;
       }
       h1 { margin: 0; }
       .muted { color: var(--muted); }
       table {
         width: 100%;
+        table-layout: fixed;
         border-collapse: collapse;
         border: 1px solid var(--line);
       }
@@ -303,6 +305,7 @@ async function writeIndex(entries) {
         text-align: left;
         vertical-align: top;
         padding: 10px 8px;
+        overflow-wrap: anywhere;
       }
       th {
         position: sticky;

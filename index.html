@@ -16,20 +16,22 @@
       body {
         margin: 0;
         min-height: 100vh;
+        padding: 0 20px;
         font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
         background: var(--bg);
         color: var(--text);
-        display: grid;
-        place-items: center start;
       }
       .wrap {
-        width: min(1100px, calc(100% - 40px));
+        width: 100%;
+        max-width: 1100px;
+        margin: 0 auto;
         padding: clamp(16px, 3vw, 32px) 0;
       }
       h1 { margin: 0; }
       .muted { color: var(--muted); }
       table {
         width: 100%;
+        table-layout: fixed;
         border-collapse: collapse;
         border: 1px solid var(--line);
       }
@@ -39,6 +41,7 @@
         text-align: left;
         vertical-align: top;
         padding: 10px 8px;
+        overflow-wrap: anywhere;
       }
       th {
         position: sticky;
@@ -80,8 +83,8 @@
       <h1>Tag Soup Kitchen (a.k.a. HTML Lab)</h1>
       <p class="muted">A minimalist long-term archive of every HTML surface.</p>
       <p class="meta">
-        <span>Entries: <strong>52</strong></span>
-        <span>Generated at: <strong>2026-08-19T06:52:47.935Z</strong></span>
+        <span>Entries: <strong>53</strong></span>
+        <span>Generated at: <strong>2026-08-19T07:27:55.387Z</strong></span>
         <span>Source: <strong>../final-portfolio</strong></span>
       </p>
       <table>
@@ -669,6 +672,17 @@
           <td>Re:Self — 5 Mobile Gallery Card Loop Variants :root { --ink: #111111; --muted: #6b6b6b; --line: #e8e8e8; --paper: #f7f7f7; --chip: #f2f2f2; --accent: #2f6bff; }</td>
           <td><span class="muted">public/reself-gallery-card-ui-variants.html</span></td>
           <td>-</td>
+        </tr>
+
+        <tr>
+          <td>0053</td>
+          <td><time datetime="2026-08-19T07:01:10.976Z">2026-08-19</time></td>
+          <td><span class="badge badge-live">live</span></td>
+          <td><a href="./ascii space/index.html">ascii space/index.html</a></td>
+          <td>ASCII Space</td>
+          <td>Mouse-field ASCII surface with slider controls and keyboard modifiers; black-white only.</td>
+          <td><span class="muted">public/ascii space/index.html</span></td>
+          <td><code>4231</code></td>
         </tr>
         </tbody>
       </table>

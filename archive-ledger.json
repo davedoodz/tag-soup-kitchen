@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-19T06:52:47.935Z",
+  "generatedAt": "2026-08-19T07:27:55.387Z",
   "repository": "Tag Soup Kitchen",
   "sourceRoot": "../final-portfolio",
   "entries": [
@@ -666,11 +666,11 @@
       "sourcePath": "public/hub.html",
       "sequence": 48,
       "createdAt": "2026-08-19T05:59:11.129Z",
-      "updatedAt": "2026-08-19T05:59:11.129Z",
+      "updatedAt": "2026-08-19T07:00:00.422Z",
       "title": "Hub",
       "description": "This catalogue — every local surface and its port.",
-      "sourceHash": "fd8c0dbeab69a74774d5709a1af41eed957c407f",
-      "size": 24211,
+      "sourceHash": "d6cbda8af4857e35243424fe12d4fabb77d55387",
+      "size": 24608,
       "state": "live",
       "port": 4170,
       "inSource": true
@@ -729,6 +729,20 @@
       "state": "standalone",
       "port": null,
       "sequence": 52,
+      "inSource": true
+    },
+    {
+      "path": "ascii space/index.html",
+      "sourcePath": "public/ascii space/index.html",
+      "createdAt": "2026-08-19T07:01:10.976Z",
+      "updatedAt": "2026-08-19T07:01:10.976Z",
+      "size": 20235,
+      "sourceHash": "2fa2e7d1c6a70c5e47845192b202e59cb3febe35",
+      "title": "ASCII Space",
+      "description": "Mouse-field ASCII surface with slider controls and keyboard modifiers; black-white only.",
+      "state": "live",
+      "port": 4231,
+      "sequence": 53,
       "inSource": true
     }
   ]
