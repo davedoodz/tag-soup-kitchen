@@ -1,0 +1,718 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Portfolio — 3D object explorations</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --paper: #ffffff;
+        --ink: #111111;
+        --muted: #8a8a8a;
+        --hairline: #e6e6e6;
+        --chip: #f2f2f2;
+        --accent: #2f6bff;
+        --sans: "Manrope", system-ui, sans-serif;
+        --mono: "IBM Plex Mono", ui-monospace, monospace;
+        --snap: cubic-bezier(0.22, 1, 0.36, 1);
+        --spring: linear(
+          0, 0.006, 0.101 6%, 0.539 18.9%, 0.849 31.5%, 0.968 41.8%, 1.006 50.1%,
+          1.017 63.9%, 1.001
+        );
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        background: var(--paper);
+      }
+      body {
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: var(--sans);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* ---------- mode switcher ---------- */
+      .switch {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        padding: 14px 24px;
+        background: rgb(255 255 255 / 82%);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--hairline);
+      }
+      .switch__label {
+        margin-right: 8px;
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      .switch button {
+        border: 1px solid var(--hairline);
+        border-radius: 999px;
+        background: var(--paper);
+        color: var(--ink);
+        cursor: pointer;
+        font: 500 13px var(--sans);
+        padding: 7px 14px;
+        transition:
+          background 0.2s,
+          color 0.2s,
+          border-color 0.2s;
+      }
+      .switch button[aria-pressed="true"] {
+        background: var(--ink);
+        border-color: var(--ink);
+        color: var(--paper);
+      }
+      .switch__note {
+        margin-left: auto;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .canvas {
+        max-width: 1512px;
+        margin-inline: auto;
+        padding: 40px 24px 120px;
+      }
+
+      /* ---------- hero ---------- */
+      .hero {
+        display: flex;
+        gap: 48px;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 28px;
+      }
+      .profile {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        width: 360px;
+        flex: 0 0 360px;
+      }
+      .avatar {
+        width: 118px;
+        height: 118px;
+        border-radius: 50%;
+        border: 1px solid var(--hairline);
+        overflow: hidden;
+        background: var(--chip);
+      }
+      .avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .profile h1 {
+        margin: 8px 0 0;
+        font-size: 26px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+      .profile .role {
+        margin: 0;
+        color: var(--muted);
+        font-size: 17px;
+        font-weight: 500;
+      }
+      .socials {
+        display: flex;
+        gap: 12px;
+      }
+      .socials svg {
+        width: 20px;
+        height: 20px;
+        fill: var(--ink);
+      }
+      .bio {
+        margin: 4px 0 0;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 24px;
+      }
+
+      .widgets {
+        display: grid;
+        grid-template-columns: 134px 268px 284px;
+        gap: 12px;
+        align-items: start;
+      }
+      .stack {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .right {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .pair {
+        display: flex;
+        gap: 12px;
+      }
+
+      /* ---------- 3D object base ---------- */
+      .o {
+        position: relative;
+        border-radius: 18px;
+        overflow: hidden;
+        transform-style: preserve-3d;
+        will-change: transform;
+      }
+      .o__sheen {
+        position: absolute;
+        inset: 0;
+        z-index: 3;
+        border-radius: inherit;
+        background: radial-gradient(
+          260px circle at var(--mx, 50%) var(--my, 50%),
+          rgb(255 255 255 / 30%),
+          transparent 46%
+        );
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+      }
+
+      /* widget skins */
+      .mini {
+        width: 134px;
+        height: 134px;
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      .mini .k {
+        font-family: var(--mono);
+        font-size: 8px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        opacity: 0.7;
+      }
+      .mini .row {
+        display: flex;
+        align-items: flex-end;
+        gap: 10px;
+      }
+      .mini .art {
+        width: 44px;
+        height: 44px;
+        border-radius: 6px;
+        flex: 0 0 44px;
+      }
+      .mini strong {
+        display: block;
+        font-size: 13px;
+        font-weight: 700;
+      }
+      .mini span.sub {
+        font-size: 11px;
+        opacity: 0.7;
+      }
+      .music {
+        background: #191414;
+        color: #fff;
+      }
+      .music .art {
+        background: linear-gradient(135deg, #e14683, #d6a04b);
+      }
+      .book {
+        background: #fff;
+        border: 1px solid var(--hairline);
+      }
+      .book .art {
+        width: 45px;
+        height: 66px;
+        flex: 0 0 45px;
+        border-radius: 3px;
+        background: linear-gradient(160deg, #eadfca, #b99d79);
+      }
+      .map {
+        width: 268px;
+        height: 280px;
+        background:
+          radial-gradient(circle at 50% 50%, rgb(255 255 255 / 55%) 0 1px, transparent 2px),
+          #e7ecf1;
+        background-size: 20px 20px;
+        color: #1b2733;
+        padding: 16px;
+      }
+      .map .k {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.06em;
+        color: #71808d;
+        text-transform: uppercase;
+      }
+      .map strong {
+        display: block;
+        margin-top: 4px;
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+      .map .pin {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 14px;
+        height: 14px;
+        border: 3px solid #fff;
+        border-radius: 50%;
+        background: var(--accent);
+        transform: translate(-50%, -50%) translateZ(30px);
+      }
+      .cal,
+      .wx {
+        width: 132px;
+        height: 132px;
+        padding: 14px;
+        display: flex;
+        justify-content: space-between;
+      }
+      .cal {
+        flex-direction: column;
+        background: #fff;
+        border: 1px solid var(--hairline);
+      }
+      .cal .d {
+        font-size: 26px;
+        font-weight: 800;
+      }
+      .cal .m {
+        color: #e2231a;
+        font: 700 11px var(--sans);
+        letter-spacing: 0.08em;
+      }
+      .cal .day {
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+      .cal .yr {
+        color: var(--muted);
+        font-size: 11px;
+      }
+      .wx {
+        align-items: flex-end;
+        background: linear-gradient(160deg, #e7ebf6, #c8d8ec);
+        color: #1b2733;
+      }
+      .wx .t {
+        font-size: 22px;
+        font-weight: 700;
+      }
+      .wx .f {
+        color: #4e6480;
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .wx .sun {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: #ffc53d;
+      }
+      .flight {
+        width: 284px;
+        height: 134px;
+        padding: 16px 18px;
+        background: #1c1c1e;
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      .flight .top {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .flight .code {
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 12px;
+      }
+      .flight .dur {
+        font-size: 30px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+
+      /* ---------- filter row ---------- */
+      .filters {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 18px 0;
+      }
+      .dot {
+        width: 24px;
+        height: 24px;
+        border: 5px solid var(--ink);
+        border-radius: 50%;
+      }
+      .pill {
+        border-radius: 999px;
+        background: var(--chip);
+        font-size: 14px;
+        font-weight: 500;
+        padding: 8px 16px;
+      }
+      .pill.on {
+        background: var(--ink);
+        color: #fff;
+      }
+      .stamp {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .stamp i {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--accent);
+      }
+
+      /* ---------- grid ---------- */
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        align-items: start;
+      }
+      .col {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .tile {
+        width: 100%;
+        background-size: cover;
+        background-position: center;
+        background-color: var(--chip);
+        color: #fff;
+      }
+      .tile .cap {
+        position: absolute;
+        left: 14px;
+        bottom: 12px;
+        z-index: 2;
+        font-size: 13px;
+        font-weight: 700;
+        text-shadow: 0 1px 6px rgb(0 0 0 / 45%);
+      }
+      .h1 {
+        height: 300px;
+      }
+      .h2 {
+        height: 240px;
+      }
+      .h3 {
+        height: 340px;
+      }
+      .h4 {
+        height: 200px;
+      }
+      .lime {
+        background-color: #d9ff43;
+      }
+      .blue {
+        background: linear-gradient(160deg, #cfe0ff, #9dbcff);
+      }
+
+      /* ============================================================
+         MODE A — CARDS  (per-object pointer tilt, the shipped system)
+         ============================================================ */
+      [data-mode="cards"] .o {
+        transition:
+          transform 0.4s var(--snap),
+          box-shadow 0.4s ease;
+        transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+      }
+      [data-mode="cards"] .o:hover {
+        box-shadow: 0 22px 48px rgb(17 17 17 / 22%);
+      }
+      [data-mode="cards"] .o:hover .o__sheen {
+        opacity: 1;
+      }
+
+      /* ============================================================
+         MODE B — SCENE  (whole stage parallax + layered depth diorama)
+         ============================================================ */
+      [data-mode="scene"] .stage {
+        transform-style: preserve-3d;
+        transform: perspective(1600px) rotateX(var(--sy, 0deg)) rotateY(var(--sx, 0deg));
+        transition: transform 0.25s ease-out;
+      }
+      [data-mode="scene"] .o {
+        transform: translateZ(var(--z, 0px));
+        transition: transform 0.5s var(--snap);
+        box-shadow: 0 calc(6px + var(--z, 0px) / 3) calc(18px + var(--z, 0px)) rgb(17 17 17 / 14%);
+      }
+
+      /* ============================================================
+         MODE C — FOCUS  (hovered object pops in Z, others recede/dim)
+         ============================================================ */
+      [data-mode="focus"] .o {
+        transition:
+          transform 0.35s var(--snap),
+          filter 0.35s ease,
+          box-shadow 0.35s ease;
+      }
+      [data-mode="focus"] .grid:has(.o:hover) .o:not(:hover),
+      [data-mode="focus"] .widgets:has(.o:hover) .o:not(:hover) {
+        filter: brightness(0.93) saturate(0.92);
+        transform: scale(0.98);
+      }
+      [data-mode="focus"] .o:hover {
+        transform: perspective(900px) translateZ(60px) scale(1.04);
+        box-shadow: 0 34px 70px rgb(17 17 17 / 30%);
+        z-index: 5;
+      }
+      [data-mode="focus"] .o:hover .o__sheen {
+        opacity: 1;
+      }
+
+      /* ============================================================
+         MODE D — SCROLL  (objects rise out of depth as they enter)
+         ============================================================ */
+      @keyframes rise3d {
+        from {
+          opacity: 0.35;
+          transform: perspective(1000px) rotateX(10deg) translateY(40px) translateZ(-80px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      [data-mode="scroll"] .grid .o {
+        animation: rise3d linear both;
+        animation-timeline: view();
+        animation-range: entry 0% cover 32%;
+      }
+      [data-mode="scroll"] .o {
+        transition: box-shadow 0.3s ease;
+      }
+      [data-mode="scroll"] .o:hover {
+        box-shadow: 0 18px 40px rgb(17 17 17 / 18%);
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .o,
+        .stage {
+          transition: none !important;
+          animation: none !important;
+          transform: none !important;
+        }
+        .o__sheen {
+          display: none;
+        }
+      }
+
+      @media (max-width: 900px) {
+        .hero {
+          flex-direction: column;
+        }
+        .grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="switch" aria-label="3D treatment">
+      <span class="switch__label">3D mode</span>
+      <button data-set="cards" aria-pressed="true">Cards · pointer tilt</button>
+      <button data-set="scene" aria-pressed="false">Scene · parallax diorama</button>
+      <button data-set="focus" aria-pressed="false">Focus · gallery spotlight</button>
+      <button data-set="scroll" aria-pressed="false">Scroll · rise from depth</button>
+      <span class="switch__note">move the cursor over the page · hover cards · scroll for mode 4</span>
+    </nav>
+
+    <div class="canvas" data-mode="cards">
+      <div class="stage">
+        <!-- hero -->
+        <header class="hero">
+          <div class="profile">
+            <div class="o avatar" style="--z: 60px">
+              <img src="images/david-lafond-avatar.png" alt="David Lafond" />
+              <span class="o__sheen"></span>
+            </div>
+            <div>
+              <h1>David Lafond</h1>
+              <p class="role">Product designer</p>
+            </div>
+            <div class="socials" aria-label="Social">
+              <svg viewBox="0 0 24 24"><path d="M5.2 8.6h3.2V19H5.2V8.6Zm1.5-5.1a1.9 1.9 0 1 1 0 3.8 1.9 1.9 0 0 1 0-3.8ZM10.3 8.6h3v1.5h.1c.4-.8 1.5-1.9 3.5-1.9 3.3 0 3.9 2.2 3.9 5.1V19h-3.2v-5.1c0-1.2 0-2.8-1.7-2.8s-2 1.3-2 2.7V19h-3.2V8.6Z"/></svg>
+              <svg viewBox="0 0 24 24"><path d="M18.2 3H21l-6.1 7 7.1 11h-5.6L12 14.2 6 21H3.2l7.5-8.6L3.8 3h5.7l4 6.2L18.2 3Z"/></svg>
+              <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-1.9c-2.8.6-3.4-1.2-3.4-1.2-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 0 1.6 1 1.6 1 .9 1.6 2.4 1.1 2.9.9.1-.7.4-1.1.7-1.4-2.2-.3-4.6-1.1-4.6-5A3.9 3.9 0 0 1 6.7 8c-.1-.3-.4-1.3.1-2.7 0 0 .9-.3 2.8 1.1a9.6 9.6 0 0 1 5.1 0c2-1.4 2.8-1.1 2.8-1.1.6 1.4.2 2.4.1 2.7a3.9 3.9 0 0 1 1.1 3c0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.8V21c0 .3.2.6.7.5A10 10 0 0 0 12 2Z"/></svg>
+            </div>
+            <p class="bio">Trained as an architect at McGill &amp; MIT.<br />Currently living in Montréal.</p>
+          </div>
+
+          <div class="widgets">
+            <div class="stack">
+              <div class="o mini music" style="--z: 20px">
+                <div class="k">▸ Recently played</div>
+                <div class="row">
+                  <div class="art"></div>
+                  <div><strong>South Side</strong><span class="sub">Uyama Hiroto</span></div>
+                </div>
+                <span class="o__sheen"></span>
+              </div>
+              <div class="o mini book">
+                <div class="k" style="opacity: 0.55">▪ Recently read</div>
+                <div class="row">
+                  <div class="art"></div>
+                  <div><strong style="font-size: 10px">Show Your Work!</strong><span class="sub" style="font-size: 10px">Austin Kleon</span></div>
+                </div>
+                <span class="o__sheen"></span>
+              </div>
+            </div>
+
+            <div class="o map" style="--z: 10px">
+              <div class="k">Currently in</div>
+              <strong>Montréal</strong>
+              <span class="pin"></span>
+              <span class="o__sheen"></span>
+            </div>
+
+            <div class="right">
+              <div class="pair">
+                <div class="o cal" style="--z: 30px">
+                  <div><div class="d">19</div><div class="m">AUG</div></div>
+                  <div><div class="day">Wednesday</div><div class="yr">2026 · Montréal</div></div>
+                  <span class="o__sheen"></span>
+                </div>
+                <div class="o wx" style="--z: 40px">
+                  <div><div class="t">18°</div><div class="f">Feels 19°</div></div>
+                  <div class="sun"></div>
+                  <span class="o__sheen"></span>
+                </div>
+              </div>
+              <div class="o flight" style="--z: 15px">
+                <div class="top"><span>Flight</span><span>✈</span></div>
+                <div><div class="code">XXX → YUL</div><div class="dur">17h 20m</div></div>
+                <span class="o__sheen"></span>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <!-- filters -->
+        <div class="filters">
+          <span class="dot"></span>
+          <span class="pill on">All</span>
+          <span class="pill">Product</span>
+          <span class="pill">Web</span>
+          <span class="pill">Mobile</span>
+          <span class="pill">Motion</span>
+          <span class="pill">Illustration</span>
+          <span class="pill">3D</span>
+          <span class="pill">Print</span>
+          <span class="stamp"><i></i>Last updated three months ago</span>
+        </div>
+
+        <!-- masonry grid of 3D objects -->
+        <div class="grid">
+          <div class="col">
+            <div class="o tile h1" style="--z: 10px; background-image: url('images/harvard-mit-portfolio-hero.webp')"><span class="o__sheen"></span></div>
+            <div class="o tile h3" style="--z: 40px; background-image: url('images/davids-journal-hero.webp')"><span class="cap">david's journal</span><span class="o__sheen"></span></div>
+          </div>
+          <div class="col">
+            <div class="o tile h2" style="--z: 30px; background-image: url('images/design-sketches-hero.webp')"><span class="o__sheen"></span></div>
+            <div class="o tile h3" style="--z: 15px; background-image: url('images/pumba-desktop-hero.webp')"><span class="o__sheen"></span></div>
+          </div>
+          <div class="col">
+            <div class="o tile h3" style="--z: 50px; background-image: url('images/global-interiors-hero.webp')"><span class="cap">GLOBAL INTERIORS</span><span class="o__sheen"></span></div>
+            <div class="o tile h1" style="--z: 20px; background-image: url('images/caj-decode-hero.webp')"><span class="cap">DECODE Nº1</span><span class="o__sheen"></span></div>
+          </div>
+          <div class="col">
+            <div class="o tile h2" style="--z: 35px; background-image: url('images/hidecs2-hero.webp')"><span class="o__sheen"></span></div>
+            <div class="o tile h3" style="--z: 55px; background-image: url('images/reself-hero.webp')"><span class="o__sheen"></span></div>
+            <div class="o tile h4 lime" style="--z: 10px"><span class="o__sheen"></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const canvas = document.querySelector(".canvas")
+      const stage = document.querySelector(".stage")
+      const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches
+
+      // mode switch
+      for (const btn of document.querySelectorAll(".switch button")) {
+        btn.addEventListener("click", () => {
+          canvas.dataset.mode = btn.dataset.set
+          for (const b of document.querySelectorAll(".switch button"))
+            b.setAttribute("aria-pressed", String(b === btn))
+          window.scrollTo({ top: 0, behavior: "smooth" })
+        })
+      }
+
+      if (!reduce) {
+        const MAX = 9
+        // per-object tilt (mode: cards / focus sheen)
+        for (const o of document.querySelectorAll(".o")) {
+          let frame = 0
+          o.addEventListener("pointermove", (e) => {
+            if (frame) return
+            frame = requestAnimationFrame(() => {
+              frame = 0
+              const r = o.getBoundingClientRect()
+              const px = (e.clientX - r.left) / r.width
+              const py = (e.clientY - r.top) / r.height
+              o.style.setProperty("--ry", `${(px - 0.5) * 2 * MAX}deg`)
+              o.style.setProperty("--rx", `${(0.5 - py) * 2 * MAX}deg`)
+              o.style.setProperty("--mx", `${px * 100}%`)
+              o.style.setProperty("--my", `${py * 100}%`)
+            })
+          })
+          o.addEventListener("pointerleave", () => {
+            o.style.setProperty("--rx", "0deg")
+            o.style.setProperty("--ry", "0deg")
+          })
+        }
+        // scene parallax (mode: scene) — whole stage tilts toward cursor
+        let sframe = 0
+        window.addEventListener("pointermove", (e) => {
+          if (canvas.dataset.mode !== "scene" || sframe) return
+          sframe = requestAnimationFrame(() => {
+            sframe = 0
+            const px = e.clientX / window.innerWidth
+            const py = e.clientY / window.innerHeight
+            stage.style.setProperty("--sx", `${(px - 0.5) * 2 * 6}deg`)
+            stage.style.setProperty("--sy", `${(0.5 - py) * 2 * 6}deg`)
+          })
+        })
+      }
+    </script>
+  </body>
+</html>

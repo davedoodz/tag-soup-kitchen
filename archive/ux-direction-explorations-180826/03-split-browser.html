@@ -1,0 +1,1670 @@
+<!doctype html>
+<html lang="en" data-design-id="03-split-browser" data-design-title="Split browser">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Split browser — David Lafond Designs</title>
+    <link rel="stylesheet" href="../../shared/review.css" />
+    <script src="../../shared/review.js" defer></script>
+    <style>
+      :root {
+        color-scheme: light;
+        --paper: #f4f3ef;
+        --paper-raised: #fbfaf6;
+        --paper-sunken: #e9e8e2;
+        --ink: #1b1d20;
+        --ink-soft: #686b70;
+        --line: #c9c8c1;
+        --line-strong: #969791;
+        --accent: #2455d6;
+        --accent-pale: #dfe6f8;
+        --focus: #173da0;
+        --media-ledger: #748ba6;
+        --media-northbound: #d48668;
+        --media-atlas: #667c6f;
+        --media-signal: #9a7c9f;
+        --media-foundry: #8a8174;
+        --media-quarter: #b78c55;
+        --media-meridian: #5f8c8e;
+        --media-harbour: #617a96;
+        --media-cadence: #a06f67;
+        --media-solstice: #93755c;
+        --media-terrace: #738266;
+        --media-prism: #706b98;
+        --space-1: 4px;
+        --space-2: 8px;
+        --space-3: 12px;
+        --space-4: 16px;
+        --space-5: 24px;
+        --space-6: 32px;
+        --space-7: 48px;
+        --space-8: 64px;
+        --radius-sm: 3px;
+        --radius-md: 8px;
+        --shadow-float: 0 16px 48px rgb(27 29 32 / 14%);
+        --font-display: "Arial Narrow", "Avenir Next Condensed", "Helvetica Neue", sans-serif;
+        --font-body: "Avenir Next", Avenir, "Helvetica Neue", sans-serif;
+        --font-data: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+        --review-safe-area: 96px;
+        --review-safe-area-mobile: calc(
+          var(--review-safe-area) + var(--review-safe-area) + var(--space-6)
+        );
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+
+      body {
+        min-width: 320px;
+        height: 100dvh;
+        overflow: hidden;
+        padding-bottom: var(--review-safe-area);
+        background: var(--paper);
+        color: var(--ink);
+        font-family: var(--font-body);
+        font-size: 15px;
+        line-height: 1.4;
+      }
+
+      button,
+      input {
+        font: inherit;
+      }
+
+      button,
+      a {
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      :focus-visible {
+        outline: 2px solid var(--focus);
+        outline-offset: 3px;
+      }
+
+      .app-shell {
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr);
+        height: calc(100dvh - var(--review-safe-area));
+      }
+      .app-header {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: var(--space-5);
+        min-height: 72px;
+        padding: var(--space-3) var(--space-5);
+        border-bottom: 1px solid var(--line);
+        background: var(--paper-raised);
+      }
+
+      .header-copy {
+        display: flex;
+        min-width: 0;
+        align-items: center;
+        gap: var(--space-5);
+      }
+
+      .gallery-link {
+        flex: 0 0 auto;
+        color: var(--ink);
+        font-family: var(--font-data);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        text-decoration: none;
+        text-transform: uppercase;
+      }
+
+      .gallery-link::before {
+        content: "←";
+        margin-right: var(--space-2);
+        color: var(--accent);
+      }
+
+      .direction-copy {
+        min-width: 0;
+        padding-left: var(--space-5);
+        border-left: 1px solid var(--line);
+      }
+
+      .direction-copy strong {
+        display: block;
+        font-family: var(--font-display);
+        font-size: 17px;
+        font-stretch: condensed;
+        letter-spacing: 0.01em;
+        line-height: 1.1;
+        text-transform: uppercase;
+      }
+
+      .direction-copy p {
+        overflow: hidden;
+        margin: var(--space-1) 0 0;
+        color: var(--ink-soft);
+        font-size: 12px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .key-guide {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        color: var(--ink-soft);
+        font-family: var(--font-data);
+        font-size: 11px;
+      }
+
+      .key-guide span {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-1);
+      }
+
+      kbd {
+        min-width: 24px;
+        padding: var(--space-1) var(--space-2);
+        border: 1px solid var(--line);
+        border-bottom-color: var(--line-strong);
+        border-radius: var(--radius-sm);
+        background: var(--paper);
+        color: var(--ink);
+        font: inherit;
+        text-align: center;
+      }
+
+      .workspace {
+        display: grid;
+        min-height: 0;
+        grid-template-columns: clamp(340px, 27vw, 420px) minmax(0, 1fr);
+      }
+
+      .browser-pane {
+        display: grid;
+        min-height: 0;
+        grid-template-rows: auto auto minmax(0, 1fr);
+        border-right: 1px solid var(--line);
+        background: var(--paper-raised);
+      }
+
+      .filter-wrap {
+        padding: var(--space-5) var(--space-4) var(--space-4);
+      }
+
+      .filter-label {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: var(--space-4);
+        margin-bottom: var(--space-2);
+        color: var(--ink-soft);
+        font-family: var(--font-data);
+        font-size: 11px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .result-count {
+        color: var(--accent);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .filter-field {
+        position: relative;
+      }
+
+      .filter-field::before {
+        position: absolute;
+        top: 50%;
+        left: var(--space-3);
+        color: var(--ink-soft);
+        content: "/";
+        font-family: var(--font-data);
+        transform: translateY(-50%);
+      }
+
+      .filter-input {
+        width: 100%;
+        height: 42px;
+        padding: 0 var(--space-3) 0 var(--space-6);
+        border: 1px solid var(--line-strong);
+        border-radius: var(--radius-sm);
+        background: var(--paper);
+        color: var(--ink);
+        caret-color: var(--accent);
+      }
+
+      .filter-input::placeholder {
+        color: var(--ink-soft);
+      }
+
+      .filter-input:focus {
+        border-color: var(--accent);
+      }
+
+      .category-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-2);
+        margin-top: var(--space-3);
+      }
+
+      .category-filter {
+        flex: 0 0 auto;
+        min-height: 28px;
+        padding: 0 var(--space-3);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: var(--paper);
+        color: var(--ink-soft);
+        cursor: pointer;
+        font-family: var(--font-data);
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .category-filter:hover {
+        border-color: var(--line-strong);
+        color: var(--ink);
+      }
+
+      .category-filter[aria-pressed="true"] {
+        border-color: var(--ink);
+        background: var(--ink);
+        color: var(--paper-raised);
+      }
+
+      .column-head,
+      .project-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 92px 48px;
+        align-items: center;
+        column-gap: var(--space-3);
+      }
+
+      .column-head {
+        min-height: 32px;
+        padding: 0 var(--space-4);
+        border-block: 1px solid var(--line);
+        color: var(--ink-soft);
+        font-family: var(--font-data);
+        font-size: 9px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .column-head span:last-child {
+        text-align: right;
+      }
+
+      .list-scroller {
+        min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scrollbar-color: var(--line-strong) transparent;
+        scrollbar-width: thin;
+      }
+
+      .project-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .project-list li {
+        border-bottom: 1px solid var(--line);
+      }
+
+      .project-row {
+        position: relative;
+        width: 100%;
+        min-height: 62px;
+        padding: var(--space-3) var(--space-4);
+        border: 0;
+        background: transparent;
+        color: var(--ink);
+        cursor: pointer;
+        text-align: left;
+        transition: background-color 140ms ease, color 140ms ease;
+      }
+
+      .project-row::before {
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: var(--space-1);
+        background: var(--accent);
+        content: "";
+        opacity: 0;
+        transform: scaleY(0.35);
+        transition: opacity 140ms ease, transform 220ms var(--ease-out);
+      }
+
+      .project-row:hover {
+        background: var(--paper-sunken);
+      }
+
+      .project-row[aria-current="true"] {
+        background: var(--accent-pale);
+      }
+
+      .project-row[aria-current="true"]::before {
+        opacity: 1;
+        transform: scaleY(1);
+      }
+
+      .project-row:focus-visible {
+        z-index: 1;
+        outline-offset: -3px;
+      }
+
+      .row-title {
+        display: flex;
+        min-width: 0;
+        align-items: baseline;
+        gap: var(--space-3);
+        font-family: var(--font-display);
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+        line-height: 1.1;
+      }
+
+      .row-index {
+        flex: 0 0 22px;
+        color: var(--ink-soft);
+        font-family: var(--font-data);
+        font-size: 9px;
+        font-weight: 400;
+      }
+
+      .row-name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .row-category,
+      .row-year {
+        color: var(--ink-soft);
+        font-family: var(--font-data);
+        font-size: 10px;
+      }
+
+      .row-category {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .row-year {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .empty-state {
+        display: grid;
+        min-height: 180px;
+        place-content: center;
+        padding: var(--space-6);
+        color: var(--ink-soft);
+        text-align: center;
+      }
+
+      .empty-state[hidden] {
+        display: none;
+      }
+
+      .empty-state strong {
+        display: block;
+        margin-bottom: var(--space-2);
+        color: var(--ink);
+        font-family: var(--font-display);
+        font-size: 22px;
+        text-transform: uppercase;
+      }
+
+      .empty-state p {
+        max-width: 28ch;
+        margin: 0;
+        font-size: 13px;
+      }
+
+      .detail-pane {
+        min-width: 0;
+        min-height: 0;
+        overflow-y: auto;
+        background: var(--paper);
+        scrollbar-color: var(--line-strong) transparent;
+        scrollbar-width: thin;
+      }
+
+      .detail-inner {
+        width: min(100%, 1240px);
+        height: 100%;
+        margin-inline: auto;
+        padding: var(--space-6);
+      }
+
+      #detailContent {
+        display: grid;
+        min-height: 100%;
+        grid-template-rows: minmax(280px, 1fr) auto;
+        gap: var(--space-5);
+      }
+
+      .mobile-back {
+        display: none;
+      }
+
+      .media-placeholder {
+        position: relative;
+        display: grid;
+        overflow: hidden;
+        width: auto;
+        max-width: 100%;
+        height: 100%;
+        max-height: 100%;
+        margin-inline: auto;
+        aspect-ratio: var(--media-ratio, 16 / 9);
+        place-items: center;
+        background: var(--media-color, var(--media-ledger));
+        color: var(--paper-raised);
+        isolation: isolate;
+      }
+
+      .media-placeholder::before,
+      .media-placeholder::after {
+        position: absolute;
+        content: "";
+        pointer-events: none;
+      }
+
+      .media-placeholder::before {
+        inset: 11% 8% 46% 56%;
+        border: 1px solid currentColor;
+        opacity: 0.72;
+      }
+
+      .media-placeholder::after {
+        inset: 56% 54% 9% 8%;
+        background: currentColor;
+        opacity: 0.16;
+      }
+
+      .media-mark {
+        position: relative;
+        z-index: 1;
+        font-family: var(--font-display);
+        font-size: clamp(68px, 10vw, 164px);
+        font-weight: 700;
+        letter-spacing: -0.06em;
+        line-height: 0.8;
+        text-transform: uppercase;
+      }
+
+      .media-number,
+      .media-ratio {
+        position: absolute;
+        z-index: 1;
+        font-family: var(--font-data);
+        font-size: 10px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .media-number {
+        top: var(--space-4);
+        left: var(--space-4);
+      }
+
+      .media-ratio {
+        right: var(--space-4);
+        bottom: var(--space-4);
+      }
+
+      .detail-meta {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(300px, 0.65fr);
+        gap: var(--space-7);
+        padding-top: var(--space-5);
+      }
+
+      .detail-kicker {
+        margin: 0 0 var(--space-2);
+        color: var(--accent);
+        font-family: var(--font-data);
+        font-size: 10px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .detail-title {
+        margin: 0;
+        font-family: var(--font-display);
+        font-size: clamp(38px, 4.5vw, 76px);
+        font-weight: 700;
+        letter-spacing: -0.035em;
+        line-height: 0.9;
+        text-transform: uppercase;
+      }
+
+      .detail-description {
+        max-width: 50ch;
+        margin: var(--space-4) 0 0;
+        color: var(--ink-soft);
+        font-size: 15px;
+        line-height: 1.5;
+      }
+
+      .detail-facts {
+        display: grid;
+        align-content: start;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        margin: 0;
+        border-top: 1px solid var(--line-strong);
+      }
+
+      .fact {
+        min-width: 0;
+        padding: var(--space-3) 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .fact:nth-child(odd) {
+        padding-right: var(--space-4);
+      }
+
+      .fact:nth-child(even) {
+        padding-left: var(--space-4);
+        border-left: 1px solid var(--line);
+      }
+
+      .fact dt {
+        margin: 0 0 var(--space-1);
+        color: var(--ink-soft);
+        font-family: var(--font-data);
+        font-size: 9px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .fact dd {
+        overflow: hidden;
+        margin: 0;
+        font-family: var(--font-display);
+        font-size: 15px;
+        font-weight: 700;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .detail-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--space-2);
+        margin-top: var(--space-5);
+      }
+
+      .case-study-button,
+      .detail-step,
+      .case-dialog-close {
+        min-height: 40px;
+        border: 1px solid var(--line-strong);
+        border-radius: var(--radius-sm);
+        background: var(--paper-raised);
+        color: var(--ink);
+        cursor: pointer;
+        font-family: var(--font-data);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .case-study-button {
+        padding: 0 var(--space-4);
+        border-color: var(--ink);
+        background: var(--ink);
+        color: var(--paper-raised);
+      }
+
+      .case-study-button::after {
+        margin-left: var(--space-2);
+        color: var(--accent-pale);
+        content: "↗";
+      }
+
+      .detail-step {
+        width: 40px;
+        padding: 0;
+      }
+
+      .case-study-button:hover,
+      .case-study-button:focus-visible {
+        background: var(--accent);
+      }
+
+      .detail-step:hover,
+      .case-dialog-close:hover {
+        border-color: var(--ink);
+      }
+
+      .detail-step:disabled {
+        cursor: not-allowed;
+        opacity: 0.28;
+      }
+
+      .case-dialog {
+        width: min(1120px, calc(100vw - var(--space-6)));
+        max-width: none;
+        height: min(860px, calc(100dvh - var(--space-6)));
+        max-height: none;
+        padding: 0;
+        border: 1px solid var(--line-strong);
+        border-radius: var(--radius-md);
+        background: var(--paper);
+        color: var(--ink);
+        box-shadow: var(--shadow-float);
+      }
+
+      .case-dialog::backdrop {
+        background: color-mix(in srgb, var(--ink) 54%, transparent);
+      }
+
+      .case-dialog-shell {
+        display: grid;
+        height: 100%;
+        grid-template-rows: auto minmax(0, 1fr) auto;
+      }
+
+      .case-dialog-header,
+      .case-dialog-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-4);
+        padding: var(--space-3) var(--space-4);
+        border-bottom: 1px solid var(--line);
+        background: var(--paper-raised);
+      }
+
+      .case-dialog-footer {
+        border-top: 1px solid var(--line);
+        border-bottom: 0;
+      }
+
+      .case-dialog-label {
+        margin: 0;
+        color: var(--ink-soft);
+        font-family: var(--font-data);
+        font-size: 10px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+
+      .case-dialog-close {
+        min-width: 72px;
+        padding: 0 var(--space-3);
+      }
+
+      .case-dialog-body {
+        overflow-y: auto;
+        padding: var(--space-5);
+        overscroll-behavior: contain;
+      }
+
+      .case-hero {
+        min-height: 420px;
+      }
+
+      .case-intro {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(280px, 0.55fr);
+        gap: var(--space-7);
+        padding: var(--space-7) 0;
+      }
+
+      .case-title {
+        margin: 0;
+        font-family: var(--font-display);
+        font-size: clamp(52px, 8vw, 112px);
+        letter-spacing: -0.055em;
+        line-height: 0.82;
+        text-transform: uppercase;
+      }
+
+      .case-description {
+        max-width: 52ch;
+        margin: var(--space-5) 0 0;
+        color: var(--ink-soft);
+        font-size: 17px;
+        line-height: 1.55;
+      }
+
+      .case-evidence {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        border-block: 1px solid var(--line-strong);
+      }
+
+      .case-evidence article {
+        min-width: 0;
+        padding: var(--space-5);
+      }
+
+      .case-evidence article + article {
+        border-left: 1px solid var(--line);
+      }
+
+      .case-evidence span {
+        display: block;
+        margin-bottom: var(--space-3);
+        color: var(--accent);
+        font-family: var(--font-data);
+        font-size: 9px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .case-evidence strong {
+        font-family: var(--font-display);
+        font-size: clamp(20px, 2.4vw, 34px);
+        line-height: 1;
+        text-transform: uppercase;
+      }
+
+      .case-footer-actions {
+        display: flex;
+        gap: var(--space-2);
+      }
+
+      .case-footer-actions .detail-step {
+        width: auto;
+        min-width: 104px;
+        padding: 0 var(--space-3);
+      }
+
+      .detail-fade {
+        animation: detail-in 180ms var(--ease-out);
+      }
+
+      @keyframes detail-in {
+        from {
+          opacity: 0.48;
+          transform: translateY(var(--space-1));
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 1023px) {
+        .key-guide {
+          display: none;
+        }
+
+        .workspace {
+          display: block;
+          overflow-y: auto;
+          overscroll-behavior: contain;
+        }
+
+        .browser-pane {
+          height: min(44dvh, 380px);
+          border-right: 0;
+          border-bottom: 1px solid var(--line-strong);
+        }
+
+        .detail-pane {
+          overflow: visible;
+        }
+
+        .detail-inner {
+          height: auto;
+          padding: var(--space-5);
+        }
+
+        #detailContent {
+          display: block;
+          min-height: 0;
+        }
+
+        .media-placeholder {
+          width: 100%;
+          height: auto;
+          max-height: none;
+        }
+
+        .detail-meta {
+          grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+          gap: var(--space-5);
+        }
+      }
+
+      @media (max-width: 639px) {
+        body {
+          padding-bottom: var(--review-safe-area-mobile);
+        }
+
+        .app-shell {
+          height: calc(100dvh - var(--review-safe-area-mobile));
+        }
+
+        .app-header {
+          grid-template-columns: 1fr;
+          min-height: 88px;
+          padding: var(--space-3) var(--space-4);
+        }
+
+        .header-copy {
+          align-items: flex-start;
+          gap: var(--space-3);
+        }
+
+        .direction-copy {
+          padding-left: var(--space-3);
+        }
+
+        .direction-copy strong {
+          font-size: 15px;
+        }
+
+        .direction-copy p {
+          white-space: normal;
+        }
+
+        .workspace {
+          overflow: hidden;
+        }
+
+        .browser-pane {
+          height: 100%;
+          border-bottom: 0;
+        }
+
+        .filter-wrap {
+          padding: var(--space-4);
+        }
+
+        .column-head,
+        .project-row {
+          grid-template-columns: minmax(0, 1fr) 76px 42px;
+          column-gap: var(--space-2);
+        }
+
+        .project-row {
+          min-height: 64px;
+        }
+
+        .row-title {
+          gap: var(--space-2);
+          font-size: 17px;
+        }
+
+        .row-index {
+          flex-basis: 18px;
+        }
+
+        .detail-pane {
+          position: fixed;
+          z-index: 20;
+          inset: 0;
+          overflow-y: auto;
+          padding-bottom: var(--review-safe-area-mobile);
+          background: var(--paper);
+          box-shadow: var(--shadow-float);
+          opacity: 0.7;
+          transform: translateX(100%);
+          transition: opacity 220ms ease, transform 320ms var(--ease-out);
+          visibility: hidden;
+        }
+
+        .app-shell.is-detail-open .detail-pane {
+          opacity: 1;
+          transform: translateX(0);
+          visibility: visible;
+        }
+
+        .detail-inner {
+          width: 100%;
+          padding: var(--space-4);
+        }
+
+        .mobile-back {
+          display: inline-flex;
+          align-items: center;
+          gap: var(--space-2);
+          min-height: 40px;
+          margin-bottom: var(--space-4);
+          padding: 0;
+          border: 0;
+          background: transparent;
+          color: var(--ink);
+          cursor: pointer;
+          font-family: var(--font-data);
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
+        }
+
+        .mobile-back::before {
+          color: var(--accent);
+          content: "←";
+          font-size: 16px;
+        }
+
+        .media-placeholder {
+          aspect-ratio: 4 / 3;
+        }
+
+        .detail-meta {
+          display: block;
+          padding-top: var(--space-5);
+        }
+
+        .detail-title {
+          font-size: clamp(42px, 16vw, 68px);
+        }
+
+        .detail-description {
+          margin-bottom: var(--space-6);
+        }
+
+        .detail-facts {
+          grid-template-columns: 1fr;
+        }
+
+        .fact:nth-child(odd),
+        .fact:nth-child(even) {
+          padding-inline: 0;
+          border-left: 0;
+        }
+
+        .case-dialog {
+          width: 100vw;
+          height: calc(100dvh - var(--review-safe-area-mobile));
+          border: 0;
+          border-radius: 0;
+        }
+
+        .case-dialog-body {
+          padding: var(--space-4);
+        }
+
+        .case-hero {
+          min-height: 280px;
+          aspect-ratio: 4 / 3;
+        }
+
+        .case-intro {
+          display: block;
+          padding: var(--space-6) 0;
+        }
+
+        .case-title {
+          font-size: clamp(54px, 18vw, 84px);
+        }
+
+        .case-description {
+          margin-bottom: var(--space-6);
+        }
+
+        .case-evidence {
+          grid-template-columns: 1fr;
+        }
+
+        .case-evidence article + article {
+          border-top: 1px solid var(--line);
+          border-left: 0;
+        }
+
+        .case-dialog-footer {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .case-footer-actions {
+          width: 100%;
+        }
+
+        .case-footer-actions .detail-step {
+          flex: 1;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-shell" id="appShell">
+      <header class="app-header">
+        <div class="header-copy">
+          <a class="gallery-link" href="index.html">All designs</a>
+          <div class="direction-copy">
+            <strong>Split browser</strong>
+            <p>Compare the complete archive without losing your place.</p>
+          </div>
+        </div>
+        <div class="key-guide" aria-hidden="true">
+          <span><kbd>↑</kbd><kbd>↓</kbd> Select</span>
+          <span><kbd>Home</kbd><kbd>End</kbd> Jump</span>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <aside class="browser-pane" id="browserPane" aria-label="Project browser">
+          <form class="filter-wrap" id="filterForm" role="search">
+            <label class="filter-label" for="projectFilter">
+              <span>Filter projects</span>
+              <span class="result-count" id="resultCount" aria-live="polite">12 / 12</span>
+            </label>
+            <div class="filter-field">
+              <input
+                class="filter-input"
+                id="projectFilter"
+                type="search"
+                placeholder="Title or category"
+                autocomplete="off"
+                spellcheck="false"
+              />
+            </div>
+            <div class="category-filters" aria-label="Filter by discipline">
+              <button class="category-filter" type="button" data-category="All" aria-pressed="true">All</button>
+              <button class="category-filter" type="button" data-category="Product" aria-pressed="false">Product</button>
+              <button class="category-filter" type="button" data-category="Branding" aria-pressed="false">Branding</button>
+              <button class="category-filter" type="button" data-category="Web" aria-pressed="false">Web</button>
+              <button class="category-filter" type="button" data-category="Motion" aria-pressed="false">Motion</button>
+              <button class="category-filter" type="button" data-category="3D" aria-pressed="false">3D</button>
+              <button class="category-filter" type="button" data-category="Print" aria-pressed="false">Print</button>
+              <button class="category-filter" type="button" data-category="Illustration" aria-pressed="false">Illustration</button>
+            </div>
+          </form>
+
+          <div class="column-head" aria-hidden="true">
+            <span>Project</span>
+            <span>Discipline</span>
+            <span>Year</span>
+          </div>
+
+          <div class="list-scroller" id="listScroller">
+            <ul class="project-list" id="projectList" aria-label="Projects"></ul>
+            <div class="empty-state" id="emptyState" hidden>
+              <div>
+                <strong>No matches</strong>
+                <p>Try a project title or a broader discipline.</p>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <section class="detail-pane" id="detailPane" aria-label="Selected project">
+          <div class="detail-inner" id="detailInner">
+            <button class="mobile-back" id="mobileBack" type="button">Back to projects</button>
+            <div id="detailContent"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <dialog class="case-dialog" id="caseStudyDialog" aria-labelledby="caseDialogLabel">
+      <div class="case-dialog-shell">
+        <header class="case-dialog-header">
+          <p class="case-dialog-label" id="caseDialogLabel">Case study</p>
+          <button class="case-dialog-close" id="caseDialogClose" type="button">Close</button>
+        </header>
+        <div class="case-dialog-body" id="caseDialogBody"></div>
+        <footer class="case-dialog-footer">
+          <p class="case-dialog-label" id="caseDialogPosition"></p>
+          <div class="case-footer-actions">
+            <button class="detail-step" type="button" data-case-step="previous">← Previous</button>
+            <button class="detail-step" type="button" data-case-step="next">Next →</button>
+          </div>
+        </footer>
+      </div>
+    </dialog>
+
+    <script>
+      ;(() => {
+        const projects = [
+          {
+            title: 'Ledger',
+            subtitle: 'payments console',
+            category: 'Product',
+            year: '2026',
+            ratio: '4 / 3',
+            ratioLabel: '4:3',
+            color: 'var(--media-ledger)',
+            description: 'A high-trust payments workspace that makes complex transfers legible at a glance.',
+            role: 'Lead product design',
+            team: '6 people',
+            duration: '14 weeks',
+          },
+          {
+            title: 'Northbound',
+            subtitle: 'brand system',
+            category: 'Branding',
+            year: '2026',
+            ratio: '1 / 1',
+            ratioLabel: '1:1',
+            color: 'var(--media-northbound)',
+            description: 'A flexible identity system built for a travel studio that prefers quiet confidence.',
+            role: 'Creative direction',
+            team: '4 people',
+            duration: '10 weeks',
+          },
+          {
+            title: 'Atlas',
+            subtitle: 'marketing site',
+            category: 'Web',
+            year: '2026',
+            ratio: '16 / 9',
+            ratioLabel: '16:9',
+            color: 'var(--media-atlas)',
+            description: 'A geographic publishing platform that turns dense field research into clear stories.',
+            role: 'Design & prototype',
+            team: '5 people',
+            duration: '12 weeks',
+          },
+          {
+            title: 'Signal',
+            subtitle: 'motion study',
+            category: 'Motion',
+            year: '2025',
+            ratio: '16 / 10',
+            ratioLabel: '16:10',
+            color: 'var(--media-signal)',
+            description: 'A motion language for alerts that conveys urgency without adding visual noise.',
+            role: 'Motion direction',
+            team: '3 people',
+            duration: '6 weeks',
+          },
+          {
+            title: 'Foundry',
+            subtitle: '3D explorations',
+            category: '3D',
+            year: '2025',
+            ratio: '4 / 3',
+            ratioLabel: '4:3',
+            color: 'var(--media-foundry)',
+            description: 'A tactile series of procedural forms shaped by casting, pressure, and imperfect surfaces.',
+            role: 'Art direction',
+            team: '2 people',
+            duration: '8 weeks',
+          },
+          {
+            title: 'Quarter',
+            subtitle: 'print annual',
+            category: 'Print',
+            year: '2025',
+            ratio: '3 / 4',
+            ratioLabel: '3:4',
+            color: 'var(--media-quarter)',
+            description: 'An annual report that gives operational detail the pace and clarity of editorial design.',
+            role: 'Editorial design',
+            team: '4 people',
+            duration: '9 weeks',
+          },
+          {
+            title: 'Meridian',
+            subtitle: 'wayfinding kit',
+            category: 'Illustration',
+            year: '2025',
+            ratio: '1 / 1',
+            ratioLabel: '1:1',
+            color: 'var(--media-meridian)',
+            description: 'A modular landmark and icon family designed to make unfamiliar places feel navigable.',
+            role: 'Design lead',
+            team: '5 people',
+            duration: '16 weeks',
+          },
+          {
+            title: 'Harbour',
+            subtitle: 'booking flow',
+            category: 'Product',
+            year: '2024',
+            ratio: '4 / 3',
+            ratioLabel: '4:3',
+            color: 'var(--media-harbour)',
+            description: 'A mobile-first booking flow that keeps availability, pricing, and trade-offs in view.',
+            role: 'Product design',
+            team: '7 people',
+            duration: '18 weeks',
+          },
+          {
+            title: 'Cadence',
+            subtitle: 'design system',
+            category: 'Product',
+            year: '2024',
+            ratio: '16 / 9',
+            ratioLabel: '16:9',
+            color: 'var(--media-cadence)',
+            description: 'A design system that aligns product teams through shared rhythms rather than rigid pages.',
+            role: 'Systems design',
+            team: '8 people',
+            duration: '24 weeks',
+          },
+          {
+            title: 'Solstice',
+            subtitle: 'campaign film',
+            category: 'Motion',
+            year: '2024',
+            ratio: '16 / 9',
+            ratioLabel: '16:9',
+            color: 'var(--media-solstice)',
+            description: 'A restrained launch film that follows light, shadow, and a single changing horizon.',
+            role: 'Creative direction',
+            team: '9 people',
+            duration: '7 weeks',
+          },
+          {
+            title: 'Terrace',
+            subtitle: 'retail identity',
+            category: 'Branding',
+            year: '2024',
+            ratio: '1 / 1',
+            ratioLabel: '1:1',
+            color: 'var(--media-terrace)',
+            description: 'A warm, modular retail identity made to shift naturally across seasons and locations.',
+            role: 'Brand design',
+            team: '4 people',
+            duration: '11 weeks',
+          },
+          {
+            title: 'Prism',
+            subtitle: 'data viz suite',
+            category: 'Web',
+            year: '2023',
+            ratio: '3 / 2',
+            ratioLabel: '3:2',
+            color: 'var(--media-prism)',
+            description: 'An accessible charting suite that reveals patterns without flattening their nuance.',
+            role: 'Information design',
+            team: '5 people',
+            duration: '15 weeks',
+          },
+        ]
+
+        const appShell = document.querySelector('#appShell')
+        const browserPane = document.querySelector('#browserPane')
+        const detailPane = document.querySelector('#detailPane')
+        const detailContent = document.querySelector('#detailContent')
+        const filterForm = document.querySelector('#filterForm')
+        const filterInput = document.querySelector('#projectFilter')
+        const projectList = document.querySelector('#projectList')
+        const listScroller = document.querySelector('#listScroller')
+        const resultCount = document.querySelector('#resultCount')
+        const emptyState = document.querySelector('#emptyState')
+        const mobileBack = document.querySelector('#mobileBack')
+        const caseStudyDialog = document.querySelector('#caseStudyDialog')
+        const caseDialogBody = document.querySelector('#caseDialogBody')
+        const caseDialogLabel = document.querySelector('#caseDialogLabel')
+        const caseDialogPosition = document.querySelector('#caseDialogPosition')
+        const mobileQuery = window.matchMedia('(max-width: 639px)')
+
+        let selectedIndex = 0
+        let visibleIndices = projects.map((_, index) => index)
+        let mobileOpen = false
+        let savedListScroll = 0
+        let lastRowIndex = 0
+        let activeCategory = 'All'
+        let caseStudyOpener = null
+
+        const escapeText = (value) =>
+          value.replace(/[&<>'"]/g, (character) => {
+            const entities = { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }
+            return entities[character]
+          })
+
+        function detailMarkup(project, index) {
+          const initials = project.title.slice(0, 2)
+          const position = visibleIndices.indexOf(index)
+          const atStart = position <= 0
+          const atEnd = position === visibleIndices.length - 1
+          return `
+            <div
+              class="media-placeholder"
+              style="--media-color: ${project.color}; --media-ratio: ${project.ratio}"
+              role="img"
+              aria-label="Placeholder artwork for ${escapeText(project.title)}"
+            >
+              <span class="media-number">${String(index + 1).padStart(2, '0')} / ${projects.length}</span>
+              <span class="media-mark" aria-hidden="true">${escapeText(initials)}</span>
+              <span class="media-ratio">Media ${project.ratioLabel}</span>
+            </div>
+            <div class="detail-meta">
+              <div>
+                <p class="detail-kicker">${escapeText(project.category)} · ${project.year}</p>
+                <h1 class="detail-title">${escapeText(project.title)}</h1>
+                <p class="detail-description">${escapeText(project.description)}</p>
+                <div class="detail-actions">
+                  <button class="detail-step" type="button" data-detail-step="previous" aria-label="Previous project" ${atStart ? 'disabled' : ''}>←</button>
+                  <button class="case-study-button" type="button" data-open-case>Open case study</button>
+                  <button class="detail-step" type="button" data-detail-step="next" aria-label="Next project" ${atEnd ? 'disabled' : ''}>→</button>
+                </div>
+              </div>
+              <dl class="detail-facts">
+                <div class="fact"><dt>Type</dt><dd>${escapeText(project.subtitle)}</dd></div>
+                <div class="fact"><dt>Year</dt><dd>${project.year}</dd></div>
+                <div class="fact"><dt>Role</dt><dd>${escapeText(project.role)}</dd></div>
+                <div class="fact"><dt>Team</dt><dd>${escapeText(project.team)}</dd></div>
+                <div class="fact"><dt>Duration</dt><dd>${escapeText(project.duration)}</dd></div>
+                <div class="fact"><dt>Discipline</dt><dd>${escapeText(project.category)}</dd></div>
+              </dl>
+            </div>
+          `
+        }
+
+        function paintDetail(index, animate = true) {
+          const project = projects[index]
+          detailContent.innerHTML = detailMarkup(project, index)
+          if (animate) {
+            detailContent.classList.remove('detail-fade')
+            void detailContent.offsetWidth
+            detailContent.classList.add('detail-fade')
+          }
+          detailPane.setAttribute('aria-label', `${project.title} project details`)
+        }
+
+        function caseStudyMarkup(project, index) {
+          const initials = project.title.slice(0, 2)
+          return `
+            <div
+              class="media-placeholder case-hero"
+              style="--media-color: ${project.color}; --media-ratio: 16 / 9"
+              role="img"
+              aria-label="Expanded artwork for ${escapeText(project.title)}"
+            >
+              <span class="media-number">${String(index + 1).padStart(2, '0')} / ${projects.length}</span>
+              <span class="media-mark" aria-hidden="true">${escapeText(initials)}</span>
+              <span class="media-ratio">Case study · ${escapeText(project.category)}</span>
+            </div>
+            <section class="case-intro" aria-labelledby="caseTitle">
+              <div>
+                <p class="detail-kicker">${escapeText(project.category)} · ${project.year}</p>
+                <h2 class="case-title" id="caseTitle">${escapeText(project.title)}</h2>
+                <p class="case-description">${escapeText(project.description)}</p>
+              </div>
+              <dl class="detail-facts">
+                <div class="fact"><dt>Type</dt><dd>${escapeText(project.subtitle)}</dd></div>
+                <div class="fact"><dt>Year</dt><dd>${project.year}</dd></div>
+                <div class="fact"><dt>Role</dt><dd>${escapeText(project.role)}</dd></div>
+                <div class="fact"><dt>Team</dt><dd>${escapeText(project.team)}</dd></div>
+                <div class="fact"><dt>Duration</dt><dd>${escapeText(project.duration)}</dd></div>
+                <div class="fact"><dt>Discipline</dt><dd>${escapeText(project.category)}</dd></div>
+              </dl>
+            </section>
+            <section class="case-evidence" aria-label="Project evidence">
+              <article><span>Brief</span><strong>${escapeText(project.subtitle)}</strong></article>
+              <article><span>Contribution</span><strong>${escapeText(project.role)}</strong></article>
+              <article><span>Delivery</span><strong>${escapeText(project.duration)}</strong></article>
+            </section>
+          `
+        }
+
+        function paintCaseStudy(index) {
+          const project = projects[index]
+          const position = visibleIndices.indexOf(index)
+          caseDialogBody.innerHTML = caseStudyMarkup(project, index)
+          caseDialogLabel.textContent = `${project.title} case study`
+          caseDialogPosition.textContent = `${String(position + 1).padStart(2, '0')} / ${String(visibleIndices.length).padStart(2, '0')}`
+          caseDialogBody.scrollTop = 0
+        }
+
+        function openCaseStudy(opener) {
+          if (selectedIndex < 0) return
+          caseStudyOpener = opener
+          paintCaseStudy(selectedIndex)
+          caseStudyDialog.showModal()
+        }
+
+        function moveCaseStudy(direction) {
+          if (visibleIndices.length < 2) return
+          const currentPosition = visibleIndices.indexOf(selectedIndex)
+          const delta = direction === 'next' ? 1 : -1
+          const nextPosition = (currentPosition + delta + visibleIndices.length) % visibleIndices.length
+          selectProject(visibleIndices[nextPosition], { animate: false })
+          caseStudyOpener = detailContent.querySelector('[data-open-case]')
+          paintCaseStudy(selectedIndex)
+        }
+
+        function renderList() {
+          projectList.innerHTML = visibleIndices
+            .map((projectIndex) => {
+              const project = projects[projectIndex]
+              const selected = projectIndex === selectedIndex
+              return `
+                <li>
+                  <button
+                    class="project-row"
+                    type="button"
+                    data-project-index="${projectIndex}"
+                    aria-current="${selected}"
+                    aria-label="${escapeText(project.title)}, ${escapeText(project.category)}, ${project.year}"
+                  >
+                    <span class="row-title">
+                      <span class="row-index">${String(projectIndex + 1).padStart(2, '0')}</span>
+                      <span class="row-name">${escapeText(project.title)}</span>
+                    </span>
+                    <span class="row-category">${escapeText(project.category)}</span>
+                    <span class="row-year">${project.year}</span>
+                  </button>
+                </li>
+              `
+            })
+            .join('')
+
+          emptyState.hidden = visibleIndices.length !== 0
+          projectList.hidden = visibleIndices.length === 0
+          resultCount.textContent = `${visibleIndices.length} / ${projects.length}`
+        }
+
+        function selectedRow() {
+          return projectList.querySelector(`[data-project-index="${selectedIndex}"]`)
+        }
+
+        function keepSelectedVisible() {
+          const row = selectedRow()
+          if (!row) return
+          const itemTop = row.parentElement.offsetTop
+          const itemBottom = itemTop + row.parentElement.offsetHeight
+          const viewportTop = listScroller.scrollTop
+          const viewportBottom = viewportTop + listScroller.clientHeight
+
+          if (itemTop < viewportTop) listScroller.scrollTop = itemTop
+          else if (itemBottom > viewportBottom) listScroller.scrollTop = itemBottom - listScroller.clientHeight
+        }
+
+        function selectProject(index, options = {}) {
+          if (!visibleIndices.includes(index)) return
+          selectedIndex = index
+          lastRowIndex = index
+          for (const row of projectList.querySelectorAll('.project-row')) {
+            row.setAttribute('aria-current', String(Number(row.dataset.projectIndex) === index))
+          }
+          paintDetail(index, options.animate !== false)
+          keepSelectedVisible()
+
+          if (options.focus) selectedRow()?.focus()
+          if (options.openMobile && mobileQuery.matches) openMobileDetail()
+        }
+
+        function filterProjects() {
+          const query = filterInput.value.trim().toLocaleLowerCase()
+          visibleIndices = projects
+            .map((project, index) => ({ project, index }))
+            .filter(({ project }) => {
+              const matchesQuery = `${project.title} ${project.category}`.toLocaleLowerCase().includes(query)
+              const matchesCategory = activeCategory === 'All' || project.category === activeCategory
+              return matchesQuery && matchesCategory
+            })
+            .map(({ index }) => index)
+
+          if (visibleIndices.length === 0) {
+            selectedIndex = -1
+            detailContent.innerHTML = ''
+            detailPane.setAttribute('aria-label', 'No project selected')
+          } else if (!visibleIndices.includes(selectedIndex)) {
+            selectedIndex = visibleIndices[0]
+            lastRowIndex = selectedIndex
+            paintDetail(selectedIndex)
+          } else {
+            paintDetail(selectedIndex, false)
+          }
+
+          renderList()
+          keepSelectedVisible()
+        }
+
+        function moveSelection(destination, focus = true) {
+          if (visibleIndices.length === 0) return
+          const currentPosition = visibleIndices.indexOf(selectedIndex)
+          let nextPosition = currentPosition < 0 ? 0 : currentPosition
+
+          if (destination === 'next') nextPosition = Math.min(nextPosition + 1, visibleIndices.length - 1)
+          if (destination === 'previous') nextPosition = Math.max(nextPosition - 1, 0)
+          if (destination === 'first') nextPosition = 0
+          if (destination === 'last') nextPosition = visibleIndices.length - 1
+
+          selectProject(visibleIndices[nextPosition], { focus })
+        }
+
+        function openMobileDetail() {
+          if (!mobileQuery.matches || selectedIndex < 0) return
+          savedListScroll = listScroller.scrollTop
+          mobileOpen = true
+          appShell.classList.add('is-detail-open')
+          syncMobileAccessibility()
+          detailPane.scrollTop = 0
+          requestAnimationFrame(() => mobileBack.focus())
+        }
+
+        function closeMobileDetail() {
+          if (!mobileOpen) return
+          mobileOpen = false
+          appShell.classList.remove('is-detail-open')
+          syncMobileAccessibility()
+          requestAnimationFrame(() => {
+            listScroller.scrollTop = savedListScroll
+            projectList.querySelector(`[data-project-index="${lastRowIndex}"]`)?.focus()
+          })
+        }
+
+        function syncMobileAccessibility() {
+          const mobile = mobileQuery.matches
+          detailPane.inert = mobile && !mobileOpen
+          detailPane.setAttribute('aria-hidden', String(mobile && !mobileOpen))
+          browserPane.inert = mobile && mobileOpen
+          browserPane.setAttribute('aria-hidden', String(mobile && mobileOpen))
+        }
+
+        filterForm.addEventListener('submit', (event) => event.preventDefault())
+        filterForm.addEventListener('click', (event) => {
+          const button = event.target.closest('.category-filter')
+          if (!button) return
+          activeCategory = button.dataset.category
+          for (const filterButton of filterForm.querySelectorAll('.category-filter')) {
+            filterButton.setAttribute('aria-pressed', String(filterButton === button))
+          }
+          filterProjects()
+        })
+        filterInput.addEventListener('input', filterProjects)
+        filterInput.addEventListener('keydown', (event) => {
+          if (event.key === 'ArrowDown' && visibleIndices.length) {
+            event.preventDefault()
+            selectProject(visibleIndices.includes(selectedIndex) ? selectedIndex : visibleIndices[0], {
+              focus: true,
+            })
+          }
+          if (event.key === 'Escape' && filterInput.value) {
+            event.preventDefault()
+            filterInput.value = ''
+            filterProjects()
+          }
+        })
+
+        projectList.addEventListener('click', (event) => {
+          const row = event.target.closest('.project-row')
+          if (!row) return
+          selectProject(Number(row.dataset.projectIndex), { openMobile: true })
+        })
+
+        projectList.addEventListener('keydown', (event) => {
+          const commands = {
+            ArrowDown: 'next',
+            ArrowUp: 'previous',
+            Home: 'first',
+            End: 'last',
+          }
+          const command = commands[event.key]
+          if (!command) return
+          event.preventDefault()
+          moveSelection(command)
+        })
+
+        detailContent.addEventListener('click', (event) => {
+          const openButton = event.target.closest('[data-open-case]')
+          if (openButton) {
+            openCaseStudy(openButton)
+            return
+          }
+
+          const stepButton = event.target.closest('[data-detail-step]')
+          if (!stepButton || stepButton.disabled) return
+          const direction = stepButton.dataset.detailStep
+          moveSelection(direction, false)
+          requestAnimationFrame(() => detailContent.querySelector(`[data-detail-step="${direction}"]`)?.focus())
+        })
+
+        caseStudyDialog.addEventListener('click', (event) => {
+          if (event.target === caseStudyDialog || event.target.closest('#caseDialogClose')) {
+            caseStudyDialog.close()
+            return
+          }
+          const stepButton = event.target.closest('[data-case-step]')
+          if (stepButton) moveCaseStudy(stepButton.dataset.caseStep)
+        })
+
+        caseStudyDialog.addEventListener('close', () => {
+          requestAnimationFrame(() => {
+            if (caseStudyOpener?.isConnected) caseStudyOpener.focus()
+          })
+        })
+
+        mobileBack.addEventListener('click', closeMobileDetail)
+        mobileQuery.addEventListener('change', () => {
+          if (!mobileQuery.matches) {
+            mobileOpen = false
+            appShell.classList.remove('is-detail-open')
+          }
+          syncMobileAccessibility()
+        })
+
+        renderList()
+        paintDetail(selectedIndex, false)
+        syncMobileAccessibility()
+      })()
+    </script>
+  </body>
+</html>

@@ -1,0 +1,1039 @@
+<!doctype html>
+<html lang="en" data-design-id="04-fullscreen-reel" data-design-title="Fullscreen reel">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A presentation-mode portfolio direction where one project owns the screen."
+    />
+    <meta name="theme-color" content="#191b1b" />
+    <link rel="stylesheet" href="../../shared/review.css" />
+    <script src="../../shared/review.js" defer></script>
+    <title>Fullscreen reel — David Lafond Designs</title>
+    <style>
+      :root {
+        --color-surround: #191b1b;
+        --color-panel: #232525;
+        --color-panel-raised: #2d2f2e;
+        --color-ink: #f1efe9;
+        --color-muted: #b9b8b1;
+        --color-faint: #777a77;
+        --color-line: rgb(241 239 233 / 22%);
+        --color-line-strong: rgb(241 239 233 / 58%);
+        --color-focus: #f0ce72;
+        --project-ledger: #8293c2;
+        --project-northbound: #a5b297;
+        --project-atlas: #c79d69;
+        --project-signal: #b96f73;
+        --project-foundry: #76747a;
+        --project-quarter: #cdbda4;
+        --project-meridian: #76a09a;
+        --project-harbour: #728da5;
+        --project-cadence: #a187a7;
+        --project-solstice: #bb794f;
+        --project-terrace: #967b66;
+        --project-prism: #718d9a;
+        --font-display: "Arial Narrow", "Avenir Next Condensed", "Helvetica Neue", sans-serif;
+        --font-utility: ui-monospace, "SFMono-Regular", "Cascadia Mono", monospace;
+        --space-1: 4px;
+        --space-2: 8px;
+        --space-3: 12px;
+        --space-4: 16px;
+        --space-6: 24px;
+        --space-8: 32px;
+        --space-12: 48px;
+        --radius-control: 2px;
+        --control-size: 44px;
+        --thumb-width: 72px;
+        --thumb-height: 52px;
+        --review-safe: 104px;
+        --chrome-duration: 240ms;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        background: var(--color-surround);
+        color-scheme: dark;
+        font-synthesis: none;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      body {
+        min-width: 320px;
+        min-height: 100svh;
+        margin: 0;
+        padding-bottom: var(--review-safe);
+        overflow: hidden;
+        background: var(--color-surround);
+        color: var(--color-ink);
+        font-family: var(--font-display);
+      }
+
+      button,
+      a {
+        color: inherit;
+        font: inherit;
+      }
+
+      button {
+        border: 0;
+      }
+
+      button:focus-visible,
+      a:focus-visible {
+        outline: 2px solid var(--color-focus);
+        outline-offset: 3px;
+      }
+
+      .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      .reel {
+        position: relative;
+        height: calc(100dvh - var(--review-safe));
+        min-height: 420px;
+        overflow: hidden;
+        background: var(--color-surround);
+        isolation: isolate;
+        touch-action: pan-y;
+      }
+
+      .stage,
+      .media-slot {
+        position: absolute;
+        inset: 0;
+      }
+
+      .media-slot {
+        z-index: -1;
+        display: grid;
+        overflow: hidden;
+        place-items: center;
+        background: var(--color-surround);
+      }
+
+      .media-slot svg {
+        display: block;
+        width: 100%;
+        height: 100%;
+        color: var(--project-color);
+        transition: color 420ms cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      .reel[data-project="ledger"] {
+        --project-color: var(--project-ledger);
+      }
+
+      .reel[data-project="northbound"] {
+        --project-color: var(--project-northbound);
+      }
+
+      .reel[data-project="atlas"] {
+        --project-color: var(--project-atlas);
+      }
+
+      .reel[data-project="signal"] {
+        --project-color: var(--project-signal);
+      }
+
+      .reel[data-project="foundry"] {
+        --project-color: var(--project-foundry);
+      }
+
+      .reel[data-project="quarter"] {
+        --project-color: var(--project-quarter);
+      }
+
+      .reel[data-project="meridian"] {
+        --project-color: var(--project-meridian);
+      }
+
+      .reel[data-project="harbour"] {
+        --project-color: var(--project-harbour);
+      }
+
+      .reel[data-project="cadence"] {
+        --project-color: var(--project-cadence);
+      }
+
+      .reel[data-project="solstice"] {
+        --project-color: var(--project-solstice);
+      }
+
+      .reel[data-project="terrace"] {
+        --project-color: var(--project-terrace);
+      }
+
+      .reel[data-project="prism"] {
+        --project-color: var(--project-prism);
+      }
+
+      .interface {
+        position: absolute;
+        z-index: 2;
+        inset: 0;
+        opacity: 1;
+        transition: opacity var(--chrome-duration) ease-out;
+      }
+
+      .reel[data-chrome="hidden"] .interface {
+        pointer-events: none;
+        opacity: 0;
+      }
+
+      .topbar {
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-6);
+        min-height: 56px;
+        padding: var(--space-3) var(--space-4);
+        background: rgb(25 27 27 / 88%);
+      }
+
+      .back-link {
+        flex: 0 0 auto;
+        font-family: var(--font-utility);
+        font-size: 11px;
+        letter-spacing: 0.04em;
+        text-decoration: none;
+        text-transform: uppercase;
+      }
+
+      .back-link::before {
+        content: "←";
+        margin-right: var(--space-2);
+      }
+
+      .direction-note {
+        max-width: 560px;
+        margin: 0;
+        color: var(--color-muted);
+        font-size: 13px;
+        line-height: 1.3;
+        text-align: right;
+      }
+
+      .step-button {
+        position: absolute;
+        top: 50%;
+        display: grid;
+        width: var(--control-size);
+        height: var(--control-size);
+        place-items: center;
+        border: 1px solid var(--color-line);
+        border-radius: var(--radius-control);
+        background: rgb(25 27 27 / 76%);
+        cursor: pointer;
+        font-family: var(--font-utility);
+        font-size: 18px;
+        transform: translateY(-50%);
+        transition:
+          border-color 160ms ease-out,
+          background-color 160ms ease-out;
+      }
+
+      .step-button:hover {
+        border-color: var(--color-line-strong);
+        background: var(--color-panel);
+      }
+
+      .step-button--previous {
+        left: var(--space-4);
+      }
+
+      .step-button--next {
+        right: var(--space-4);
+      }
+
+      .bottom-dock {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background: rgb(25 27 27 / 94%);
+      }
+
+      .project-bar {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(280px, 40%);
+        align-items: end;
+        gap: var(--space-8);
+        padding: var(--space-4);
+      }
+
+      .project-heading {
+        min-width: 0;
+      }
+
+      .project-title {
+        margin: 0;
+        overflow: hidden;
+        font-size: clamp(26px, 3.2vw, 52px);
+        font-stretch: condensed;
+        font-weight: 500;
+        letter-spacing: -0.035em;
+        line-height: 0.95;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .project-meta,
+      .project-description {
+        margin: 0;
+      }
+
+      .project-meta {
+        display: flex;
+        gap: var(--space-3);
+        margin-top: var(--space-2);
+        color: var(--color-muted);
+        font-family: var(--font-utility);
+        font-size: 10px;
+        letter-spacing: 0.05em;
+        line-height: 1.2;
+        text-transform: uppercase;
+      }
+
+      .project-description {
+        margin-top: var(--space-2);
+        color: var(--color-muted);
+        font-size: 13px;
+        line-height: 1.3;
+      }
+
+      .transport {
+        display: grid;
+        grid-template-columns: auto minmax(80px, 1fr) auto;
+        align-items: center;
+        gap: var(--space-3);
+        min-width: 0;
+      }
+
+      .play-toggle {
+        min-width: 72px;
+        min-height: 36px;
+        padding: 0 var(--space-3);
+        border: 1px solid var(--color-line);
+        border-radius: var(--radius-control);
+        background: transparent;
+        cursor: pointer;
+        font-family: var(--font-utility);
+        font-size: 10px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .play-toggle:hover:not(:disabled) {
+        border-color: var(--color-line-strong);
+        background: var(--color-panel);
+      }
+
+      .play-toggle:disabled {
+        color: var(--color-faint);
+        cursor: not-allowed;
+      }
+
+      .progress-track {
+        position: relative;
+        height: 1px;
+        overflow: hidden;
+        background: var(--color-line);
+      }
+
+      .progress-fill {
+        position: absolute;
+        inset: 0;
+        background: var(--color-ink);
+        transform: scaleX(0);
+        transform-origin: left center;
+        will-change: transform;
+      }
+
+      .counter {
+        color: var(--color-muted);
+        font-family: var(--font-utility);
+        font-size: 11px;
+        letter-spacing: 0.04em;
+        white-space: nowrap;
+      }
+
+      .thumb-strip {
+        display: flex;
+        gap: var(--space-2);
+        height: calc(var(--thumb-height) + var(--space-4));
+        margin: 0;
+        padding: var(--space-2) var(--space-4);
+        overflow-x: auto;
+        overflow-y: hidden;
+        border-top: 1px solid var(--color-line);
+        list-style: none;
+        scrollbar-color: var(--color-faint) transparent;
+        scrollbar-width: thin;
+        scroll-padding-inline: var(--space-4);
+      }
+
+      .thumb-strip li {
+        flex: 0 0 var(--thumb-width);
+      }
+
+      .thumb {
+        position: relative;
+        display: grid;
+        width: 100%;
+        height: var(--thumb-height);
+        padding: var(--space-1);
+        place-items: center;
+        border: 1px solid transparent;
+        border-radius: var(--radius-control);
+        background: transparent;
+        cursor: pointer;
+      }
+
+      .thumb::after {
+        position: absolute;
+        right: var(--space-1);
+        bottom: var(--space-1);
+        color: var(--color-ink);
+        content: attr(data-number);
+        font-family: var(--font-utility);
+        font-size: 8px;
+        line-height: 1;
+        text-shadow: 0 1px 2px rgb(25 27 27 / 85%);
+      }
+
+      .thumb:hover {
+        background: var(--color-panel);
+      }
+
+      .thumb[aria-current="true"] {
+        border-color: var(--color-ink);
+        background: var(--color-panel-raised);
+      }
+
+      .thumb-block {
+        display: block;
+        width: 100%;
+        height: 100%;
+        color: var(--thumb-color);
+      }
+
+      .thumb--ledger {
+        --thumb-color: var(--project-ledger);
+      }
+
+      .thumb--northbound {
+        --thumb-color: var(--project-northbound);
+      }
+
+      .thumb--atlas {
+        --thumb-color: var(--project-atlas);
+      }
+
+      .thumb--signal {
+        --thumb-color: var(--project-signal);
+      }
+
+      .thumb--foundry {
+        --thumb-color: var(--project-foundry);
+      }
+
+      .thumb--quarter {
+        --thumb-color: var(--project-quarter);
+      }
+
+      .thumb--meridian {
+        --thumb-color: var(--project-meridian);
+      }
+
+      .thumb--harbour {
+        --thumb-color: var(--project-harbour);
+      }
+
+      .thumb--cadence {
+        --thumb-color: var(--project-cadence);
+      }
+
+      .thumb--solstice {
+        --thumb-color: var(--project-solstice);
+      }
+
+      .thumb--terrace {
+        --thumb-color: var(--project-terrace);
+      }
+
+      .thumb--prism {
+        --thumb-color: var(--project-prism);
+      }
+
+      @media (max-width: 640px) {
+        :root {
+          --review-safe: 220px;
+          --thumb-width: 64px;
+          --thumb-height: 46px;
+        }
+
+        .topbar {
+          align-items: flex-start;
+          gap: var(--space-3);
+          min-height: 68px;
+          padding: var(--space-3);
+        }
+
+        .direction-note {
+          max-width: 220px;
+          font-size: 11px;
+        }
+
+        .step-button {
+          top: 44%;
+        }
+
+        .step-button--previous {
+          left: var(--space-3);
+        }
+
+        .step-button--next {
+          right: var(--space-3);
+        }
+
+        .project-bar {
+          grid-template-columns: 1fr;
+          gap: var(--space-3);
+          padding: var(--space-3);
+        }
+
+        .project-title {
+          font-size: 29px;
+        }
+
+        .project-description {
+          max-width: 34em;
+          font-size: 12px;
+        }
+
+        .transport {
+          grid-template-columns: auto minmax(64px, 1fr) auto;
+          gap: var(--space-2);
+        }
+
+        .thumb-strip {
+          padding-inline: var(--space-3);
+          scroll-padding-inline: var(--space-3);
+        }
+      }
+
+      @media (min-width: 1440px) {
+        :root {
+          --thumb-width: 84px;
+          --thumb-height: 56px;
+        }
+
+        .topbar,
+        .project-bar {
+          padding-inline: var(--space-6);
+        }
+
+        .step-button--previous {
+          left: var(--space-6);
+        }
+
+        .step-button--next {
+          right: var(--space-6);
+        }
+
+        .thumb-strip {
+          padding-inline: var(--space-6);
+          scroll-padding-inline: var(--space-6);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        :root {
+          --chrome-duration: 0ms;
+        }
+
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          transition-duration: 0.01ms !important;
+        }
+
+        .progress-fill {
+          will-change: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="reel" data-chrome="visible" data-project="ledger">
+      <h1 class="visually-hidden">Fullscreen reel</h1>
+      <p class="visually-hidden">
+        A looping deck that gives each project a full-screen, aspect-true stage.
+      </p>
+
+      <section class="stage" aria-label="Project presentation">
+        <div class="media-slot" aria-hidden="true">
+          <svg viewBox="0 0 4 3" preserveAspectRatio="xMidYMid meet" focusable="false">
+            <rect width="100%" height="100%" fill="currentColor"></rect>
+          </svg>
+        </div>
+
+        <div class="interface">
+          <header class="topbar">
+            <a class="back-link" href="index.html">All designs</a>
+            <p class="direction-note">
+              A looping deck that gives each project a full-screen, aspect-true stage.
+            </p>
+          </header>
+
+          <button class="step-button step-button--previous" type="button" aria-label="Previous project">
+            ←
+          </button>
+          <button class="step-button step-button--next" type="button" aria-label="Next project">
+            →
+          </button>
+
+          <div class="bottom-dock">
+            <div class="project-bar">
+              <div class="project-heading">
+                <h2 class="project-title" id="project-title">Ledger — payments console</h2>
+                <p class="project-meta">
+                  <span id="project-category">Product</span>
+                  <span aria-hidden="true">·</span>
+                  <span id="project-year">2026</span>
+                </p>
+                <p class="project-description" id="project-description">
+                  A precise operations console for reconciling high-volume payments.
+                </p>
+              </div>
+
+              <div class="transport" aria-label="Reel playback">
+                <button class="play-toggle" type="button" aria-pressed="false">Play</button>
+                <div
+                  class="progress-track"
+                  role="progressbar"
+                  aria-label="Auto-advance progress"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  aria-valuenow="0"
+                >
+                  <span class="progress-fill"></span>
+                </div>
+                <span class="counter" aria-label="Slide 1 of 12">01 / 12</span>
+              </div>
+            </div>
+
+            <nav aria-label="Jump to a project">
+              <ol class="thumb-strip"></ol>
+            </nav>
+          </div>
+        </div>
+      </section>
+
+      <p class="visually-hidden" id="reel-announcement" aria-live="polite"></p>
+    </main>
+
+    <script>
+      ;(() => {
+        const projects = [
+          {
+            slug: 'ledger',
+            title: 'Ledger — payments console',
+            category: 'Product',
+            year: '2026',
+            ratio: '4 / 3',
+            viewBox: '0 0 4 3',
+            description: 'A precise operations console for reconciling high-volume payments.',
+          },
+          {
+            slug: 'northbound',
+            title: 'Northbound — brand system',
+            category: 'Branding',
+            year: '2026',
+            ratio: '1 / 1',
+            viewBox: '0 0 1 1',
+            description: 'A modular identity built for an alpine outfitter moving across seasons.',
+          },
+          {
+            slug: 'atlas',
+            title: 'Atlas — marketing site',
+            category: 'Web',
+            year: '2026',
+            ratio: '16 / 9',
+            viewBox: '0 0 16 9',
+            description: 'An editorial product story organized around live geographic data.',
+          },
+          {
+            slug: 'signal',
+            title: 'Signal — motion study',
+            category: 'Motion',
+            year: '2025',
+            ratio: '16 / 10',
+            viewBox: '0 0 16 10',
+            description: 'A paced motion language for idents, transitions, and broadcast moments.',
+          },
+          {
+            slug: 'foundry',
+            title: 'Foundry — 3D explorations',
+            category: '3D',
+            year: '2025',
+            ratio: '4 / 3',
+            viewBox: '0 0 4 3',
+            description: 'Material and lighting experiments shaped into a tactile launch world.',
+          },
+          {
+            slug: 'quarter',
+            title: 'Quarter — print annual',
+            category: 'Print',
+            year: '2025',
+            ratio: '3 / 4',
+            viewBox: '0 0 3 4',
+            description: 'A restrained annual report designed around two-colour press constraints.',
+          },
+          {
+            slug: 'meridian',
+            title: 'Meridian — wayfinding kit',
+            category: 'Illustration',
+            year: '2025',
+            ratio: '1 / 1',
+            viewBox: '0 0 1 1',
+            description: 'A civic symbol set that stays legible from pocket maps to street signs.',
+          },
+          {
+            slug: 'harbour',
+            title: 'Harbour — booking flow',
+            category: 'Product',
+            year: '2024',
+            ratio: '4 / 3',
+            viewBox: '0 0 4 3',
+            description: 'A calm reservation flow that makes complex itineraries easy to compare.',
+          },
+          {
+            slug: 'cadence',
+            title: 'Cadence — design system',
+            category: 'Product',
+            year: '2024',
+            ratio: '16 / 9',
+            viewBox: '0 0 16 9',
+            description: 'A shared component language tuned for dense tools and fast product teams.',
+          },
+          {
+            slug: 'solstice',
+            title: 'Solstice — campaign film',
+            category: 'Motion',
+            year: '2024',
+            ratio: '16 / 9',
+            viewBox: '0 0 16 9',
+            description: 'A light-led campaign film moving from long winter into open summer.',
+          },
+          {
+            slug: 'terrace',
+            title: 'Terrace — retail identity',
+            category: 'Branding',
+            year: '2024',
+            ratio: '1 / 1',
+            viewBox: '0 0 1 1',
+            description: 'A flexible neighbourhood identity spanning storefront, packaging, and print.',
+          },
+          {
+            slug: 'prism',
+            title: 'Prism — data viz suite',
+            category: 'Web',
+            year: '2023',
+            ratio: '3 / 2',
+            viewBox: '0 0 3 2',
+            description: 'A coherent charting suite for turning operational data into clear decisions.',
+          },
+        ]
+
+        const reel = document.querySelector('.reel')
+        const chrome = document.querySelector('.interface')
+        const media = document.querySelector('.media-slot svg')
+        const title = document.querySelector('#project-title')
+        const category = document.querySelector('#project-category')
+        const year = document.querySelector('#project-year')
+        const description = document.querySelector('#project-description')
+        const counter = document.querySelector('.counter')
+        const previousButton = document.querySelector('.step-button--previous')
+        const nextButton = document.querySelector('.step-button--next')
+        const playButton = document.querySelector('.play-toggle')
+        const progressTrack = document.querySelector('.progress-track')
+        const progressFill = document.querySelector('.progress-fill')
+        const thumbStrip = document.querySelector('.thumb-strip')
+        const announcement = document.querySelector('#reel-announcement')
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
+        const autoAdvanceDuration = 6500
+        const chromeIdleDuration = 3200
+
+        let activeIndex = 0
+        let isPlaying = false
+        let isPlaybackPaused = false
+        let isChromeHovered = false
+        let isChromeFocused = false
+        let elapsed = 0
+        let previousFrame = 0
+        let animationFrame = 0
+        let lastProgressValue = 0
+        let chromeTimer = 0
+        let pointerStart = null
+
+        const twoDigits = (value) => String(value).padStart(2, '0')
+
+        for (const [index, project] of projects.entries()) {
+          const item = document.createElement('li')
+          const button = document.createElement('button')
+          const block = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+          const blockFill = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+          button.className = `thumb thumb--${project.slug}`
+          button.type = 'button'
+          button.dataset.number = twoDigits(index + 1)
+          button.setAttribute('aria-label', `Show ${project.title}`)
+          button.setAttribute('aria-current', index === 0 ? 'true' : 'false')
+          block.classList.add('thumb-block')
+          block.setAttribute('viewBox', project.viewBox)
+          block.setAttribute('preserveAspectRatio', 'xMidYMid meet')
+          block.setAttribute('aria-hidden', 'true')
+          blockFill.setAttribute('width', '100%')
+          blockFill.setAttribute('height', '100%')
+          blockFill.setAttribute('fill', 'currentColor')
+          block.append(blockFill)
+          button.append(block)
+          button.addEventListener('click', () => showProject(index, true))
+          item.append(button)
+          thumbStrip.append(item)
+        }
+
+        const thumbs = [...thumbStrip.querySelectorAll('.thumb')]
+
+        function resetProgress() {
+          elapsed = 0
+          previousFrame = 0
+          lastProgressValue = 0
+          progressFill.style.transform = 'scaleX(0)'
+          progressTrack.setAttribute('aria-valuenow', '0')
+        }
+
+        function showProject(index, announce = false) {
+          activeIndex = (index + projects.length) % projects.length
+          const project = projects[activeIndex]
+          reel.dataset.project = project.slug
+          media.setAttribute('viewBox', project.viewBox)
+          title.textContent = project.title
+          category.textContent = project.category
+          year.textContent = project.year
+          description.textContent = project.description
+          const position = `${twoDigits(activeIndex + 1)} / ${twoDigits(projects.length)}`
+          counter.textContent = position
+          counter.setAttribute('aria-label', `Slide ${activeIndex + 1} of ${projects.length}`)
+
+          for (const [thumbIndex, thumb] of thumbs.entries()) {
+            thumb.setAttribute('aria-current', thumbIndex === activeIndex ? 'true' : 'false')
+          }
+
+          thumbs[activeIndex].scrollIntoView({
+            behavior: reducedMotion.matches ? 'auto' : 'smooth',
+            block: 'nearest',
+            inline: 'center',
+          })
+          resetProgress()
+          if (announce) {
+            announcement.textContent = `${project.title}. ${project.category}, ${project.year}. Slide ${activeIndex + 1} of ${projects.length}.`
+          }
+        }
+
+        function changeProject(step) {
+          showProject(activeIndex + step, true)
+        }
+
+        function paintPlayback() {
+          if (reducedMotion.matches) {
+            isPlaying = false
+            playButton.disabled = true
+            playButton.textContent = 'Motion off'
+            playButton.setAttribute('aria-label', 'Auto-advance unavailable while reduced motion is enabled')
+          } else {
+            playButton.disabled = false
+            playButton.textContent = isPlaying ? 'Pause' : 'Play'
+            playButton.setAttribute('aria-label', isPlaying ? 'Pause auto-advance' : 'Play auto-advance')
+          }
+          playButton.setAttribute('aria-pressed', String(isPlaying))
+        }
+
+        function stopPlaybackLoop() {
+          if (animationFrame) cancelAnimationFrame(animationFrame)
+          animationFrame = 0
+          previousFrame = 0
+        }
+
+        function playbackFrame(timestamp) {
+          if (!isPlaying || reducedMotion.matches) {
+            stopPlaybackLoop()
+            return
+          }
+
+          if (!previousFrame) previousFrame = timestamp
+          const delta = timestamp - previousFrame
+          previousFrame = timestamp
+          if (!isPlaybackPaused && !document.hidden) elapsed += delta
+
+          if (elapsed >= autoAdvanceDuration) {
+            changeProject(1)
+            previousFrame = timestamp
+          }
+
+          const progress = Math.min(elapsed / autoAdvanceDuration, 1)
+          progressFill.style.transform = `scaleX(${progress})`
+          const progressValue = Math.round(progress * 100)
+          if (progressValue !== lastProgressValue) {
+            progressTrack.setAttribute('aria-valuenow', String(progressValue))
+            lastProgressValue = progressValue
+          }
+          animationFrame = requestAnimationFrame(playbackFrame)
+        }
+
+        function startPlaybackLoop() {
+          stopPlaybackLoop()
+          animationFrame = requestAnimationFrame(playbackFrame)
+        }
+
+        function togglePlayback() {
+          if (reducedMotion.matches) return
+          isPlaying = !isPlaying
+          paintPlayback()
+          if (isPlaying) startPlaybackLoop()
+          else stopPlaybackLoop()
+        }
+
+        function hideChrome() {
+          if (chrome.contains(document.activeElement)) {
+            scheduleChromeHide()
+            return
+          }
+          reel.dataset.chrome = 'hidden'
+          chrome.inert = true
+        }
+
+        function scheduleChromeHide() {
+          window.clearTimeout(chromeTimer)
+          chromeTimer = window.setTimeout(hideChrome, chromeIdleDuration)
+        }
+
+        function revealChrome() {
+          if (reel.dataset.chrome === 'hidden') {
+            reel.dataset.chrome = 'visible'
+            chrome.inert = false
+          }
+          scheduleChromeHide()
+        }
+
+        function isInteractiveTarget(target) {
+          return target instanceof Element && Boolean(target.closest('input, textarea, select, button, a'))
+        }
+
+        previousButton.addEventListener('click', () => changeProject(-1))
+        nextButton.addEventListener('click', () => changeProject(1))
+        playButton.addEventListener('click', (event) => {
+          if (event.detail > 0) playButton.blur()
+          togglePlayback()
+        })
+
+        chrome.addEventListener('pointerenter', (event) => {
+          isChromeHovered = event.pointerType !== 'touch'
+          isPlaybackPaused = isChromeHovered || isChromeFocused
+          window.clearTimeout(chromeTimer)
+        })
+        chrome.addEventListener('pointerleave', () => {
+          isChromeHovered = false
+          isPlaybackPaused = isChromeFocused
+          revealChrome()
+        })
+        chrome.addEventListener('focusin', () => {
+          isChromeFocused = true
+          isPlaybackPaused = true
+          window.clearTimeout(chromeTimer)
+        })
+        chrome.addEventListener('focusout', (event) => {
+          if (event.relatedTarget && chrome.contains(event.relatedTarget)) return
+          isChromeFocused = false
+          isPlaybackPaused = isChromeHovered
+          revealChrome()
+        })
+
+        reel.addEventListener('pointerdown', (event) => {
+          revealChrome()
+          if (event.pointerType !== 'touch') return
+          pointerStart = { x: event.clientX, y: event.clientY, id: event.pointerId }
+          reel.setPointerCapture(event.pointerId)
+        })
+
+        reel.addEventListener('pointerup', (event) => {
+          if (!pointerStart || event.pointerId !== pointerStart.id) return
+          const distanceX = event.clientX - pointerStart.x
+          const distanceY = event.clientY - pointerStart.y
+          pointerStart = null
+          if (Math.abs(distanceX) < 48 || Math.abs(distanceX) <= Math.abs(distanceY)) return
+          changeProject(distanceX < 0 ? 1 : -1)
+        })
+
+        reel.addEventListener('pointercancel', () => {
+          pointerStart = null
+        })
+
+        document.addEventListener('keydown', (event) => {
+          revealChrome()
+          if (isInteractiveTarget(event.target)) return
+          if (event.key === 'ArrowLeft') {
+            event.preventDefault()
+            changeProject(-1)
+          } else if (event.key === 'ArrowRight') {
+            event.preventDefault()
+            changeProject(1)
+          } else if (event.code === 'Space') {
+            event.preventDefault()
+            changeProject(1)
+          }
+        })
+
+        document.addEventListener('pointermove', revealChrome, { passive: true })
+        document.addEventListener('wheel', revealChrome, { passive: true })
+
+        reducedMotion.addEventListener('change', () => {
+          if (reducedMotion.matches) {
+            isPlaying = false
+            stopPlaybackLoop()
+            resetProgress()
+          }
+          paintPlayback()
+        })
+
+        document.addEventListener('visibilitychange', () => {
+          previousFrame = 0
+        })
+
+        showProject(0)
+        paintPlayback()
+        scheduleChromeHide()
+      })()
+    </script>
+  </body>
+</html>

@@ -1,0 +1,903 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HIDECS 2 Reenactment — David Lafond</title>
+<meta name="description" content="A 1962 decomposition program, reenacted as an object you can touch. The project record is live DOM rendered on the machine's own screen.">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%232b3ce0'/%3E%3Crect x='3' y='4' width='10' height='7' fill='%23f2efe6'/%3E%3C/svg%3E">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+
+  :root {
+    --field: #2b3ce0;
+    --field-deep: #1e29ac;
+    --rule: rgba(255,255,255,.14);
+    --paper: #f2efe6;
+
+    --shell: #ddd7c6;
+    --shell-lit: #efeade;
+    --shell-dim: #bab4a2;
+    --shell-dark: #918c7c;
+    --shell-deep: #6f6b5d;
+
+    /* chassis: width x height x depth */
+    --w: 640px;
+    --h: 720px;
+    --d: 420px;
+
+    /* screen opening */
+    --sw: 480px;
+    --sh: 340px;
+    --pit: 44px;
+
+    --rx: -6deg;
+    --ry: 22deg;
+    --fit: 1;
+  }
+
+  html, body { height: 100%; }
+
+  body {
+    margin: 0;
+    background: var(--field);
+    color: var(--paper);
+    font: 400 14px/1.4 ui-sans-serif, system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+  }
+
+  /* ---------------- field ---------------- */
+
+  .field {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(120% 90% at 50% 10%, rgba(255,255,255,.10), transparent 62%),
+      linear-gradient(180deg, var(--field) 0%, var(--field-deep) 100%);
+  }
+
+  .field::after {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    opacity: .55;
+    background-image:
+      linear-gradient(to right, var(--rule) 0 1px, transparent 1px 100%),
+      linear-gradient(to bottom, var(--rule) 0 1px, transparent 1px 100%);
+    background-size: 96px 96px, 96px 96px;
+    mask-image: radial-gradient(115% 100% at 50% 42%, #000 34%, transparent 94%);
+  }
+
+  /* ---------------- page chrome ---------------- */
+
+  .bar {
+    position: fixed;
+    z-index: 40;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 18px;
+    font-size: 13px;
+  }
+
+  .bar--top { top: 0; }
+  .bar--bottom { bottom: 0; }
+
+  .wordmark {
+    color: var(--paper);
+    font-weight: 600;
+    letter-spacing: -.01em;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .bar nav { display: flex; align-items: center; gap: 18px; }
+
+  .bar a:not(.wordmark) {
+    color: rgba(242,239,230,.72);
+    text-decoration: none;
+    transition: color .18s ease;
+  }
+
+  .bar a:not(.wordmark):hover { color: var(--paper); }
+
+  :focus-visible { outline: 2px solid var(--paper); outline-offset: 3px; }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 4px 10px;
+    border: 1px solid rgba(242,239,230,.34);
+    border-radius: 999px;
+    color: rgba(242,239,230,.78);
+    font: 500 11px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .chip::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .chip[data-mode="canvas"] { color: #bdf7c3; border-color: rgba(189,247,195,.5); }
+
+  .hint {
+    color: rgba(242,239,230,.58);
+    font: 500 11px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+  }
+
+  /* ---------------- 3D stage ---------------- */
+
+  .stage {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    display: block;
+    perspective: 2000px;
+    perspective-origin: 50% 46%;
+    touch-action: pan-y;
+  }
+
+  .rig {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: var(--w);
+    height: var(--h);
+    transform: translate(-50%, -50%) scale(var(--fit)) rotateX(var(--rx)) rotateY(var(--ry));
+    transform-style: preserve-3d;
+    will-change: transform;
+    cursor: grab;
+  }
+
+  .rig.grab { cursor: grabbing; }
+
+  /* every face is centred, then pushed out to its half-dimension */
+  .face {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    backface-visibility: hidden;
+    background: var(--shell);
+  }
+
+  .f-front {
+    width: var(--w);
+    height: var(--h);
+    transform: translate(-50%, -50%) translateZ(calc(var(--d) / 2));
+    background-image: linear-gradient(152deg, var(--shell-lit), var(--shell) 44%, var(--shell-dim));
+    border-radius: 8px 8px 6px 6px;
+    box-shadow: inset 0 2px 0 rgba(255,255,255,.6);
+  }
+
+  .f-back {
+    width: var(--w);
+    height: var(--h);
+    transform: translate(-50%, -50%) rotateY(180deg) translateZ(calc(var(--d) / 2));
+    background-image: linear-gradient(152deg, var(--shell-dark), var(--shell-deep));
+    border-radius: 22px;
+  }
+
+  .f-left, .f-right {
+    width: var(--d);
+    height: var(--h);
+    background-image: linear-gradient(96deg, var(--shell-dim), var(--shell-dark));
+  }
+
+  .f-left { transform: translate(-50%, -50%) rotateY(-90deg) translateZ(calc(var(--w) / 2)); }
+  .f-right { transform: translate(-50%, -50%) rotateY(90deg) translateZ(calc(var(--w) / 2)); }
+
+  .f-top, .f-bottom { width: var(--w); height: var(--d); }
+
+  .f-top {
+    transform: translate(-50%, -50%) rotateX(90deg) translateZ(calc(var(--h) / 2));
+    background-image: linear-gradient(168deg, var(--shell-lit), var(--shell-dim));
+  }
+
+  .f-bottom {
+    transform: translate(-50%, -50%) rotateX(-90deg) translateZ(calc(var(--h) / 2));
+    background-image: linear-gradient(168deg, var(--shell-deep), #56534a);
+  }
+
+  /* vents on the right cheek, in the manner of the period */
+  .f-right::after {
+    content: "";
+    position: absolute;
+    right: 34px;
+    bottom: 92px;
+    width: 128px;
+    height: 108px;
+    border-radius: 3px;
+    background: repeating-linear-gradient(180deg, rgba(0,0,0,.26) 0 2px, transparent 2px 9px);
+  }
+
+  /* ---------------- front panel ---------------- */
+
+  .bezel {
+    position: absolute;
+    left: 48px;
+    top: 54px;
+    width: calc(var(--sw) + 64px);
+    height: calc(var(--sh) + 64px);
+    transform-style: preserve-3d;
+    background: none;
+    border: 32px solid transparent;
+    border-image: linear-gradient(158deg, #cdc7b5, #b3ad9b 44%, #8b8676) 1 / 32px;
+    box-shadow:
+      inset 0 4px 9px rgba(0,0,0,.42),
+      0 1px 0 rgba(255,255,255,.45);
+  }
+
+  /* the frame and pit boxes sit in front of the recessed screen, so they must not
+     swallow pointer events meant for the document on the display */
+  .bezel, .pit, .wall { pointer-events: none; }
+
+  .pit {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: var(--sw);
+    height: var(--sh);
+    transform-style: preserve-3d;
+  }
+
+  .wall {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+  }
+
+  .wall--top {
+    width: var(--sw);
+    height: var(--pit);
+    transform: translate(-50%, -50%) translate3d(0, calc(var(--sh) / -2), calc(var(--pit) / -2)) rotateX(90deg);
+    background: linear-gradient(180deg, #4f4c40, #7f7a69);
+  }
+
+  .wall--bottom {
+    width: var(--sw);
+    height: var(--pit);
+    transform: translate(-50%, -50%) translate3d(0, calc(var(--sh) / 2), calc(var(--pit) / -2)) rotateX(90deg);
+    background: linear-gradient(0deg, #423f35, #6b6757);
+  }
+
+  .wall--left {
+    width: var(--pit);
+    height: var(--sh);
+    transform: translate(-50%, -50%) translate3d(calc(var(--sw) / -2), 0, calc(var(--pit) / -2)) rotateY(90deg);
+    background: linear-gradient(90deg, #4b4839, #7b7665);
+  }
+
+  .wall--right {
+    width: var(--pit);
+    height: var(--sh);
+    transform: translate(-50%, -50%) translate3d(calc(var(--sw) / 2), 0, calc(var(--pit) / -2)) rotateY(90deg);
+    background: linear-gradient(270deg, #4b4839, #7b7665);
+  }
+
+  .screen {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: var(--sw);
+    height: var(--sh);
+    transform: translateZ(calc(var(--pit) * -1));
+    pointer-events: auto;
+    overflow: hidden;
+    background: #101013;
+    box-shadow: inset 0 0 44px rgba(0,0,0,.7);
+  }
+
+  .screen > canvas { display: block; width: 100%; height: 100%; }
+
+  .crt {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    background:
+      radial-gradient(130% 120% at 46% -6%, rgba(255,255,255,.16), transparent 44%),
+      radial-gradient(122% 112% at 50% 50%, transparent 54%, rgba(0,0,0,.44) 100%);
+  }
+
+  .crt::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: .1;
+    background: repeating-linear-gradient(180deg, rgba(0,0,0,.92) 0 1px, transparent 1px 3px);
+  }
+
+  /* card slot, badge, grille */
+
+  .slot {
+    position: absolute;
+    left: 76px;
+    right: 76px;
+    top: 486px;
+    height: 13px;
+    border-radius: 3px;
+    background: linear-gradient(180deg, #24221c, #3f3c32);
+    box-shadow: inset 0 2px 3px rgba(0,0,0,.85), 0 1px 0 rgba(255,255,255,.5);
+  }
+
+  .deck {
+    position: absolute;
+    left: 56px;
+    right: 56px;
+    top: 528px;
+    height: 132px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .badge { display: flex; align-items: baseline; gap: 11px; }
+
+  .badge b {
+    font: 700 21px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: .13em;
+    color: #4a4638;
+    text-shadow: 0 1px 0 rgba(255,255,255,.62);
+  }
+
+  .badge span {
+    font: 500 11px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: #7d7869;
+  }
+
+  .grille {
+    width: 176px;
+    height: 52px;
+    border-radius: 4px;
+    background: repeating-linear-gradient(180deg, #9d9787 0 2px, #d2ccbb 2px 7px);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,.4);
+  }
+
+  /* contact shadow, flat on the ground plane under the box footprint */
+
+  .cast {
+    position: absolute;
+    left: -110px;
+    width: calc(var(--w) + 220px);
+    height: calc(var(--d) + 220px);
+    top: 100%;
+    transform-origin: center top;
+    transform: translateZ(calc(var(--d) / 2 + 40px)) rotateX(90deg);
+    background: radial-gradient(46% 40% at 50% 46%, rgba(0,0,0,.6), rgba(0,0,0,.28) 58%, transparent 76%);
+    filter: blur(14px);
+  }
+
+  /* ---------------- the screen surface: a 1-bit desktop ---------------- */
+
+  #os {
+    width: var(--sw);
+    height: var(--sh);
+    background: #b9b9b9;
+    color: #000;
+    font: 400 11px/1.36 Geneva, Verdana, "DejaVu Sans", ui-sans-serif, sans-serif;
+    user-select: text;
+  }
+
+  #os .menubar {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    height: 20px;
+    padding: 0 9px;
+    background: #fff;
+    border-bottom: 1px solid #000;
+  }
+
+  #os .menubar b { font-weight: 700; letter-spacing: .06em; }
+  #os .menubar .spacer { margin-left: auto; }
+  #os .menubar time { font-variant-numeric: tabular-nums; }
+
+  #os .desktop {
+    position: relative;
+    height: calc(100% - 20px);
+    padding: 11px;
+    background-image:
+      linear-gradient(45deg, #a7a7a7 25%, transparent 25% 75%, #a7a7a7 75%),
+      linear-gradient(45deg, #a7a7a7 25%, transparent 25% 75%, #a7a7a7 75%);
+    background-size: 4px 4px;
+    background-position: 0 0, 2px 2px;
+  }
+
+  #os .disk {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    width: 58px;
+    text-align: center;
+    font-size: 9px;
+  }
+
+  #os .disk i {
+    display: block;
+    width: 36px;
+    height: 27px;
+    margin: 0 auto 3px;
+    border: 1px solid #000;
+    background: linear-gradient(158deg, #fff 42%, #9a9a9a);
+    box-shadow: inset -7px 0 0 #fff, 1px 1px 0 #000;
+  }
+
+  #os .disk em {
+    display: inline-block;
+    padding: 0 2px;
+    background: #fff;
+    font-style: normal;
+  }
+
+  #os .window {
+    position: relative;
+    width: 372px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #000;
+    background: #fff;
+    box-shadow: 3px 3px 0 rgba(0,0,0,.45);
+  }
+
+  #os .titlebar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 18px;
+    padding: 0 5px;
+    border-bottom: 1px solid #000;
+    background: repeating-linear-gradient(180deg, #000 0 1px, #fff 1px 2px);
+  }
+
+  #os .knob {
+    width: 11px;
+    height: 11px;
+    flex: 0 0 auto;
+    border: 1px solid #000;
+    background: #fff;
+  }
+
+  #os .titlebar h1 {
+    margin: 0 auto;
+    padding: 0 7px;
+    background: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  #os .tabs {
+    display: flex;
+    border-bottom: 1px solid #000;
+    background: #dcdcdc;
+  }
+
+  #os .tabs button {
+    flex: 1 1 auto;
+    padding: 4px 6px;
+    border: 0;
+    border-right: 1px solid #000;
+    background: #dcdcdc;
+    color: #000;
+    font: inherit;
+    font-size: 10px;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  #os .tabs button:last-child { border-right: 0; }
+  #os .tabs button:hover { background: #efefef; }
+
+  #os .tabs button[aria-selected="true"] {
+    background: #000;
+    color: #fff;
+    font-weight: 700;
+  }
+
+  #os .doc {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 10px 12px 12px;
+    scrollbar-width: thin;
+    scrollbar-color: #000 #e8e8e8;
+  }
+
+  #os .doc::-webkit-scrollbar { width: 12px; }
+  #os .doc::-webkit-scrollbar-track { background: #e8e8e8; border-left: 1px solid #000; }
+  #os .doc::-webkit-scrollbar-thumb { background: #000; border: 2px solid #e8e8e8; }
+
+  #os h2 { margin: 0 0 7px; font-size: 15px; line-height: 1.14; letter-spacing: -.012em; }
+
+  #os .kicker {
+    margin: 0 0 8px;
+    font-size: 9px;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+  }
+
+  #os p { margin: 0 0 8px; }
+  #os p:last-child { margin-bottom: 0; }
+  #os .rule { height: 1px; margin: 11px 0; background: #000; }
+
+  #os blockquote {
+    margin: 11px 0;
+    padding: 8px 10px;
+    border: 1px solid #000;
+    background: #ededed;
+  }
+
+  #os figure { margin: 0 0 10px; }
+
+  #os figure img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid #000;
+    filter: grayscale(1) contrast(1.5) brightness(1.05);
+  }
+
+  #os figcaption { margin-top: 5px; font-size: 9px; }
+
+  #os dl {
+    display: grid;
+    grid-template-columns: 78px 1fr;
+    gap: 4px 9px;
+    margin: 0 0 11px;
+    font-size: 10px;
+  }
+
+  #os dt { font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+  #os dd { margin: 0; }
+
+  #os .links { margin: 0; padding: 0; list-style: none; font-size: 10px; }
+  #os .links li { margin-bottom: 5px; }
+  #os .links a { color: #000; }
+
+  #os .statusbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    height: 17px;
+    padding: 0 7px;
+    border-top: 1px solid #000;
+    background: #dcdcdc;
+    font-size: 9px;
+  }
+
+  #os [hidden] { display: none; }
+
+  /* ---------------- responsive ---------------- */
+
+  @media (max-width: 720px) {
+    .bar { font-size: 12px; padding: 11px 13px; }
+    .bar nav { gap: 13px; }
+    .hint { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="field" aria-hidden="true"></div>
+
+<header class="bar bar--top">
+  <a class="wordmark" href="https://david-lafond-designs.vercel.app/">HIDECS 2 — Reenactment</a>
+  <nav aria-label="Primary">
+    <a href="https://christopher-alexander-ces-archive.org/article/hidecs-2-a-computer-program-for-the-hierarchical-decomposition-of-a-set-which-has-an-associated-linear-graph/" target="_blank" rel="noopener">1962 report</a>
+    <a href="https://papers.cumincad.org/data/works/att/acadia22_726.pdf" target="_blank" rel="noopener">ACADIA paper</a>
+    <a href="https://david-lafond-designs.vercel.app/">Portfolio</a>
+  </nav>
+</header>
+
+<main class="stage" id="stage" tabindex="0" aria-label="Model of the reenactment machine. Drag to rotate, arrow keys to nudge. The screen holds the project record.">
+  <div class="rig" id="rig">
+    <div class="face f-back"></div>
+    <div class="face f-left"></div>
+    <div class="face f-right"></div>
+    <div class="face f-top"></div>
+    <div class="face f-bottom"></div>
+
+    <div class="face f-front">
+      <div class="bezel">
+        <div class="pit">
+          <div class="wall wall--top"></div>
+          <div class="wall wall--bottom"></div>
+          <div class="wall wall--left"></div>
+          <div class="wall wall--right"></div>
+          <div class="screen" id="screen">
+            <!-- #os stays here until HTML-in-canvas is available, then moves into <canvas layoutsubtree> -->
+            <div id="os">
+              <div class="menubar">
+                <b aria-hidden="true">&#9646;</b>
+                <span>File</span><span>Edit</span><span>View</span><span>Special</span>
+                <span class="spacer"></span>
+                <time id="clock" datetime="">2:00 PM</time>
+              </div>
+              <div class="desktop">
+                <div class="disk" aria-hidden="true"><i></i><em>HIDECS2</em></div>
+                <div class="window">
+                  <div class="titlebar">
+                    <span class="knob" aria-hidden="true"></span>
+                    <h1>HIDECS 2 — Reenactment</h1>
+                    <span class="knob" aria-hidden="true"></span>
+                  </div>
+                  <div class="tabs" role="tablist" aria-label="Sections">
+                    <button type="button" role="tab" id="tab-read" aria-controls="pane-read" aria-selected="true">Read</button>
+                    <button type="button" role="tab" id="tab-model" aria-controls="pane-model" aria-selected="false">Model</button>
+                    <button type="button" role="tab" id="tab-record" aria-controls="pane-record" aria-selected="false">Record</button>
+                  </div>
+                  <div class="doc" id="doc">
+                    <section id="pane-read" role="tabpanel" aria-labelledby="tab-read">
+                      <p class="kicker">Montreal · 2023 · product design</p>
+                      <h2>A 1962 program, rebuilt as an object you can touch.</h2>
+                      <p>HIDECS 2 was written in 1962 by Christopher Alexander and Marvin Manheim at MIT's Civil Engineering Systems Laboratory. You gave it a list of design requirements and a graph of how those requirements interacted. It cut the graph, scored each cut, and kept the grouping that severed the fewest links — the structure of the problem, computed rather than assumed.</p>
+                      <p>There was no screen. Input was a card deck; output was a page of printed statements that a designer then had to redraw as a tree by hand.</p>
+                      <blockquote>The brief listed what to avoid rather than what to achieve. Alexander called those entries misfits.</blockquote>
+                      <p>The CoDEx group at McGill reenacted the system as something a visitor could operate: pick a requirement, rewire its links, watch the hierarchy recompute. My work was the physical half of that — the apparatus the software is met through.</p>
+                      <div class="rule"></div>
+                      <p class="kicker">About this screen</p>
+                      <p>What you are reading is real DOM, laid out by the browser and painted onto the machine's screen. Select the text. Scroll it. The clock in the menu bar keeps time.</p>
+                    </section>
+
+                    <section id="pane-model" role="tabpanel" aria-labelledby="tab-model" hidden>
+                      <figure>
+                        <img src="hero.webp" width="1600" height="909" alt="Two transparent acrylic HIDECS 2 reenactment models with inset cork panels, beside a layered cardboard keyboard element." decoding="async">
+                        <figcaption>Acrylic housings with inset cork panels; the keyboard element built up from layered cardboard.</figcaption>
+                      </figure>
+                      <p>Transparent acrylic keeps the mechanism legible — nothing about the machine is withheld from the person using it, which is the argument a reenactment exists to make. Cork takes the glare and the noise out of the surfaces a hand actually lands on.</p>
+                      <p>The keyboard was resolved in cardboard first: layer count as the variable for key travel and shoulder height, settled before cutting a material that cannot be re-cut.</p>
+                      <div class="rule"></div>
+                      <p>Presented as a floating object rather than a desk appliance, so the hardware reads as exhibit and the software as live instrument.</p>
+                    </section>
+
+                    <section id="pane-record" role="tabpanel" aria-labelledby="tab-record" hidden>
+                      <dl>
+                        <dt>Year</dt><dd>2023</dd>
+                        <dt>Role</dt><dd>Product designer</dd>
+                        <dt>Fields</dt><dd>Product design · Human-computer interaction · Media arts</dd>
+                        <dt>With</dt><dd>McGill University · McGill CoDEx</dd>
+                        <dt>System</dt><dd>HIDECS 2, 1962 — Alexander &amp; Manheim, MIT Civil Engineering Systems Laboratory, Publication 160</dd>
+                        <dt>Ran on</dt><dd>IBM 709, MIT Computation Center, under the Fortran Monitor System</dd>
+                        <dt>Precedent</dt><dd>141 requirements for a village at Bavra cut into 12 components in <i>Notes on the Synthesis of Form</i>, 1964</dd>
+                      </dl>
+                      <ul class="links">
+                        <li><a href="https://david-lafond-designs.vercel.app/">Back to the portfolio &#8599;</a></li>
+                        <li><a href="https://christopher-alexander-ces-archive.org/article/hidecs-2-a-computer-program-for-the-hierarchical-decomposition-of-a-set-which-has-an-associated-linear-graph/" target="_blank" rel="noopener">Alexander &amp; Manheim, the 1962 HIDECS 2 report &#8599;</a></li>
+                        <li><a href="https://papers.cumincad.org/data/works/att/acadia22_726.pdf" target="_blank" rel="noopener">Vardouli, <i>Setting Historic Computer Systems in Motion</i>, ACADIA 2022 &#8599;</a></li>
+                      </ul>
+                    </section>
+                  </div>
+                  <div class="statusbar">
+                    <span id="status-left">3 items</span>
+                    <span id="status-right">448K in disk</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="crt" aria-hidden="true"></div>
+          </div>
+        </div>
+      </div>
+      <div class="slot" aria-hidden="true"></div>
+      <div class="deck" aria-hidden="true">
+        <div class="badge"><b>HIDECS 2</b><span>reenactment</span></div>
+        <div class="grille"></div>
+      </div>
+    </div>
+
+    <div class="cast" aria-hidden="true"></div>
+  </div>
+</main>
+
+<footer class="bar bar--bottom">
+  <a href="https://david-lafond-designs.vercel.app/">&#8592; Portfolio</a>
+  <span class="hint">Drag the shell to rotate</span>
+  <span class="chip" id="chip" data-mode="dom">DOM overlay</span>
+</footer>
+
+<script>
+(() => {
+  const rig = document.getElementById('rig');
+  const stage = document.getElementById('stage');
+  const screenEl = document.getElementById('screen');
+  const os = document.getElementById('os');
+  const doc = document.getElementById('doc');
+  const chip = document.getElementById('chip');
+  const clock = document.getElementById('clock');
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+
+  /* ---- orientation ---- */
+
+  const home = { rx: -6, ry: 22 };
+  const state = { rx: home.rx, ry: home.ry, tx: home.rx, ty: home.ry };
+  let dragging = false, lastX = 0, lastY = 0, frame = 0, moved = false, maxYaw = 40;
+
+  const fit = () => {
+    const s = Math.min((innerWidth - 96) / 640, (innerHeight - 156) / 800, 1.06);
+    document.documentElement.style.setProperty('--fit', Math.max(0.32, s).toFixed(4));
+    maxYaw = innerWidth < 700 ? 16 : 40;    // perspective pushes a turned box off-centre
+    aim(state.tx, state.ty);
+  };
+  addEventListener('resize', fit, { passive: true });
+
+  const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+
+  const write = () => {
+    rig.style.setProperty('--rx', state.rx.toFixed(3) + 'deg');
+    rig.style.setProperty('--ry', state.ry.toFixed(3) + 'deg');
+    repaint();
+  };
+
+  const tick = () => {
+    frame = 0;
+    const k = dragging ? 0.5 : 0.14;
+    state.rx += (state.tx - state.rx) * k;
+    state.ry += (state.ty - state.ry) * k;
+    write();
+    if (Math.abs(state.tx - state.rx) > 0.02 || Math.abs(state.ty - state.ry) > 0.02) {
+      frame = requestAnimationFrame(tick);
+    }
+  };
+
+  const aim = (rx, ry) => {
+    state.tx = clamp(rx, -20, 15);
+    state.ty = clamp(ry, -maxYaw, maxYaw);
+    if (reduced.matches) {                 // no damping when motion is unwelcome
+      state.rx = state.tx;
+      state.ry = state.ty;
+      write();
+      return;
+    }
+    if (!frame) frame = requestAnimationFrame(tick);
+  };
+
+  stage.addEventListener('pointerdown', (e) => {
+    if (e.target.closest('#os')) return;   // the screen keeps its own input
+    dragging = true;
+    moved = false;
+    lastX = e.clientX;
+    lastY = e.clientY;
+    rig.classList.add('grab');
+    stage.setPointerCapture(e.pointerId);
+  });
+
+  stage.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    const dx = e.clientX - lastX, dy = e.clientY - lastY;
+    lastX = e.clientX;
+    lastY = e.clientY;
+    if (Math.abs(dx) + Math.abs(dy) > 2) moved = true;
+    aim(state.tx - dy * 0.16, state.ty + dx * 0.24);
+  });
+
+  const release = (e) => {
+    if (!dragging) return;
+    dragging = false;
+    rig.classList.remove('grab');
+    if (stage.hasPointerCapture?.(e.pointerId)) stage.releasePointerCapture(e.pointerId);
+    if (!moved) aim(home.rx, home.ry);     // a plain click squares the machine up
+  };
+
+  stage.addEventListener('pointerup', release);
+  stage.addEventListener('pointercancel', release);
+
+  stage.addEventListener('keydown', (e) => {
+    const step = e.shiftKey ? 9 : 3;
+    const moves = {
+      ArrowLeft: [0, -step], ArrowRight: [0, step],
+      ArrowUp: [-step, 0], ArrowDown: [step, 0]
+    };
+    if (moves[e.key]) {
+      e.preventDefault();
+      aim(state.tx + moves[e.key][0], state.ty + moves[e.key][1]);
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      aim(home.rx, home.ry);
+    }
+  });
+
+  /* ---- the screen's own behaviour ---- */
+
+  const tabs = [...document.querySelectorAll('[role="tab"]')];
+  const panes = tabs.map((t) => document.getElementById(t.getAttribute('aria-controls')));
+
+  tabs.forEach((tab, i) => {
+    tab.addEventListener('click', () => {
+      tabs.forEach((t, j) => {
+        t.setAttribute('aria-selected', String(j === i));
+        panes[j].hidden = j !== i;
+      });
+      doc.scrollTop = 0;
+      repaint();
+    });
+  });
+
+  doc.addEventListener('scroll', repaint, { passive: true });
+  os.addEventListener('pointerover', repaint);
+  os.addEventListener('pointerout', repaint);
+  os.addEventListener('focusin', repaint);
+
+  const fmt = new Intl.DateTimeFormat('en-US', { weekday: 'short', hour: 'numeric', minute: '2-digit' });
+
+  const setClock = () => {
+    const now = new Date();
+    clock.dateTime = now.toISOString();
+    clock.textContent = fmt.format(now);
+    repaint();
+  };
+
+  /* ---- render path: HTML-in-canvas when the browser has it, plain DOM otherwise ---- */
+
+  let canvas = null, ctx = null, queued = false;
+
+  function repaint() {
+    if (!canvas || queued) return;
+    queued = true;
+    requestAnimationFrame(() => {
+      queued = false;
+      canvas.requestPaint();
+    });
+  }
+
+  if ('requestPaint' in HTMLCanvasElement.prototype) {
+    canvas = document.createElement('canvas');
+    canvas.setAttribute('layoutsubtree', '');
+    canvas.append(os);
+    screenEl.prepend(canvas);
+    ctx = canvas.getContext('2d');
+
+    const ro = new ResizeObserver(([entry]) => {
+      const dpc = entry.devicePixelContentBoxSize;
+      canvas.width = dpc ? dpc[0].inlineSize : Math.round(entry.contentRect.width * devicePixelRatio);
+      canvas.height = dpc ? dpc[0].blockSize : Math.round(entry.contentRect.height * devicePixelRatio);
+      canvas.requestPaint();
+    });
+    const box = (typeof ResizeObserverEntry !== 'undefined' && 'devicePixelContentBoxSize' in ResizeObserverEntry.prototype)
+      ? { box: 'device-pixel-content-box' }
+      : {};
+    ro.observe(canvas, box);
+
+    canvas.onpaint = () => {
+      ctx.reset();
+      const scale = canvas.width / (os.offsetWidth || 1);
+      ctx.setTransform(scale, 0, 0, scale, 0, 0);
+      const t = ctx.drawElementImage(os, 0, 0);
+      if (t) os.style.transform = t.toString();   // hit testing follows the drawn pixels
+    };
+
+    chip.dataset.mode = 'canvas';
+    chip.textContent = 'drawElementImage';
+    canvas.requestPaint();
+  }
+
+  fit();
+  setClock();
+  setInterval(setClock, 15000);
+  write();
+})();
+</script>
+</body>
+</html>

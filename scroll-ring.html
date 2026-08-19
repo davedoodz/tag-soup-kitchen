@@ -1,0 +1,1001 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#ffffff" />
+    <title>Filter ring as position tracker — system BRIM</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* ------------------------------------------------------------------
+         Tokens lifted verbatim from src/styles.css so the specimen reads in
+         the shipped portfolio's own voice.
+         ------------------------------------------------------------------ */
+      :root {
+        --color-paper: #ffffff;
+        --color-ink: #111111;
+        --color-muted: #8a8a8a;
+        --color-hairline: #e6e6e6;
+        --color-placeholder: #eeeeee;
+        --color-chip: #f2f2f2;
+        --color-accent: #2f6bff;
+        --color-live: #2fd08a;
+        --font-sans: 'Manrope', system-ui, sans-serif;
+        --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+        --page-padding: 24px;
+        --page-width: 1436px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        min-width: 320px;
+        background: var(--color-paper);
+        /* Click-to-top rides a real smooth scroll; the ring refills off that
+           same scroll, so no separate refill tween can fight it. */
+        scroll-behavior: smooth;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+      }
+
+      body {
+        margin: 0;
+        color: var(--color-ink);
+        background: var(--color-paper);
+        font-family: var(--font-sans);
+        font-synthesis: none;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      button {
+        border: 0;
+        color: inherit;
+        font: inherit;
+      }
+
+      button:focus-visible {
+        outline: 2px solid var(--color-accent);
+        outline-offset: 3px;
+      }
+
+      .shell {
+        width: 100%;
+        max-width: var(--page-width);
+        margin-inline: auto;
+        padding-inline: var(--page-padding);
+      }
+
+      /* ---------------------------------------------------------------- masthead */
+      .masthead {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 24px;
+        padding-top: 56px;
+        padding-bottom: 28px;
+      }
+
+      .masthead h1 {
+        max-width: 720px;
+        margin: 0;
+        font-size: 40px;
+        font-weight: 800;
+        line-height: 1.06;
+        letter-spacing: -0.02em;
+      }
+
+      .masthead p {
+        max-width: 560px;
+        margin: 10px 0 0;
+        color: var(--color-muted);
+        font-size: 15px;
+        line-height: 1.5;
+      }
+
+      .stamp {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--color-muted);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+
+      /* ---------------------------------------------- the real sticky filter bar */
+      .filter-bar {
+        position: sticky;
+        z-index: 10;
+        top: 0;
+        display: flex;
+        height: 70px;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding-block: 16px;
+        background: var(--color-paper);
+      }
+
+      .filter-bar::after {
+        position: absolute;
+        right: var(--page-padding);
+        bottom: 0;
+        left: var(--page-padding);
+        height: 1px;
+        background: var(--color-hairline);
+        content: '';
+      }
+
+      .filters {
+        display: flex;
+        min-width: 0;
+        align-items: center;
+        gap: 8px;
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+
+      .filters::-webkit-scrollbar {
+        display: none;
+      }
+
+      .filter {
+        display: inline-flex;
+        height: 38px;
+        flex: 0 0 auto;
+        align-items: center;
+        justify-content: center;
+        padding-inline: 18px;
+        border-radius: 999px;
+        background: var(--color-chip);
+        color: var(--color-ink);
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 18px;
+      }
+
+      .filter[data-active='true'] {
+        background: var(--color-ink);
+        color: var(--color-paper);
+      }
+
+      .freshness {
+        display: inline-flex;
+        flex: 0 0 auto;
+        align-items: center;
+        gap: 8px;
+        color: var(--color-muted);
+        font-size: 13px;
+      }
+
+      .freshness > span {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--color-live);
+      }
+
+      /* ------------------------------------------------------------------
+         system BRIM — the ring is the page position.
+
+         Ported from the previous site (davidlafond.xyz): the home glyph sits
+         brim-full at the hero and drains to empty exactly at the bottom of the
+         footer, so an empty ring always means "you have reached the very end".
+         There, `SceneChrome.tsx` computed the level in a rAF-throttled scroll
+         listener; here the same level is a registered custom property driven by
+         a scroll-driven animation, so the browser owns it off the main thread.
+         ------------------------------------------------------------------ */
+      @property --brim {
+        syntax: '<number>';
+        inherits: true;
+        initial-value: 1;
+      }
+
+      @keyframes brim-drain {
+        from {
+          --brim: 1;
+        }
+        to {
+          --brim: 0;
+        }
+      }
+
+      .brim {
+        animation: brim-drain auto linear both;
+        animation-timeline: scroll(root);
+      }
+
+      /* Reduced motion keeps the wayfinding — the ring still reports position —
+         but quantises it to twenty discrete levels instead of sweeping
+         continuously. `jump-none` puts a stop at both 1 and 0, so the last step
+         still lands on empty inside the final 5% of the page and the "empty ring
+         means the very end" contract survives. */
+      @media (prefers-reduced-motion: reduce) {
+        .brim {
+          animation-timing-function: steps(20, jump-none);
+        }
+      }
+
+      /* The ring never scales: full and empty share the exact same 24px
+         footprint (`.filter-logo` in src/styles.css — 24px box, 5px border), so
+         returning home reads as a fill sweep, never a size change. */
+      .ring {
+        display: inline-grid;
+        flex: 0 0 34px;
+        width: 34px;
+        height: 34px;
+        padding: 5px;
+        place-items: center;
+        background: none;
+        border-radius: 50%;
+        cursor: pointer;
+      }
+
+      .glyph {
+        display: block;
+        width: 24px;
+        height: 24px;
+        overflow: visible;
+        color: var(--color-ink);
+      }
+
+      .ring .glyph {
+        display: none;
+      }
+
+      .ring[data-variant='brim'] .glyph--brim,
+      .ring[data-variant='rim'] .glyph--rim,
+      .ring[data-variant='gauge'] .glyph--gauge,
+      .ring[data-variant='iris'] .glyph--iris,
+      .ring[data-variant='dial'] .glyph--dial,
+      .ring[data-variant='level'] .glyph--level {
+        display: block;
+      }
+
+      /* Shared geometry: r=9.5 at stroke-width 5 reproduces the shipped ring
+         exactly (24px outer, 14px hole). */
+      .outline {
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 5;
+      }
+
+      .track {
+        fill: none;
+        stroke: var(--color-hairline);
+        stroke-width: 5;
+      }
+
+      /* ---- BRIM: pie wipe inside the ring, the literal port ------------------
+         The classic "thick stroke on a half-radius circle" trick: a circle of
+         r=3.5 with stroke-width 7 lays a solid disc from the centre out to the
+         14px hole's edge. Rotated -90deg so the dash pattern starts at 12
+         o'clock; dasharray/dashoffset (both in circumference units, 2*pi*3.5 =
+         21.9911) keep the ON segment anchored at the 12 o'clock wrap and shrink
+         its start forward as the level drops, so the removed wedge grows
+         clockwise out of 12 o'clock. */
+      .wedge {
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 7;
+        transform-box: fill-box;
+        transform-origin: center;
+        transform: rotate(-90deg);
+        stroke-dasharray: calc(var(--brim, 1) * 21.9911) calc((1 - var(--brim, 1)) * 21.9911);
+        stroke-dashoffset: calc(var(--brim, 1) * 21.9911);
+      }
+
+      /* ---- RIM: the border itself drains, 2*pi*9.5 = 59.6903 ---------------- */
+      .rim {
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 5;
+        stroke-linecap: butt;
+        transform-box: fill-box;
+        transform-origin: center;
+        transform: rotate(-90deg);
+        stroke-dasharray: calc(var(--brim, 1) * 59.6903) calc((1 - var(--brim, 1)) * 59.6903);
+        stroke-dashoffset: calc(var(--brim, 1) * 59.6903);
+      }
+
+      /* ---- GAUGE: inverse read — the arc accumulates clockwise -------------- */
+      .gauge {
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 5;
+        stroke-linecap: butt;
+        transform-box: fill-box;
+        transform-origin: center;
+        transform: rotate(-90deg);
+        stroke-dasharray: calc((1 - var(--brim, 1)) * 59.6903) 59.6903;
+      }
+
+      /* ---- IRIS: the disc closes to nothing -------------------------------- */
+      .iris {
+        fill: currentColor;
+        transform-box: fill-box;
+        transform-origin: center;
+        transform: scale(var(--brim, 1));
+      }
+
+      /* ---- DIAL: one clockwise revolution across the whole page ------------- */
+      .hand {
+        stroke: currentColor;
+        stroke-width: 2.5;
+        stroke-linecap: round;
+        transform-box: view-box;
+        transform-origin: 12px 12px;
+        transform: rotate(calc((1 - var(--brim, 1)) * 360deg));
+      }
+
+      /* ---- LEVEL: a water line falling inside the ring ---------------------- */
+      .glyph--level {
+        position: relative;
+        border: 5px solid currentColor;
+        border-radius: 50%;
+        overflow: hidden;
+      }
+
+      .glyph--level > i {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        height: calc(var(--brim, 1) * 100%);
+        background: currentColor;
+      }
+
+      /* ---- hover: the glyph is kept in the air ------------------------------
+         Each arc leaves the ground on an ease-out and falls back on an ease-in,
+         looped for as long as the pointer stays. */
+      @keyframes ring-bounce-loop {
+        0%,
+        100% {
+          transform: translateY(0);
+          animation-timing-function: ease-out;
+        }
+        50% {
+          transform: translateY(-9px);
+          animation-timing-function: ease-in;
+        }
+      }
+
+      /* Letting go reads as dropping the ball, never as a fresh launch: motion
+         starts by continuing downward from `--drop-start`, the live height read
+         off the loop at the instant hover ended, then rebounds at a fixed
+         fraction of that height (45%, then 18%) so a small release stays a
+         small bounce. Impacts squash for tactility; height is translateY only. */
+      @keyframes ring-bounce-settle {
+        0% {
+          transform: translateY(var(--drop-start, 0px)) scale(1, 1);
+          animation-timing-function: ease-in;
+        }
+        32% {
+          transform: translateY(0) scale(1.14, 0.82);
+          animation-timing-function: ease-out;
+        }
+        42% {
+          transform: translateY(calc(var(--drop-start, 0px) * 0.45)) scale(1, 1);
+          animation-timing-function: ease-in;
+        }
+        58% {
+          transform: translateY(0) scale(1.08, 0.9);
+          animation-timing-function: ease-out;
+        }
+        72% {
+          transform: translateY(calc(var(--drop-start, 0px) * 0.18)) scale(1, 1);
+          animation-timing-function: ease-in;
+        }
+        86% {
+          transform: translateY(0) scale(1.04, 0.96);
+          animation-timing-function: ease-out;
+        }
+        100% {
+          transform: translateY(0) scale(1, 1);
+        }
+      }
+
+      /* The loop is started from JS (`ring-bounce-loop` keyframes replayed via
+         the Web Animations API) rather than a `:hover` rule, so the release
+         handler can still read the live height at the instant the pointer
+         leaves — with a CSS `:hover` animation the computed transform is already
+         back to `none` by the time `pointerleave` runs, and the drop had nothing
+         to fall from. */
+      .ring.is-settling .glyph {
+        animation: ring-bounce-settle 0.62s linear both;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .ring.is-settling .glyph {
+          animation: none;
+        }
+      }
+
+      /* ---- end-of-page flag, off the same scroll timeline ------------------- */
+      @keyframes brim-end-flag {
+        0%,
+        95.5% {
+          opacity: 0;
+        }
+        95.6%,
+        100% {
+          opacity: 1;
+        }
+      }
+
+      .end-flag {
+        margin-left: 2px;
+        color: var(--color-muted);
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        white-space: nowrap;
+        opacity: 0;
+        animation: brim-end-flag auto linear both;
+        animation-timeline: scroll(root);
+      }
+
+      /* ---------------------------------------------------------------- specimens */
+      .specimens {
+        padding-block: 44px 12px;
+      }
+
+      .specimens > h2 {
+        margin: 0 0 4px;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+      }
+
+      .specimens > p {
+        margin: 0 0 22px;
+        max-width: 620px;
+        color: var(--color-muted);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .specimen-grid {
+        display: grid;
+        gap: 1px;
+        /* Six specimens: fixed three-up so no row is ever left with empty
+           hairline cells. */
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        background: var(--color-hairline);
+        border: 1px solid var(--color-hairline);
+      }
+
+      .specimen {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        padding: 20px;
+        background: var(--color-paper);
+      }
+
+      .specimen__head {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .specimen__head .glyph {
+        display: block;
+        flex: 0 0 24px;
+      }
+
+      .specimen__name {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+
+      .specimen__note {
+        margin: 0;
+        flex: 1 1 auto;
+        color: var(--color-muted);
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
+      .specimen__end {
+        margin: 0;
+        color: var(--color-ink);
+        font-size: 12px;
+        line-height: 1.4;
+      }
+
+      .specimen__end b {
+        font-weight: 600;
+      }
+
+      .adopt {
+        align-self: flex-start;
+        padding: 7px 14px;
+        border-radius: 999px;
+        background: var(--color-chip);
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 500;
+      }
+
+      .adopt[aria-pressed='true'] {
+        background: var(--color-ink);
+        color: var(--color-paper);
+      }
+
+      /* ---------------------------------------------------------------- the plates */
+      .grid-head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 16px;
+        padding-block: 44px 16px;
+      }
+
+      .grid-head h2 {
+        margin: 0;
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .project-grid {
+        display: grid;
+        gap: 24px;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        padding-bottom: 72px;
+      }
+
+      .plate {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .plate__frame {
+        display: grid;
+        border-radius: 10px;
+        background: var(--color-placeholder);
+        place-items: center;
+        aspect-ratio: var(--ratio, 3 / 2);
+        max-height: 380px;
+      }
+
+      .plate__frame span {
+        color: var(--color-muted);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.14em;
+      }
+
+      .plate__meta {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+        font-size: 14px;
+      }
+
+      .plate__meta span:last-child {
+        color: var(--color-muted);
+        font-family: var(--font-mono);
+        font-size: 12px;
+      }
+
+      /* ---------------------------------------------------------------- the fold */
+      .fold {
+        padding: 64px var(--page-padding) 40px;
+        background: var(--color-ink);
+        color: var(--color-paper);
+      }
+
+      .fold__inner {
+        display: flex;
+        max-width: var(--page-width);
+        flex-wrap: wrap;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 24px;
+        margin-inline: auto;
+      }
+
+      .fold h2 {
+        margin: 0;
+        font-size: 32px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+
+      .fold p {
+        margin: 8px 0 0;
+        max-width: 520px;
+        color: rgba(255, 255, 255, 0.62);
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .fold .stamp {
+        color: rgba(255, 255, 255, 0.5);
+      }
+
+      @media (max-width: 1080px) {
+        .specimen-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 640px) {
+        .masthead {
+          padding-top: 36px;
+        }
+
+        .masthead h1 {
+          font-size: 30px;
+        }
+
+        .filter-bar {
+          height: 66px;
+        }
+
+        .filter {
+          height: 36px;
+          padding-inline: 16px;
+        }
+
+        .specimen-grid {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="masthead shell">
+      <div>
+        <span class="stamp">system BRIM · scroll position in the filter ring</span>
+        <h1>The black circle stops being decoration and becomes the page position.</h1>
+        <p>
+          Ported from davidlafond.xyz, where the home glyph sat brim-full at the hero and drained to
+          empty exactly at the bottom of the footer — an empty ring always meant “you have reached
+          the very end”. Same law here, applied to the ring that already sits in front of the filter
+          pills. Scroll the page; the ring in the pinned bar is the readout. Click it to go home.
+        </p>
+      </div>
+      <span class="stamp">6 mechanics · one scroll timeline</span>
+    </header>
+
+    <!-- The shipped bar, unchanged except that its logo is now a control. -->
+    <search class="filter-bar shell">
+      <div class="filters" aria-label="Filter projects">
+        <button
+          class="ring brim"
+          id="ring"
+          data-variant="rim"
+          type="button"
+          aria-label="Back to top — the ring shows how far down the page you are"
+        >
+          <svg class="glyph glyph--brim" viewBox="0 0 24 24" aria-hidden="true">
+            <circle class="wedge" cx="12" cy="12" r="3.5" />
+            <circle class="outline" cx="12" cy="12" r="9.5" />
+          </svg>
+          <svg class="glyph glyph--rim" viewBox="0 0 24 24" aria-hidden="true">
+            <circle class="track" cx="12" cy="12" r="9.5" />
+            <circle class="rim" cx="12" cy="12" r="9.5" />
+          </svg>
+          <svg class="glyph glyph--gauge" viewBox="0 0 24 24" aria-hidden="true">
+            <circle class="track" cx="12" cy="12" r="9.5" />
+            <circle class="gauge" cx="12" cy="12" r="9.5" />
+          </svg>
+          <svg class="glyph glyph--iris" viewBox="0 0 24 24" aria-hidden="true">
+            <circle class="iris" cx="12" cy="12" r="7" />
+            <circle class="outline" cx="12" cy="12" r="9.5" />
+          </svg>
+          <svg class="glyph glyph--dial" viewBox="0 0 24 24" aria-hidden="true">
+            <circle class="outline" cx="12" cy="12" r="9.5" />
+            <line class="hand" x1="12" y1="12" x2="12" y2="5" />
+          </svg>
+          <span class="glyph glyph--level" aria-hidden="true"><i></i></span>
+        </button>
+        <span class="end-flag" aria-hidden="true">END</span>
+        <button class="filter" data-active="true" type="button">All</button>
+        <button class="filter" type="button">Product</button>
+        <button class="filter" type="button">Web</button>
+        <button class="filter" type="button">Mobile</button>
+        <button class="filter" type="button">Motion</button>
+        <button class="filter" type="button">Illustration</button>
+        <button class="filter" type="button">3D</button>
+        <button class="filter" type="button">Print</button>
+      </div>
+      <div class="freshness" aria-label="Portfolio status">
+        <span aria-hidden="true"></span>
+        Last updated three months ago
+      </div>
+    </search>
+
+    <section class="specimens shell" aria-labelledby="specimens-title">
+      <h2 id="specimens-title">Six ways the same law can look</h2>
+      <p>
+        Every glyph below is live and reads the same scroll timeline as the ring in the pinned bar —
+        scroll and all seven move together. Press “Use in bar” to judge one in its real slot, in
+        front of the pills, at 24px.
+      </p>
+      <div class="specimen-grid">
+        <article class="specimen">
+          <div class="specimen__head">
+            <svg class="glyph brim" viewBox="0 0 24 24" aria-hidden="true">
+              <circle class="wedge" cx="12" cy="12" r="3.5" />
+              <circle class="outline" cx="12" cy="12" r="9.5" />
+            </svg>
+            <span class="specimen__name">BRIM</span>
+          </div>
+          <p class="specimen__note">
+            The literal port. A solid disc fills the ring's hole at the hero and a wedge is removed
+            clockwise out of 12 o'clock as you descend.
+          </p>
+          <p class="specimen__end"><b>At the end:</b> a hollow ring — the shipped logo.</p>
+          <button class="adopt" data-variant="brim" type="button" aria-pressed="false">
+            Use in bar
+          </button>
+        </article>
+
+        <article class="specimen">
+          <div class="specimen__head">
+            <svg class="glyph brim" viewBox="0 0 24 24" aria-hidden="true">
+              <circle class="track" cx="12" cy="12" r="9.5" />
+              <circle class="rim" cx="12" cy="12" r="9.5" />
+            </svg>
+            <span class="specimen__name">RIM</span>
+          </div>
+          <p class="specimen__note">
+            The 5px border itself drains clockwise off 12 o'clock, leaving a hairline track. Keeps
+            the exact silhouette the site already ships — nothing new appears inside it.
+          </p>
+          <p class="specimen__end"><b>At the end:</b> a grey ghost of the ring.</p>
+          <button class="adopt" data-variant="rim" type="button" aria-pressed="true">
+            Use in bar
+          </button>
+        </article>
+
+        <article class="specimen">
+          <div class="specimen__head">
+            <svg class="glyph brim" viewBox="0 0 24 24" aria-hidden="true">
+              <circle class="track" cx="12" cy="12" r="9.5" />
+              <circle class="gauge" cx="12" cy="12" r="9.5" />
+            </svg>
+            <span class="specimen__name">GAUGE</span>
+          </div>
+          <p class="specimen__note">
+            The inverse read: the ring starts as a hairline and accumulates black clockwise. Reads as
+            progress earned rather than distance left.
+          </p>
+          <p class="specimen__end"><b>At the end:</b> the full black ring.</p>
+          <button class="adopt" data-variant="gauge" type="button" aria-pressed="false">
+            Use in bar
+          </button>
+        </article>
+
+        <article class="specimen">
+          <div class="specimen__head">
+            <svg class="glyph brim" viewBox="0 0 24 24" aria-hidden="true">
+              <circle class="iris" cx="12" cy="12" r="7" />
+              <circle class="outline" cx="12" cy="12" r="9.5" />
+            </svg>
+            <span class="specimen__name">IRIS</span>
+          </div>
+          <p class="specimen__note">
+            No angles at all — the inner disc closes concentrically to nothing. The quietest of the
+            six at 24px; position reads as weight, not as a clock.
+          </p>
+          <p class="specimen__end"><b>At the end:</b> a hollow ring.</p>
+          <button class="adopt" data-variant="iris" type="button" aria-pressed="false">
+            Use in bar
+          </button>
+        </article>
+
+        <article class="specimen">
+          <div class="specimen__head">
+            <svg class="glyph brim" viewBox="0 0 24 24" aria-hidden="true">
+              <circle class="outline" cx="12" cy="12" r="9.5" />
+              <line class="hand" x1="12" y1="12" x2="12" y2="5" />
+            </svg>
+            <span class="specimen__name">DIAL</span>
+          </div>
+          <p class="specimen__note">
+            One clockwise revolution across the whole document. The most legible mid-page — you can
+            name the angle — but it needs the hairline hand inside the heavy ring.
+          </p>
+          <p class="specimen__end"><b>At the end:</b> the hand back at 12, one turn later.</p>
+          <button class="adopt" data-variant="dial" type="button" aria-pressed="false">
+            Use in bar
+          </button>
+        </article>
+
+        <article class="specimen">
+          <div class="specimen__head">
+            <span class="glyph glyph--level brim" aria-hidden="true"><i></i></span>
+            <span class="specimen__name">LEVEL</span>
+          </div>
+          <p class="specimen__note">
+            A water line falling inside the ring. “Brim-full” taken literally: the level is horizontal,
+            so it reads at a glance without decoding a wedge.
+          </p>
+          <p class="specimen__end"><b>At the end:</b> a drained ring.</p>
+          <button class="adopt" data-variant="level" type="button" aria-pressed="false">
+            Use in bar
+          </button>
+        </article>
+      </div>
+    </section>
+
+    <div class="shell grid-head">
+      <h2>Scroll ballast — nine plates, real titles</h2>
+      <span class="stamp">watch the pinned ring, not this</span>
+    </div>
+
+    <section class="project-grid shell" aria-label="Projects">
+      <article class="plate">
+        <div class="plate__frame" style="--ratio: 1200 / 849"><span>PRINT</span></div>
+        <div class="plate__meta"><span>Harvard + MIT Acceptance Portfolio</span><span>2024</span></div>
+      </article>
+      <article class="plate">
+        <div class="plate__frame" style="--ratio: 1600 / 1040"><span>PRODUCT</span></div>
+        <div class="plate__meta"><span>Re:Self</span><span>2025</span></div>
+      </article>
+      <article class="plate">
+        <div class="plate__frame" style="--ratio: 1280 / 784"><span>WEB</span></div>
+        <div class="plate__meta"><span>Global Interiors</span><span>2025</span></div>
+      </article>
+      <article class="plate">
+        <div class="plate__frame" style="--ratio: 1200 / 675"><span>PRODUCT</span></div>
+        <div class="plate__meta"><span>EcoFabriq</span><span>2025</span></div>
+      </article>
+      <article class="plate">
+        <div class="plate__frame" style="--ratio: 1284 / 950"><span>PRODUCT</span></div>
+        <div class="plate__meta"><span>Pumba Desktop</span><span>2025</span></div>
+      </article>
+      <article class="plate">
+        <div class="plate__frame" style="--ratio: 1600 / 909"><span>PRODUCT</span></div>
+        <div class="plate__meta"><span>HIDECS 2 Reenactment</span><span>2023</span></div>
+      </article>
+      <article class="plate">
+        <div class="plate__frame" style="--ratio: 440 / 956"><span>WEB</span></div>
+        <div class="plate__meta"><span>David's Journal</span><span>2025</span></div>
+      </article>
+      <article class="plate">
+        <div class="plate__frame" style="--ratio: 1200 / 872"><span>PRINT</span></div>
+        <div class="plate__meta"><span>N°1 Decode (CAJ)</span><span>2023</span></div>
+      </article>
+      <article class="plate">
+        <div class="plate__frame" style="--ratio: 399 / 512"><span>ILLUSTRATION</span></div>
+        <div class="plate__meta"><span>Design Sketches</span><span>2025</span></div>
+      </article>
+    </section>
+
+    <footer class="fold">
+      <div class="fold__inner">
+        <div>
+          <h2>You are at the bottom.</h2>
+          <p>
+            The ring in the bar above is empty here, and only here. That is the whole contract: full
+            at the hero, empty on this row, monotonic in between — so the glyph answers “how much
+            portfolio is left” without a scrollbar.
+          </p>
+        </div>
+        <span class="stamp">built with · scroll() · @property · no libraries</span>
+      </div>
+    </footer>
+
+    <script type="module">
+      const ring = document.getElementById('ring')
+      const glyphs = ring.querySelectorAll('.glyph')
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)')
+
+      /* Variant switcher — the six glyphs all live in the button; only the
+         chosen one is displayed, so nothing has to be re-created and the shared
+         `--brim` keeps its live value across a swap. */
+      const adopts = [...document.querySelectorAll('.adopt')]
+      for (const adopt of adopts) {
+        adopt.addEventListener('click', () => {
+          ring.dataset.variant = adopt.dataset.variant
+          for (const other of adopts) {
+            other.setAttribute('aria-pressed', String(other === adopt))
+          }
+        })
+      }
+
+      /* Home is a scroll, not a jump: the ring refills off the real scroll back
+         up, which is why no separate refill tween exists here. */
+      ring.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: reduce.matches ? 'auto' : 'smooth' })
+      })
+
+      /* Hover keeps the glyph in the air; release reads as dropping the ball.
+         The loop runs through the Web Animations API so `pointerleave` can read
+         the live height off the still-running animation and hand it to the CSS
+         settle keyframes as `--drop-start`. */
+      const visibleGlyph = () => [...glyphs].find((g) => getComputedStyle(g).display !== 'none')
+
+      const bounceLoop = [
+        { transform: 'translateY(0)', easing: 'ease-out' },
+        { offset: 0.5, transform: 'translateY(-9px)', easing: 'ease-in' },
+        { transform: 'translateY(0)' },
+      ]
+      let loop = null
+
+      const startBounce = () => {
+        if (reduce.matches || loop) return
+        const glyph = visibleGlyph()
+        if (!glyph) return
+        ring.classList.remove('is-settling')
+        loop = glyph.animate(bounceLoop, { duration: 375, iterations: Infinity })
+      }
+
+      const endBounce = () => {
+        if (!loop) return
+        const glyph = visibleGlyph()
+        const raw = glyph ? getComputedStyle(glyph).transform : 'none'
+        const height = raw === 'none' ? 0 : new DOMMatrixReadOnly(raw).m42
+        loop.cancel()
+        loop = null
+        // Released at the bottom of an arc: nothing to fall from.
+        if (height >= -0.5) return
+        ring.style.setProperty('--drop-start', `${height.toFixed(2)}px`)
+        ring.classList.remove('is-settling')
+        void ring.offsetWidth
+        ring.classList.add('is-settling')
+      }
+
+      ring.addEventListener('pointerenter', startBounce)
+      ring.addEventListener('pointerleave', endBounce)
+      ring.addEventListener('focus', startBounce)
+      ring.addEventListener('blur', endBounce)
+
+      ring.addEventListener(
+        'animationend',
+        (event) => {
+          if (event.animationName === 'ring-bounce-settle') ring.classList.remove('is-settling')
+        },
+        true,
+      )
+
+      /* Firefox has no scroll-driven animations: drive the same registered
+         property from a rAF-throttled scroll listener, the way the previous
+         site's SceneChrome did. Chrome and Safari 26 never run this. */
+      if (!CSS.supports('animation-timeline', 'scroll()')) {
+        const hosts = document.querySelectorAll('.brim')
+        const flag = document.querySelector('.end-flag')
+        let frame = 0
+        const update = () => {
+          frame = 0
+          const drainEnd = document.documentElement.scrollHeight - window.innerHeight
+          const level = drainEnd > 0 ? 1 - window.scrollY / drainEnd : 1
+          const clamped = Math.min(1, Math.max(0, level))
+          const stepped = reduce.matches ? Math.round(clamped * 19) / 19 : clamped
+          for (const host of hosts) host.style.setProperty('--brim', stepped.toFixed(4))
+          flag.style.opacity = clamped <= 0.045 ? '1' : '0'
+        }
+        const onScroll = () => {
+          if (!frame) frame = requestAnimationFrame(update)
+        }
+        update()
+        window.addEventListener('scroll', onScroll, { passive: true })
+        window.addEventListener('resize', onScroll)
+      }
+    </script>
+  </body>
+</html>

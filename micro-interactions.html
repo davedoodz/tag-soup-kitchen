@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Micro-interaction system — 10 demos on the portfolio as built</title>
+<meta name="description" content="Motion tokens and ten micro-interaction demos built on the live portfolio's own components, palette and copy.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   SYSTEM: MOTION/HAIRLINE
+   Derived only from what the site already ships:
+     src/styles.css  — :root tokens, .tilt (400ms cubic-bezier(.22,1,.36,1)),
+                       .location-widget (300ms ease + 0 12px 28px/16%),
+                       focus-visible (2px #2f6bff, offset 3px), radii 12/10/999,
+                       chip #f2f2f2, hairline #e6e6e6, muted #8a8a8a
+     src/cardTilt.ts — MAX_DEG 9, rAF-throttled pointermove, --rx/--ry/--mx/--my
+   Consequences kept as hard rules for every demo below:
+     - achromatic; #2f6bff is focus and status only, never decoration
+     - hover never changes layout: transform / opacity / colour only
+     - one easing for entering rest (--ease-out), one for leaving (--ease-in)
+     - three durations only: press 120 / swap 160 / reveal 240, plus the
+       observed 400 for the card tilt and 300 for shadow
+     - every effect has a prefers-reduced-motion path
+   ============================================================ */
+:root{
+  /* observed, copied verbatim from src/styles.css */
+  --color-paper:#ffffff;
+  --color-ink:#111111;
+  --color-muted:#8a8a8a;
+  --color-hairline:#e6e6e6;
+  --color-placeholder:#eeeeee;
+  --color-chip:#f2f2f2;
+  --color-accent:#2f6bff;
+  --font-sans:"Manrope", system-ui, sans-serif;
+  --font-mono:"IBM Plex Mono", ui-monospace, monospace;
+  --page-padding:24px;
+  --page-width:1436px;
+
+  /* NEW — motion tokens. Durations: the two observed values plus a ladder
+     underneath them, so nothing on the page moves at an undeclared speed. */
+  --dur-press:120ms;   /* pointer-down compression, must feel mechanical */
+  --dur-swap:160ms;    /* colour/state swap: chips, rows, icons */
+  --dur-reveal:240ms;  /* content arriving: scrims, captions, crossfades */
+  --dur-shadow:300ms;  /* observed — .location-widget */
+  --dur-card:400ms;    /* observed — .tilt transform + shadow */
+
+  /* Easings. --ease-out is the observed tilt curve; --ease-in is its mirror
+     for anything leaving; --ease-swap for symmetric colour changes. */
+  --ease-out:cubic-bezier(.22,1,.36,1);
+  --ease-in:cubic-bezier(.55,0,.68,.19);
+  --ease-swap:cubic-bezier(.4,0,.2,1);
+
+  /* Distance + scale ladder. 9deg is observed (cardTilt MAX_DEG). */
+  --lift-1:1px;        /* icon / inline mark */
+  --lift-2:2px;        /* pill, ticker note */
+  --lift-4:4px;        /* caption rise */
+  --lift-8:8px;        /* scrim caption travel */
+  --press:.97;         /* control compression */
+  --grow:1.04;         /* media inside a fixed box */
+  --tilt-deg:9deg;
+
+  /* Shadow ladder — both rungs are observed values, rest is 0. */
+  --shadow-1:0 12px 28px rgb(17 17 17 / 16%);
+  --shadow-2:0 22px 48px rgb(17 17 17 / 22%);
+
+  /* Interaction greys derived one step off the observed chip/hairline. */
+  --chip-hover:#eaeaea;
+  --row-hover:#fafafa;
+
+  --radius-card:12px;
+  --radius-control:10px;
+  --radius-pill:999px;
+}
+*{box-sizing:border-box;}
+html{min-width:320px; background:var(--color-paper); -webkit-text-size-adjust:100%;}
+body{
+  margin:0; min-width:320px;
+  background:var(--color-paper); color:var(--color-ink);
+  font-family:var(--font-sans); font-weight:500;
+  font-synthesis:none; text-rendering:optimizeLegibility; -webkit-font-smoothing:antialiased;
+}
+button,a{color:inherit; font:inherit;}
+button{border:0; background:none;}
+button:focus-visible,a:focus-visible,[tabindex]:focus-visible{
+  outline:2px solid var(--color-accent); outline-offset:3px;   /* observed */
+}
+.shell{width:100%; max-width:var(--page-width); margin-inline:auto; padding-inline:var(--page-padding);}
+
+/* ---------- documentation chrome ---------- */
+.mono{font-family:var(--font-mono); font-size:12px; font-weight:500; letter-spacing:.12em; text-transform:uppercase; color:var(--color-muted);}
+.mono--tight{letter-spacing:.04em;}
+.mast{padding-block:56px 32px;}
+.mast h1{margin:0 0 16px; font-size:38px; font-weight:800; letter-spacing:-.03em; line-height:44px;}
+.mast p{margin:0; max-width:78ch; color:var(--color-muted); font-size:15px; font-weight:500; line-height:24px;}
+.mast p + p{margin-top:12px;}
+.mast strong{color:var(--color-ink); font-weight:600;}
+.mast code,.spec code,.note code{font-family:var(--font-mono); font-size:.92em; color:var(--color-ink);}
+
+.tokens{border-top:1px solid var(--color-hairline); padding-block:32px 40px;}
+.tokens h2{margin:0 0 24px; font-size:20px; font-weight:800; letter-spacing:-.02em;}
+.tokens__grid{display:grid; gap:24px; grid-template-columns:repeat(auto-fit,minmax(240px,1fr));}
+.tokens dl{margin:0; display:grid; gap:8px;}
+.tokens dt{font-family:var(--font-mono); font-size:11px; letter-spacing:.04em; color:var(--color-muted); text-transform:uppercase;}
+.tokens dd{margin:0; display:flex; align-items:baseline; gap:8px; font-size:13px; font-weight:600;}
+.tokens dd span{font-family:var(--font-mono); font-size:11px; font-weight:400; color:var(--color-muted); letter-spacing:.02em;}
+.swatch{inline-size:14px; block-size:14px; border:1px solid var(--color-hairline); border-radius:3px; flex:0 0 auto;}
+.tag{
+  display:inline-flex; align-items:center; height:22px; padding-inline:8px;
+  border-radius:var(--radius-pill); background:var(--color-chip);
+  font-family:var(--font-mono); font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--color-muted);
+}
+.tag--obs{background:var(--color-ink); color:var(--color-paper);}
+
+/* demo plate */
+.demos{display:grid; gap:20px; padding-bottom:64px;}
+.demo{border:1px solid var(--color-hairline); border-radius:var(--radius-card); overflow:clip; background:var(--color-paper);}
+.demo__head{display:flex; flex-wrap:wrap; align-items:baseline; gap:8px 14px; padding:16px 20px; border-bottom:1px solid var(--color-hairline);}
+.demo__idx{font-family:var(--font-mono); font-size:11px; letter-spacing:.06em; color:var(--color-muted);}
+.demo__name{margin:0; font-size:16px; font-weight:700; letter-spacing:-.01em;}
+.demo__where{flex:1 1 240px; font-family:var(--font-mono); font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--color-muted);}
+.demo__body{display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:0;}
+.demo__stage{padding:32px; display:flex; flex-wrap:wrap; align-items:center; gap:20px; min-width:0; background:var(--color-paper);}
+.demo__stage--tint{background:linear-gradient(180deg,#ffffff 0%, #f7f7f7 100%);}
+.demo__meta{border-left:1px solid var(--color-hairline); padding:24px; display:grid; gap:14px; align-content:start; background:var(--color-paper);}
+.demo__note{margin:0; font-size:13px; font-weight:500; line-height:21px; color:var(--color-muted);}
+.demo__note b{color:var(--color-ink); font-weight:600;}
+.spec{margin:0; display:grid; gap:6px;}
+.spec div{display:grid; grid-template-columns:74px minmax(0,1fr); gap:10px; align-items:baseline;}
+.spec dt{font-family:var(--font-mono); font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--color-muted);}
+.spec dd{margin:0; font-family:var(--font-mono); font-size:11px; line-height:16px; color:var(--color-ink);}
+details.code{border-top:1px solid var(--color-hairline); padding-top:12px;}
+details.code summary{
+  font-family:var(--font-mono); font-size:10px; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--color-muted); cursor:pointer;
+}
+details.code summary:hover{color:var(--color-ink);}
+details.code pre{
+  margin:10px 0 0; padding:12px; overflow:auto; max-height:280px;
+  background:#fafafa; border:1px solid var(--color-hairline); border-radius:var(--radius-control);
+  font-family:var(--font-mono); font-size:11px; line-height:17px; color:#333;
+}
+@media (max-width:1023px){ .demo__body{grid-template-columns:minmax(0,1fr);} .demo__meta{border-left:0; border-top:1px solid var(--color-hairline);} }
+
+.adopt{border-top:1px solid var(--color-hairline); padding-block:40px 72px;}
+.adopt h2{margin:0 0 20px; font-size:20px; font-weight:800; letter-spacing:-.02em;}
+.adopt ol{margin:0; padding-left:20px; display:grid; gap:10px; max-width:90ch;}
+.adopt li{font-size:14px; line-height:22px; color:var(--color-muted);}
+.adopt li b{color:var(--color-ink); font-weight:600;}
+
+/* ============================================================
+   01 · CARD TILT + SHEEN — as built today (styles.css 234-276)
+   ============================================================ */
+.tilt{
+  position:relative;
+  transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));
+  transform-style:preserve-3d;
+  transition:transform var(--dur-card) var(--ease-out), box-shadow var(--dur-card) ease;
+  will-change:transform;
+}
+.tilt:hover{box-shadow:var(--shadow-2);}
+.tilt::after{
+  content:""; position:absolute; inset:0; z-index:2; border-radius:inherit;
+  background:radial-gradient(280px circle at var(--mx,50%) var(--my,50%), rgb(255 255 255 / 32%), transparent 46%);
+  opacity:0; transition:opacity var(--dur-shadow) ease; pointer-events:none;
+}
+.tilt:hover::after{opacity:1;}
+
+.project-card{
+  position:relative; display:block; width:100%; padding:0; overflow:hidden;
+  border-radius:var(--radius-card); background:var(--color-placeholder);
+  cursor:pointer; text-align:inherit; -webkit-appearance:none; appearance:none;
+}
+.project-card__image{display:block; width:100%; height:100%; object-fit:cover;}
+.demo-card{width:300px; aspect-ratio:1200/849;}
+
+/* ============================================================
+   02 · FILTER PILL — press + swap  (adds motion to .filter)
+   ============================================================ */
+.filter-bar{
+  display:flex; height:70px; align-items:center; justify-content:space-between; gap:16px;
+  padding-block:16px; background:var(--color-paper);
+}
+.filters{display:flex; min-width:0; align-items:center; gap:8px; overflow-x:auto; scrollbar-width:none;}
+.filters::-webkit-scrollbar{display:none;}
+.filter-logo{width:24px; height:24px; flex:0 0 24px; border:5px solid var(--color-ink); border-radius:50%;}
+.filter{
+  display:inline-flex; height:38px; flex:0 0 auto; align-items:center; justify-content:center;
+  border-radius:var(--radius-pill); background:var(--color-chip); color:var(--color-ink);
+  cursor:pointer; font-size:14px; font-weight:500; line-height:18px; padding-inline:18px;
+  /* NEW: identity transform declared up front so :active never creates a new
+     stacking context mid-press */
+  scale:1;
+  transition:
+    background-color var(--dur-swap) var(--ease-swap),
+    color var(--dur-swap) var(--ease-swap),
+    scale var(--dur-press) var(--ease-out);
+}
+.filter:hover{background:var(--chip-hover);}
+.filter:active{scale:var(--press);}
+.filter[data-active="true"]{background:var(--color-ink); color:var(--color-paper);}
+.filter[data-active="true"]:hover{background:#000000;}
+
+/* ============================================================
+   03 · FRESHNESS DOT — status pulse on data change
+   ============================================================ */
+.freshness{
+  display:flex; flex:0 0 auto; align-items:center; gap:8px;
+  color:var(--color-muted); font-size:14px; font-weight:500; line-height:18px; white-space:nowrap;
+}
+.freshness__dot{position:relative; width:7px; height:7px; flex:0 0 7px; border-radius:50%; background:var(--color-accent);}
+.freshness__dot::after{
+  content:""; position:absolute; inset:-4px; border-radius:50%;
+  border:1px solid var(--color-accent); opacity:0; scale:.6;
+}
+.freshness[data-pulse="true"] .freshness__dot::after{animation:halo 620ms var(--ease-out) 1;}
+.freshness[data-pulse="true"] .freshness__dot{animation:beat 620ms var(--ease-out) 1;}
+@keyframes halo{ from{opacity:.9; scale:.6;} to{opacity:0; scale:2.4;} }
+@keyframes beat{ 0%{scale:1;} 35%{scale:1.5;} 100%{scale:1;} }
+.freshness__label{position:relative; display:inline-grid;}
+.freshness__label span{grid-area:1/1; transition:opacity var(--dur-reveal) var(--ease-swap), translate var(--dur-reveal) var(--ease-out);}
+.freshness__label span[data-state="stale"]{opacity:1; translate:0 0;}
+.freshness__label span[data-state="fresh"]{opacity:0; translate:0 var(--lift-4);}
+.freshness[data-fresh="true"] span[data-state="stale"]{opacity:0; translate:0 calc(-1 * var(--lift-4));}
+.freshness[data-fresh="true"] span[data-state="fresh"]{opacity:1; translate:0 0;}
+
+/* ============================================================
+   04 · SOCIAL MARKS — ink lift  (adds motion to .social-marks a)
+   ============================================================ */
+.social-marks{display:flex; height:20px; align-items:center; gap:11px;}
+.social-marks a{
+  display:block; width:20px; height:20px; position:relative;
+  translate:0 0; transition:translate var(--dur-swap) var(--ease-out);
+}
+.social-marks svg{display:block; width:20px; height:20px; fill:var(--color-muted); transition:fill var(--dur-swap) var(--ease-swap);}
+.social-marks a:hover,.social-marks a:focus-visible{translate:0 calc(-1 * var(--lift-1));}
+.social-marks a:hover svg,.social-marks a:focus-visible svg{fill:var(--color-ink);}
+.social-marks a::after{
+  content:""; position:absolute; left:0; right:0; bottom:-4px; height:1px;
+  background:var(--color-ink); scale:0 1; transform-origin:left center;
+  transition:scale var(--dur-swap) var(--ease-out);
+}
+.social-marks a:hover::after,.social-marks a:focus-visible::after{scale:1 1;}
+
+/* ============================================================
+   05 · MUSIC WIDGET — cover grow + label crossfade
+   ============================================================ */
+.mini-widget{
+  display:flex; width:134px; height:134px; flex-direction:column; justify-content:space-between;
+  padding:14px; overflow:hidden; border-radius:22px;
+}
+.mini-widget--music{background:#191414; color:#ffffff; cursor:pointer; text-decoration:none;}
+.mini-widget__label{
+  display:flex; align-items:center; gap:7px; color:#b3b3b3;
+  font-size:8px; font-weight:600; letter-spacing:.04em; line-height:10px; text-transform:uppercase; white-space:nowrap;
+}
+.mini-widget__label--swap{display:inline-grid;}
+.mini-widget__label--swap span{grid-area:1/1; transition:opacity var(--dur-reveal) var(--ease-swap), translate var(--dur-reveal) var(--ease-out);}
+.mini-widget__label--swap span[data-state="open"]{opacity:0; translate:0 var(--lift-4); color:#ffffff;}
+.mini-widget--music:hover .mini-widget__label--swap span[data-state="idle"],
+.mini-widget--music:focus-visible .mini-widget__label--swap span[data-state="idle"]{opacity:0; translate:0 calc(-1 * var(--lift-4));}
+.mini-widget--music:hover .mini-widget__label--swap span[data-state="open"],
+.mini-widget--music:focus-visible .mini-widget__label--swap span[data-state="open"]{opacity:1; translate:0 0;}
+.spotify-mark{width:16px; height:16px; flex:0 0 16px; border-radius:50%; background:#1db954; transition:scale var(--dur-swap) var(--ease-out); scale:1;}
+.mini-widget--music:hover .spotify-mark{scale:1.15;}
+.mini-widget__media{display:flex; align-items:flex-end; gap:10px;}
+.album-cover{
+  width:44px; height:44px; flex:0 0 44px; border-radius:6px;
+  background:linear-gradient(135deg,#e14683,#d6a04b); object-fit:cover;
+  scale:1; transition:scale var(--dur-reveal) var(--ease-out);
+}
+.mini-widget--music:hover .album-cover,.mini-widget--music:focus-visible .album-cover{scale:var(--grow);}
+.mini-widget__media div{display:flex; min-width:0; flex-direction:column; gap:1px;}
+.mini-widget__media strong{display:block; font-size:13px; font-weight:700; line-height:16px;}
+.mini-widget__media span:last-child{display:block; color:#b3b3b3; font-size:11px; font-weight:500; line-height:14px;}
+
+/* ============================================================
+   06 · PROJECT CARD CAPTION — scrim + staggered lines
+   ============================================================ */
+.card-cap{
+  position:absolute; z-index:3; inset:auto 0 0 0; padding:14px 16px;
+  display:grid; gap:2px; pointer-events:none;
+  background:linear-gradient(to top, rgb(17 17 17 / 72%), rgb(17 17 17 / 0%));
+  opacity:0; transition:opacity var(--dur-reveal) var(--ease-swap);
+}
+.card-cap strong,.card-cap span{
+  color:#ffffff; translate:0 var(--lift-8);
+  transition:translate var(--dur-reveal) var(--ease-out), opacity var(--dur-reveal) var(--ease-swap);
+  opacity:0;
+}
+.card-cap strong{font-size:15px; font-weight:700; letter-spacing:-.01em;}
+.card-cap span{font-family:var(--font-mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:rgb(255 255 255 / 72%);}
+.card-cap span{transition-delay:40ms;}                 /* the only stagger in the system */
+.project-card:hover .card-cap,.project-card:focus-visible .card-cap{opacity:1;}
+.project-card:hover .card-cap strong,.project-card:focus-visible .card-cap strong,
+.project-card:hover .card-cap span,.project-card:focus-visible .card-cap span{translate:0 0; opacity:1;}
+
+/* ============================================================
+   07 · CARD → DETAIL — same-document view transition
+   ============================================================ */
+.vt-grid{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; width:100%; max-width:620px;}
+.vt-card{aspect-ratio:1200/849;}
+.vt-detail{
+  display:grid; grid-template-columns:minmax(0,1fr) 260px;
+  width:100%; border:1px solid var(--color-hairline); border-radius:var(--radius-card); overflow:clip;
+}
+.vt-detail[hidden]{display:none;}
+.vt-detail__stage{display:grid; place-items:center; padding:24px; background:linear-gradient(180deg,#ffffff 0%,#ededed 100%);}
+.vt-detail__stage img{display:block; max-width:100%; max-height:260px; border-radius:var(--radius-card); object-fit:contain;}
+.vt-detail__panel{border-left:1px solid var(--color-hairline); padding:20px; display:grid; gap:12px; align-content:start;}
+.vt-detail__panel h3{margin:0; font-size:20px; font-weight:800; letter-spacing:-.02em; outline:none;}
+.vt-detail__panel p{margin:0; color:var(--color-muted); font-size:13px; line-height:20px;}
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; height:40px; padding-inline:18px;
+  border:1px solid var(--color-hairline); border-radius:var(--radius-control);
+  background:var(--color-paper); color:var(--color-ink); cursor:pointer;
+  font-size:14px; font-weight:600; scale:1;
+  transition:border-color var(--dur-swap) var(--ease-swap), background-color var(--dur-swap) var(--ease-swap), scale var(--dur-press) var(--ease-out);
+}
+.btn:hover{border-color:var(--color-muted); background:#fafafa;}
+.btn:active{scale:var(--press);}
+.btn--solid{background:var(--color-ink); color:var(--color-paper); border-color:var(--color-ink);}
+.btn--solid:hover{background:#000000; border-color:#000000;}
+::view-transition-old(project-media),::view-transition-new(project-media){height:100%;}
+::view-transition-group(project-media){animation-duration:var(--dur-card); animation-timing-function:var(--ease-out);}
+
+/* ============================================================
+   08 · RECEIPT ROW — quiet row response
+   ============================================================ */
+.receipt-list{margin:0; padding:0; list-style:none; width:100%;}
+.receipt-list li{
+  position:relative; display:grid; grid-template-columns:56px minmax(0,1fr) 240px;
+  align-items:flex-start; gap:32px; border-top:1px solid var(--color-hairline); padding:22px 40px 22px 12px;
+  background:var(--color-paper);
+  transition:background-color var(--dur-swap) var(--ease-swap);
+}
+.receipt-list li:last-child{border-bottom:1px solid var(--color-hairline);}
+.receipt-list li:hover{background:var(--row-hover);}
+.receipt-list__index{color:var(--color-muted); font-family:var(--font-mono); font-size:12px; letter-spacing:.04em; line-height:30px; transition:color var(--dur-swap) var(--ease-swap);}
+.receipt-list li:hover .receipt-list__index{color:var(--color-ink);}
+.receipt-list blockquote{margin:0; font-size:20px; font-weight:600; letter-spacing:-.02em; line-height:28px;}
+.receipt-list__credit{display:flex; flex-direction:column; gap:3px;}
+.receipt-list__credit strong{font-size:14px; font-weight:600; line-height:20px;}
+.receipt-list__credit span{color:var(--color-muted); font-family:var(--font-mono); font-size:11px; letter-spacing:.04em; line-height:16px; text-transform:uppercase;}
+.receipt-list__more{
+  position:absolute; top:24px; right:12px; font-family:var(--font-mono); font-size:12px; color:var(--color-muted);
+  opacity:0; translate:calc(-1 * var(--lift-4)) 0;
+  transition:opacity var(--dur-swap) var(--ease-swap), translate var(--dur-swap) var(--ease-out);
+}
+.receipt-list li:hover .receipt-list__more{opacity:1; translate:0 0;}
+
+/* ============================================================
+   09 · TICKER DRIFT — accumulator marquee, hover brakes
+   ============================================================ */
+.ticker{display:flex; gap:12px; overflow-x:auto; width:100%; padding-block:4px; scrollbar-width:none;}
+.ticker::-webkit-scrollbar{display:none;}
+.ticker__note{
+  display:flex; flex:0 0 auto; align-items:center; gap:10px;
+  border-radius:var(--radius-pill); background:var(--color-chip); padding:12px 18px;
+  translate:0 0; scale:1;
+  transition:translate var(--dur-swap) var(--ease-out), box-shadow var(--dur-shadow) ease, background-color var(--dur-swap) var(--ease-swap);
+}
+.ticker__note:hover{translate:0 calc(-1 * var(--lift-2)); box-shadow:var(--shadow-1); background:var(--chip-hover);}
+.ticker__avatar{
+  display:flex; width:24px; height:24px; flex:0 0 24px; align-items:center; justify-content:center;
+  border-radius:50%; background:#d8d8d8; color:var(--color-muted); font-family:var(--font-mono); font-size:9px; line-height:12px;
+}
+.ticker__note strong{font-size:14px; font-weight:500; line-height:18px;}
+.ticker__note > span:last-child{color:var(--color-muted); font-size:13px; font-weight:500; line-height:16px;}
+
+/* ============================================================
+   10 · FILTER BAR CONDENSE — scroll-driven
+   One registered property carries the progress, so the native path and the
+   Firefox fallback share *identical* declarations — only the source of
+   --condense differs (scroll timeline vs. scroll listener). Animating the
+   individual properties instead needs one keyframe per element, and a
+   keyframe on an in-flow child never resolved its timeline in Chrome.
+   ============================================================ */
+@property --condense{ syntax:"<number>"; inherits:true; initial-value:0; }
+.scroller{
+  position:relative; width:100%; height:300px; overflow-y:auto;
+  border:1px solid var(--color-hairline); border-radius:var(--radius-card); background:var(--color-paper);
+}
+.scroller__bar{
+  position:sticky; z-index:10; top:0;
+  display:flex; align-items:center; justify-content:space-between; gap:16px;
+  padding-inline:20px;
+  background:rgb(255 255 255 / 92%); backdrop-filter:blur(6px);
+  height:calc(70px - 12px * var(--condense));
+  border-bottom:1px solid color-mix(in oklab, var(--color-hairline) calc(var(--condense) * 100%), transparent);
+}
+.scroller__bar .filter-logo{scale:calc(1 - .22 * var(--condense)); transition:none;}
+@keyframes condense{ to{ --condense:1; } }
+@supports ((animation-timeline:scroll()) and (animation-range:0% 100%)){
+  .scroller__bar{
+    animation:condense auto linear both;
+    animation-timeline:scroll(nearest);
+    animation-range:0px 120px;
+  }
+}
+.scroller__fill{padding:20px; display:grid; gap:12px;}
+.scroller__fill div{height:96px; border-radius:var(--radius-card); background:var(--color-placeholder);}
+
+/* ============================================================
+   REDUCED MOTION — one block, every demo accounted for
+   ============================================================ */
+@media (prefers-reduced-motion: reduce){
+  .tilt{transform:none; transition:none;}
+  .tilt::after{display:none;}
+  .filter,.btn,.social-marks a,.social-marks a::after,.social-marks svg,
+  .album-cover,.spotify-mark,.card-cap,.card-cap strong,.card-cap span,
+  .receipt-list li,.receipt-list__index,.receipt-list__more,
+  .ticker__note,.freshness__label span,.mini-widget__label--swap span{
+    transition-duration:1ms !important; transition-delay:0ms !important;
+  }
+  .filter:active,.btn:active{scale:1;}
+  .album-cover,.spotify-mark{scale:1 !important;}
+  .freshness[data-pulse="true"] .freshness__dot,
+  .freshness[data-pulse="true"] .freshness__dot::after{animation:none;}
+  .scroller__bar{animation:none;}
+  html{scroll-behavior:auto;}
+}
+</style>
+</head>
+<body>
+
+<header class="mast shell">
+  <p class="mono">Motion/Hairline — micro-interaction system · davidlafond.xyz as built 19 Aug 2026</p>
+  <h1>Ten micro-interactions for the portfolio, on its own components</h1>
+  <p>Every specimen below is the <strong>live site's own markup, palette and copy</strong> — the same
+    <code>.project-card.tilt</code> buttons, <code>.filter</code> pills, receipts, ticker notes and Spotify
+    widget that <code>src/App.tsx</code> renders today. Nothing here introduces a colour, radius or font the
+    site does not already ship.</p>
+  <p>The site currently declares motion in exactly two places: <code>.tilt</code>
+    (<code>400ms cubic-bezier(.22,1,.36,1)</code> plus a 280px pointer sheen) and
+    <code>.location-widget</code> (<code>300ms</code> shadow). Everything else — pills, rows, icons, the
+    detail overlay — changes state <strong>instantly</strong>. These ten demos fill that gap using a token
+    ledger derived from those two observed values, so the additions read as the same hand.</p>
+</header>
+
+<section class="tokens shell" aria-labelledby="tok">
+  <h2 id="tok">Token ledger</h2>
+  <div class="tokens__grid">
+    <dl>
+      <dt>Duration</dt>
+      <dd>120ms <span>--dur-press · pointer-down compression</span></dd>
+      <dd>160ms <span>--dur-swap · colour + state</span></dd>
+      <dd>240ms <span>--dur-reveal · content arriving</span></dd>
+      <dd>300ms <span class="tag tag--obs">observed</span> <span>--dur-shadow</span></dd>
+      <dd>400ms <span class="tag tag--obs">observed</span> <span>--dur-card · tilt</span></dd>
+    </dl>
+    <dl>
+      <dt>Easing</dt>
+      <dd>cubic-bezier(.22,1,.36,1) <span class="tag tag--obs">observed</span></dd>
+      <dd><span>--ease-out · anything settling into rest</span></dd>
+      <dd>cubic-bezier(.55,0,.68,.19) <span>--ease-in · anything leaving</span></dd>
+      <dd>cubic-bezier(.4,0,.2,1) <span>--ease-swap · symmetric colour swap</span></dd>
+      <dd>linear <span>drift only (ticker)</span></dd>
+    </dl>
+    <dl>
+      <dt>Distance / scale</dt>
+      <dd>1px <span>--lift-1 · inline mark</span></dd>
+      <dd>2px <span>--lift-2 · pill, ticker note</span></dd>
+      <dd>4px / 8px <span>--lift-4 / --lift-8 · captions</span></dd>
+      <dd>0.97 <span>--press · control compression</span></dd>
+      <dd>1.04 <span>--grow · media in a fixed box</span></dd>
+      <dd>9deg <span class="tag tag--obs">observed</span> <span>--tilt-deg · cardTilt MAX_DEG</span></dd>
+    </dl>
+    <dl>
+      <dt>Elevation</dt>
+      <dd>none <span>rest — the site is hairline-first</span></dd>
+      <dd>0 12px 28px / 16% <span class="tag tag--obs">observed</span> <span>--shadow-1</span></dd>
+      <dd>0 22px 48px / 22% <span class="tag tag--obs">observed</span> <span>--shadow-2 · card hover</span></dd>
+    </dl>
+    <dl>
+      <dt>Interaction greys</dt>
+      <dd><span class="swatch" style="background:#f2f2f2"></span>#F2F2F2 <span class="tag tag--obs">observed</span> <span>chip rest</span></dd>
+      <dd><span class="swatch" style="background:#eaeaea"></span>#EAEAEA <span>--chip-hover · one step darker</span></dd>
+      <dd><span class="swatch" style="background:#fafafa"></span>#FAFAFA <span>--row-hover · list rows</span></dd>
+      <dd><span class="swatch" style="background:#2f6bff"></span>#2F6BFF <span class="tag tag--obs">observed</span> <span>focus ring + status only</span></dd>
+    </dl>
+    <dl>
+      <dt>Invariants</dt>
+      <dd>No layout shift <span>hover animates transform / opacity / colour only</span></dd>
+      <dd>One stagger <span>40ms, caption second line only</span></dd>
+      <dd>Focus = hover <span>every :hover rule also matches :focus-visible</span></dd>
+      <dd>Reduced motion <span>one @media block, all ten demos</span></dd>
+    </dl>
+  </div>
+</section>
+
+<main class="demos shell">
+
+  <!-- 01 -->
+  <article class="demo">
+    <header class="demo__head">
+      <span class="demo__idx">01</span>
+      <h2 class="demo__name">Card tilt + sheen</h2>
+      <span class="demo__where">As built · styles.css .tilt + cardTilt.ts · baseline for everything else</span>
+    </header>
+    <div class="demo__body">
+      <div class="demo__stage demo__stage--tint">
+        <button class="project-card tilt demo-card" type="button" aria-label="Harvard + MIT Acceptance Portfolio, Print — open project details">
+          <img class="project-card__image" src="/images/harvard-mit-portfolio-hero.webp" alt="" decoding="async">
+        </button>
+        <div>
+          <p class="mono mono--tight">Live values</p>
+          <p class="demo__note" style="max-width:34ch">Rotation is capped at <b>9°</b>, written as <code>--rx/--ry</code>
+            by a rAF-throttled <code>pointermove</code>; the sheen is a 280px radial gradient at
+            <code>--mx/--my</code>. This is the one interaction the site already has, so it sets the
+            vocabulary: pointer-tracked, 400ms to rest, shadow as the only elevation cue.</p>
+        </div>
+      </div>
+      <div class="demo__meta">
+        <dl class="spec">
+          <div><dt>Trigger</dt><dd>pointermove / pointerleave</dd></div>
+          <div><dt>Property</dt><dd>transform, box-shadow, sheen opacity</dd></div>
+          <div><dt>Duration</dt><dd>400ms transform · 300ms sheen</dd></div>
+          <div><dt>Easing</dt><dd>--ease-out (transform) · ease (shadow)</dd></div>
+          <div><dt>Reduced</dt><dd>transform:none, sheen removed</dd></div>
+        </dl>
+        <p class="demo__note">Unchanged — documented here so the other nine read against it. <b>Do not add a
+          second card motion;</b> compose inside this one (see 06).</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- 02 -->
+  <article class="demo">
+    <header class="demo__head">
+      <span class="demo__idx">02</span>
+      <h2 class="demo__name">Filter pill — press &amp; swap</h2>
+      <span class="demo__where">Adds motion to .filter · today the ink fill snaps with no feedback</span>
+    </header>
+    <div class="demo__body">
+      <div class="demo__stage">
+        <div class="filter-bar" style="width:100%">
+          <div class="filters" aria-label="Filter projects" id="demo-filters">
+            <span class="filter-logo" aria-hidden="true"></span>
+            <button class="filter" data-active="true" aria-pressed="true" type="button">All</button>
+            <button class="filter" data-active="false" aria-pressed="false" type="button">Product</button>
+            <button class="filter" data-active="false" aria-pressed="false" type="button">Web</button>
+            <button class="filter" data-active="false" aria-pressed="false" type="button">Mobile</button>
+            <button class="filter" data-active="false" aria-pressed="false" type="button">Motion</button>
+            <button class="filter" data-active="false" aria-pressed="false" type="button">Illustration</button>
+            <button class="filter" data-active="false" aria-pressed="false" type="button">3D</button>
+            <button class="filter" data-active="false" aria-pressed="false" type="button">Print</button>
+          </div>
+        </div>
+      </div>
+      <div class="demo__meta">
+        <dl class="spec">
+          <div><dt>Trigger</dt><dd>:hover · :active · [data-active]</dd></div>
+          <div><dt>Property</dt><dd>background-color, color, scale</dd></div>
+          <div><dt>Duration</dt><dd>160ms swap · 120ms press</dd></div>
+          <div><dt>Easing</dt><dd>--ease-swap · --ease-out (press)</dd></div>
+          <div><dt>Reduced</dt><dd>1ms swap, no compression</dd></div>
+        </dl>
+        <p class="demo__note">Weight stays 500 in both states, so the pill never re-measures — the row cannot
+          reflow while you scan it. <b>Press compression is the only mechanical cue</b> in the system; it is
+          reserved for controls that commit something.</p>
+        <details class="code">
+          <summary>Paste into src/styles.css</summary>
+<pre>.filter{
+  scale: 1;                       /* identity first — no stacking-context jump */
+  transition:
+    background-color var(--dur-swap) var(--ease-swap),
+    color            var(--dur-swap) var(--ease-swap),
+    scale            var(--dur-press) var(--ease-out);
+}
+.filter:hover{ background: var(--chip-hover); }
+.filter:active{ scale: var(--press); }
+.filter[data-active="true"]:hover{ background: #000; }</pre>
+        </details>
+      </div>
+    </div>
+  </article>
+
+  <!-- 03 -->
+  <article class="demo">
+    <header class="demo__head">
+      <span class="demo__idx">03</span>
+      <h2 class="demo__name">Freshness dot — status pulse</h2>
+      <span class="demo__where">Adds motion to .freshness · the accent dot is the site's only status colour</span>
+    </header>
+    <div class="demo__body">
+      <div class="demo__stage">
+        <div class="freshness" id="demo-freshness" data-fresh="false" aria-live="polite" aria-label="Portfolio status">
+          <span class="freshness__dot" aria-hidden="true"></span>
+          <span class="freshness__label">
+            <span data-state="stale">Last updated three months ago</span>
+            <span data-state="fresh">Updated just now</span>
+          </span>
+        </div>
+        <button class="btn" type="button" id="demo-refresh">Simulate data refresh</button>
+      </div>
+      <div class="demo__meta">
+        <dl class="spec">
+          <div><dt>Trigger</dt><dd>data arrival (not hover)</dd></div>
+          <div><dt>Property</dt><dd>scale + halo opacity · label crossfade</dd></div>
+          <div><dt>Duration</dt><dd>620ms pulse, once · 240ms label</dd></div>
+          <div><dt>Easing</dt><dd>--ease-out</dd></div>
+          <div><dt>Reduced</dt><dd>no pulse; label swaps at 1ms</dd></div>
+        </dl>
+        <p class="demo__note">The only <b>un-triggered</b> motion in the system, and it fires once per data
+          change — never a loop. The label crossfades in place inside an <code>inline-grid</code>, so the
+          sticky bar's width never jumps between “three months ago” and “just now”.</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- 04 -->
+  <article class="demo">
+    <header class="demo__head">
+      <span class="demo__idx">04</span>
+      <h2 class="demo__name">Social marks — ink lift</h2>
+      <span class="demo__where">Adds motion to .social-marks a · today the 20px marks have no hover at all</span>
+    </header>
+    <div class="demo__body">
+      <div class="demo__stage">
+        <nav aria-label="Social profiles" class="social-marks">
+          <a aria-label="LinkedIn" href="https://www.linkedin.com/in/davidlafondx/" target="_blank" rel="noopener noreferrer">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5.2 8.6h3.2V19H5.2V8.6Zm1.5-5.1a1.9 1.9 0 1 1 0 3.8 1.9 1.9 0 0 1 0-3.8ZM10.3 8.6h3v1.5h.1c.4-.8 1.5-1.9 3.5-1.9 3.3 0 3.9 2.2 3.9 5.1V19h-3.2v-5.1c0-1.2 0-2.8-1.7-2.8s-2 1.3-2 2.7V19h-3.2V8.6Z"/></svg>
+          </a>
+          <a aria-label="X" href="https://x.com/davidlafondx" target="_blank" rel="noopener noreferrer">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M18.2 3H21l-6.1 7 7.1 11h-5.6L12 14.2 6 21H3.2l7.5-8.6L3.8 3h5.7l4 6.2L18.2 3Zm-1 16.1h1.5L8.6 4.8H7L17.2 19Z"/></svg>
+          </a>
+          <a aria-label="GitHub" href="https://github.com/davedoodz" target="_blank" rel="noopener noreferrer">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-1.9c-2.8.6-3.4-1.2-3.4-1.2-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 0 1.6 1 1.6 1 .9 1.6 2.4 1.1 2.9.9.1-.7.4-1.1.7-1.4-2.2-.3-4.6-1.1-4.6-5A3.9 3.9 0 0 1 6.7 8c-.1-.3-.4-1.3.1-2.7 0 0 .9-.3 2.8 1.1a9.6 9.6 0 0 1 5.1 0c2-1.4 2.8-1.1 2.8-1.1.6 1.4.2 2.4.1 2.7a3.9 3.9 0 0 1 1.1 3c0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.8V21c0 .3.2.6.7.5A10 10 0 0 0 12 2Z"/></svg>
+          </a>
+        </nav>
+        <p class="demo__note" style="max-width:36ch">Rest fill drops to <code>--color-muted</code> so the lift
+          has somewhere to go: fill to ink, 1px rise, and a 1px rule that grows from the left edge.</p>
+      </div>
+      <div class="demo__meta">
+        <dl class="spec">
+          <div><dt>Trigger</dt><dd>:hover and :focus-visible (identical)</dd></div>
+          <div><dt>Property</dt><dd>fill, translate, ::after scale-x</dd></div>
+          <div><dt>Duration</dt><dd>160ms</dd></div>
+          <div><dt>Easing</dt><dd>--ease-out · --ease-swap (fill)</dd></div>
+          <div><dt>Reduced</dt><dd>colour swap only, no rise or rule</dd></div>
+        </dl>
+        <p class="demo__note">Keyboard parity is not optional here: these are the only outbound links in the
+          hero, so <b>the focus state must show the same affordance</b> the pointer gets.</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- 05 -->
+  <article class="demo">
+    <header class="demo__head">
+      <span class="demo__idx">05</span>
+      <h2 class="demo__name">Music widget — intent reveal</h2>
+      <span class="demo__where">Adds motion to .mini-widget--music · it is a link but never says so</span>
+    </header>
+    <div class="demo__body">
+      <div class="demo__stage demo__stage--tint">
+        <a class="mini-widget mini-widget--music tilt" href="https://open.spotify.com/" target="_blank" rel="noopener noreferrer"
+           aria-label="Play “Midnight City” by M83 on Spotify">
+          <span class="mini-widget__label">
+            <span class="spotify-mark" aria-hidden="true"></span>
+            <span class="mini-widget__label--swap">
+              <span data-state="idle">Recently played</span>
+              <span data-state="open">Open in Spotify ↗</span>
+            </span>
+          </span>
+          <span class="mini-widget__media">
+            <span class="album-cover" aria-hidden="true"></span>
+            <span>
+              <strong>Midnight City</strong>
+              <span>M83</span>
+            </span>
+          </span>
+        </a>
+        <p class="demo__note" style="max-width:34ch">The card already tilts. The new layer is
+          <b>intent</b>: the kicker crossfades from “Recently played” to “Open in Spotify ↗”, the cover grows
+          4% inside its fixed 44px box, the green mark swells 15%. Nothing reflows the 134px tile.</p>
+      </div>
+      <div class="demo__meta">
+        <dl class="spec">
+          <div><dt>Trigger</dt><dd>:hover · :focus-visible on the anchor</dd></div>
+          <div><dt>Property</dt><dd>opacity + translate (label), scale (media)</dd></div>
+          <div><dt>Duration</dt><dd>240ms label &amp; cover · 160ms mark</dd></div>
+          <div><dt>Easing</dt><dd>--ease-out · --ease-swap (fade)</dd></div>
+          <div><dt>Reduced</dt><dd>label swaps, no growth</dd></div>
+        </dl>
+        <p class="demo__note">Composition rule in practice: the tilt owns the <b>card</b>, this owns the
+          <b>contents</b>. Two transforms, two different elements, no fight over <code>transform</code>.</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- 06 -->
+  <article class="demo">
+    <header class="demo__head">
+      <span class="demo__idx">06</span>
+      <h2 class="demo__name">Project caption — scrim + stagger</h2>
+      <span class="demo__where">Adds to .project-card · titles exist in aria-label only, never on screen</span>
+    </header>
+    <div class="demo__body">
+      <div class="demo__stage demo__stage--tint">
+        <button class="project-card tilt demo-card" type="button" aria-label="Global Interiors, Web — open project details">
+          <img class="project-card__image" src="/images/global-interiors-hero.webp" alt="" decoding="async">
+          <span class="card-cap" aria-hidden="true">
+            <strong>Global Interiors</strong>
+            <span>Web · 2025</span>
+          </span>
+        </button>
+        <button class="project-card tilt demo-card" type="button" aria-label="Pumba Desktop, Product — open project details">
+          <img class="project-card__image" src="/images/pumba-desktop-hero.webp" alt="" decoding="async">
+          <span class="card-cap" aria-hidden="true">
+            <strong>Pumba Desktop</strong>
+            <span>Product · 2025</span>
+          </span>
+        </button>
+      </div>
+      <div class="demo__meta">
+        <dl class="spec">
+          <div><dt>Trigger</dt><dd>:hover · :focus-visible on the card</dd></div>
+          <div><dt>Property</dt><dd>scrim opacity, caption translate + opacity</dd></div>
+          <div><dt>Duration</dt><dd>240ms, second line +40ms delay</dd></div>
+          <div><dt>Easing</dt><dd>--ease-out (travel) · --ease-swap (fade)</dd></div>
+          <div><dt>Reduced</dt><dd>scrim + caption appear at 1ms, no travel</dd></div>
+        </dl>
+        <p class="demo__note">The caption lives <b>inside</b> the tilted button, so it rides the same 3D plane
+          instead of floating above it. It is <code>aria-hidden</code> because the button's
+          <code>aria-label</code> already carries title and category — the reveal is for eyes only.</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- 07 -->
+  <article class="demo">
+    <header class="demo__head">
+      <span class="demo__idx">07</span>
+      <h2 class="demo__name">Card → detail morph</h2>
+      <span class="demo__where">Adds to the .detail overlay · today it appears with no relationship to the card</span>
+    </header>
+    <div class="demo__body">
+      <div class="demo__stage" style="align-items:flex-start">
+        <div class="vt-grid" id="vt-grid">
+          <button class="project-card tilt vt-card" type="button" data-vt="reself"
+                  aria-label="Re:Self, Product — open project details">
+            <img class="project-card__image" src="/images/reself-hero.webp" alt="" decoding="async">
+          </button>
+          <button class="project-card tilt vt-card" type="button" data-vt="ecofabriq"
+                  aria-label="EcoFabriq, Product — open project details">
+            <img class="project-card__image" src="/images/ecofabriq-hero.webp" alt="" decoding="async">
+          </button>
+          <button class="project-card tilt vt-card" type="button" data-vt="caj"
+                  aria-label="N°1 Decode (CAJ), Print — open project details">
+            <img class="project-card__image" src="/images/caj-decode-hero.webp" alt="" decoding="async">
+          </button>
+        </div>
+        <div class="vt-detail" id="vt-detail" hidden>
+          <div class="vt-detail__stage"><img id="vt-media" alt=""></div>
+          <div class="vt-detail__panel">
+            <h3 id="vt-title" tabindex="-1">Re:Self</h3>
+            <p id="vt-sub">Product · 2025</p>
+            <p>Panel copy stands in for <code>.detail__panel</code>. The point of the demo is the
+              <b>continuity</b>: the thumbnail you clicked becomes the stage image.</p>
+            <button class="btn btn--solid" type="button" id="vt-close">Close detail</button>
+          </div>
+        </div>
+        <p class="mono mono--tight" id="vt-support">Checking View Transitions support…</p>
+      </div>
+      <div class="demo__meta">
+        <dl class="spec">
+          <div><dt>Trigger</dt><dd>click on card · Escape or button to return</dd></div>
+          <div><dt>Property</dt><dd>view-transition-name: project-media</dd></div>
+          <div><dt>Duration</dt><dd>400ms (--dur-card, reuses the tilt speed)</dd></div>
+          <div><dt>Easing</dt><dd>--ease-out</dd></div>
+          <div><dt>Reduced</dt><dd>DOM updates directly, no transition</dd></div>
+        </dl>
+        <p class="demo__note">One name, one pair: the clicked thumbnail and the stage image. The name is
+          assigned on click and <b>removed when <code>transition.finished</code> resolves</b>, or the next open
+          would find two elements with the same name and silently skip the animation. Focus is routed to the
+          detail heading either way — with, without, and instead of the transition.</p>
+        <details class="code">
+          <summary>The hook for App.tsx</summary>
+<pre>function openProject(index, cardEl) {
+  const run = () => setOpenIndex(index)         // your existing state change
+  if (!document.startViewTransition ||
+      matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    run(); requestAnimationFrame(() => titleRef.current?.focus()); return
+  }
+  cardEl.style.viewTransitionName = 'project-media'
+  const t = document.startViewTransition(run)
+  t.ready.then(() => { /* stage img gets the same name via CSS class */ })
+  t.finished.finally(() => {
+    cardEl.style.viewTransitionName = ''
+    titleRef.current?.focus()
+  })
+}</pre>
+        </details>
+      </div>
+    </div>
+  </article>
+
+  <!-- 08 -->
+  <article class="demo">
+    <header class="demo__head">
+      <span class="demo__idx">08</span>
+      <h2 class="demo__name">Receipt row — quiet response</h2>
+      <span class="demo__where">Adds to .receipt-list li · real quotes from src/App.tsx</span>
+    </header>
+    <div class="demo__body">
+      <div class="demo__stage" style="padding:24px 20px">
+        <ol class="receipt-list">
+          <li>
+            <span class="receipt-list__index">01</span>
+            <blockquote>He redrew our onboarding in a week and activation jumped. I still send new designers to study how he thinks.</blockquote>
+            <div class="receipt-list__credit"><strong>Maya Okonkwo</strong><span>Head of Product, Cadence</span></div>
+            <span class="receipt-list__more" aria-hidden="true">↗</span>
+          </li>
+          <li>
+            <span class="receipt-list__index">02</span>
+            <blockquote>The calmest hands in a redesign I've worked with. Ships, documents, and never precious about killing his own darlings.</blockquote>
+            <div class="receipt-list__credit"><strong>Priya Nair</strong><span>Design Director, Northwind</span></div>
+            <span class="receipt-list__more" aria-hidden="true">↗</span>
+          </li>
+          <li>
+            <span class="receipt-list__index">03</span>
+            <blockquote>He treats typography like it's load-bearing — because it is. Our brand finally reads like one voice.</blockquote>
+            <div class="receipt-list__credit"><strong>Idris Bello</strong><span>Brand Lead, Halcyon</span></div>
+            <span class="receipt-list__more" aria-hidden="true">↗</span>
+          </li>
+          <li>
+            <span class="receipt-list__index">04</span>
+            <blockquote>Handoff was flawless — tokens, states and edge cases documented before we thought to ask.</blockquote>
+            <div class="receipt-list__credit"><strong>Theo Walsh</strong><span>Eng Lead, Vertex</span></div>
+            <span class="receipt-list__more" aria-hidden="true">↗</span>
+          </li>
+        </ol>
+      </div>
+      <div class="demo__meta">
+        <dl class="spec">
+          <div><dt>Trigger</dt><dd>:hover on the row</dd></div>
+          <div><dt>Property</dt><dd>background-color, index colour, ↗ opacity + translate</dd></div>
+          <div><dt>Duration</dt><dd>160ms</dd></div>
+          <div><dt>Easing</dt><dd>--ease-swap · --ease-out (↗)</dd></div>
+          <div><dt>Reduced</dt><dd>tint + colour only</dd></div>
+        </dl>
+        <p class="demo__note">Editorial rows must not bounce. The hairline keeps its 1px, the quote does not
+          move, and the affordance is a 4px slide of one glyph in reserved space —
+          <b>a 32-word quote never re-wraps on hover</b>.</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- 09 -->
+  <article class="demo">
+    <header class="demo__head">
+      <span class="demo__idx">09</span>
+      <h2 class="demo__name">Ticker drift — hover brakes</h2>
+      <span class="demo__where">Adds to .ticker · today it is a static horizontal scroller</span>
+    </header>
+    <div class="demo__body">
+      <div class="demo__stage" style="padding:24px 0 24px 20px">
+        <div class="ticker" id="demo-ticker" aria-label="Short testimonials"></div>
+      </div>
+      <div class="demo__meta">
+        <dl class="spec">
+          <div><dt>Trigger</dt><dd>always drifting · pointerenter brakes to 0</dd></div>
+          <div><dt>Property</dt><dd>scrollLeft (float accumulator) · note translate</dd></div>
+          <div><dt>Duration</dt><dd>28px/s drift · 160ms note lift</dd></div>
+          <div><dt>Easing</dt><dd>linear (drift) · --ease-out (lift)</dd></div>
+          <div><dt>Reduced</dt><dd>no drift at all; native scroll only</dd></div>
+        </dl>
+        <p class="demo__note">The accumulator is the whole trick: <code>scrollLeft += 0.3</code> stalls because
+          the getter rounds the value straight back, so the loop <b>owns a float</b> and writes the rounded
+          result. Braking is a lerp on speed, not a class toggle — the band eases to a stop under the cursor
+          and back up when you leave.</p>
+        <details class="code">
+          <summary>The drift loop</summary>
+<pre>let pos = 0, speed = 0, frame = 0
+const TARGET = 28 / 1000            // px per ms
+function tick(now) {
+  const dt = Math.min(now - last, 48); last = now
+  speed += ((hovering ? 0 : TARGET) - speed) * (1 - Math.exp(-dt / 180))
+  pos += speed * dt
+  const half = track.scrollWidth / 2
+  if (pos >= half) pos -= half      // the list is duplicated once
+  track.scrollLeft = pos            // never read it back
+  frame = requestAnimationFrame(tick)
+}</pre>
+        </details>
+      </div>
+    </div>
+  </article>
+
+  <!-- 10 -->
+  <article class="demo">
+    <header class="demo__head">
+      <span class="demo__idx">10</span>
+      <h2 class="demo__name">Filter bar condense</h2>
+      <span class="demo__where">Adds to .filter-bar (position:sticky, 70px) · scroll inside the frame</span>
+    </header>
+    <div class="demo__body">
+      <div class="demo__stage" style="padding:24px">
+        <div class="scroller" id="demo-scroller">
+          <div class="scroller__bar">
+            <div class="filters">
+              <span class="filter-logo" aria-hidden="true"></span>
+              <button class="filter" data-active="true" aria-pressed="true" type="button">All</button>
+              <button class="filter" data-active="false" aria-pressed="false" type="button">Product</button>
+              <button class="filter" data-active="false" aria-pressed="false" type="button">Web</button>
+            </div>
+            <span class="mono mono--tight" style="font-size:10px">Scroll ↓</span>
+          </div>
+          <div class="scroller__fill">
+            <div></div><div></div><div></div><div></div><div></div><div></div>
+          </div>
+        </div>
+      </div>
+      <div class="demo__meta">
+        <dl class="spec">
+          <div><dt>Trigger</dt><dd>scroll position, 0 → 120px</dd></div>
+          <div><dt>Property</dt><dd>height 70→58, hairline fade in, logo scale .78</dd></div>
+          <div><dt>Duration</dt><dd>scroll-linked (no time)</dd></div>
+          <div><dt>Easing</dt><dd>linear against scroll</dd></div>
+          <div><dt>Reduced</dt><dd>animation:none — bar stays 70px</dd></div>
+        </dl>
+        <p class="demo__note"><code>animation-timeline: scroll(nearest)</code> with an
+          <code>@supports ((animation-timeline:scroll()) and (animation-range:0% 100%))</code> gate, plus a
+          scroll-listener fallback that drives the same registered
+          <code>--condense</code> property for Firefox — both paths use one set of declarations.
+          <b>Height is not a compositor property</b> — it is animated here because the bar is a 3-element row
+          and the alternative (scaling) would distort the pills; the cost is one layout pass per frame on a
+          70px band.</p>
+      </div>
+    </div>
+  </article>
+
+</main>
+
+<section class="adopt shell" aria-labelledby="adopt">
+  <h2 id="adopt">Adopting this in the app</h2>
+  <ol>
+    <li><b>src/styles.css</b> — paste the motion tokens into <code>:root</code> under the existing colour
+      tokens, then the per-component blocks from demos 02, 04, 05, 06, 08, 09, 10. Nothing above needs a new
+      colour, radius, or font.</li>
+    <li><b>src/cardTilt.ts</b> — unchanged. Demo 01 documents it; demos 05 and 06 deliberately animate
+      <em>children</em> so they never contend for the card's <code>transform</code>.</li>
+    <li><b>src/App.tsx</b> — three markup additions only: the caption span inside
+      <code>.project-card</code> (06), the second label span in the music widget (05), the <code>↗</code>
+      span in each receipt row (08). The view transition (07) is a wrapper around the existing
+      <code>onOpen(index)</code> handler.</li>
+    <li><b>One reduced-motion block</b> covers all ten — extend the block that already exists at the bottom of
+      <code>styles.css</code> rather than adding per-component queries.</li>
+    <li><b>What was deliberately left out:</b> no scroll reveals on the project grid (the masonry already
+      settles on load and a second entrance would fight it), no page-load animation, no looping motion except
+      the ticker, and no hover effect on the map widget — its shadow-only treatment is correct because a tilt
+      blurs the WebGL canvas.</li>
+  </ol>
+</section>
+
+<script type="module">
+'use strict'
+
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)')
+
+/* ---------- 01/05/06/07 · pointer tilt, ported verbatim from src/cardTilt.ts ---------- */
+// 9deg, read from --tilt-deg so the ledger is the single source of truth
+const MAX_DEG = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--tilt-deg')) || 9
+const tracked = new WeakSet()
+
+function attachTilt(card) {
+  if (tracked.has(card)) return
+  tracked.add(card)
+  let frame = 0
+  card.addEventListener('pointermove', (event) => {
+    if (frame) return
+    frame = requestAnimationFrame(() => {
+      frame = 0
+      const rect = card.getBoundingClientRect()
+      const px = (event.clientX - rect.left) / rect.width
+      const py = (event.clientY - rect.top) / rect.height
+      card.style.setProperty('--ry', `${(px - 0.5) * 2 * MAX_DEG}deg`)
+      card.style.setProperty('--rx', `${(0.5 - py) * 2 * MAX_DEG}deg`)
+      card.style.setProperty('--mx', `${px * 100}%`)
+      card.style.setProperty('--my', `${py * 100}%`)
+    })
+  })
+  card.addEventListener('pointerleave', () => {
+    if (frame) { cancelAnimationFrame(frame); frame = 0 }
+    card.style.setProperty('--rx', '0deg')
+    card.style.setProperty('--ry', '0deg')
+  })
+}
+
+function initTilt() {
+  if (REDUCED.matches) return
+  for (const card of document.querySelectorAll('.tilt')) attachTilt(card)
+}
+initTilt()
+
+/* ---------- 02 · filter pills ---------- */
+const filterBar = document.getElementById('demo-filters')
+filterBar.addEventListener('click', (event) => {
+  const pill = event.target.closest('.filter')
+  if (!pill) return
+  for (const other of filterBar.querySelectorAll('.filter')) {
+    const on = other === pill
+    other.dataset.active = String(on)
+    other.setAttribute('aria-pressed', String(on))
+  }
+})
+
+/* ---------- 03 · freshness pulse ---------- */
+const freshness = document.getElementById('demo-freshness')
+document.getElementById('demo-refresh').addEventListener('click', () => {
+  const fresh = freshness.dataset.fresh !== 'true'
+  freshness.dataset.fresh = String(fresh)
+  if (REDUCED.matches) return
+  freshness.dataset.pulse = 'false'
+  void freshness.offsetWidth            // restart the one-shot animation
+  freshness.dataset.pulse = 'true'
+})
+
+/* ---------- 07 · same-document view transition ---------- */
+const PROJECTS = {
+  reself:    { title: 'Re:Self',          sub: 'Product · 2025', src: '/images/reself-hero.webp' },
+  ecofabriq: { title: 'EcoFabriq',        sub: 'Product · 2025', src: '/images/ecofabriq-hero.webp' },
+  caj:       { title: 'N°1 Decode (CAJ)', sub: 'Print · 2023',   src: '/images/caj-decode-hero.webp' },
+}
+const vtGrid = document.getElementById('vt-grid')
+const vtDetail = document.getElementById('vt-detail')
+const vtMedia = document.getElementById('vt-media')
+const vtTitle = document.getElementById('vt-title')
+const vtSub = document.getElementById('vt-sub')
+const vtSupport = document.getElementById('vt-support')
+let vtOpenCard = null
+
+const supported = typeof document.startViewTransition === 'function'
+vtSupport.textContent = supported
+  ? 'View Transitions: supported — the thumbnail morphs into the stage'
+  : 'View Transitions: unsupported here — falls back to an instant swap, focus still routed'
+
+function paintDetail(key) {
+  const project = PROJECTS[key]
+  vtMedia.src = project.src
+  vtMedia.alt = ''
+  vtTitle.textContent = project.title
+  vtSub.textContent = project.sub
+  vtDetail.hidden = false
+  vtGrid.hidden = true
+}
+
+function openDetail(card) {
+  const key = card.dataset.vt
+  const run = () => paintDetail(key)
+  if (!supported || REDUCED.matches) {
+    run()
+    vtTitle.focus()
+    return
+  }
+  vtOpenCard = card
+  card.style.viewTransitionName = 'project-media'
+  vtMedia.style.viewTransitionName = 'project-media'
+  const transition = document.startViewTransition(run)
+  transition.finished.finally(() => {
+    card.style.viewTransitionName = ''
+    vtTitle.focus()
+  })
+}
+
+function closeDetail() {
+  const run = () => { vtDetail.hidden = true; vtGrid.hidden = false }
+  const focusBack = () => (vtOpenCard || vtGrid.querySelector('.vt-card')).focus()
+  if (!supported || REDUCED.matches) { run(); focusBack(); return }
+  if (vtOpenCard) vtOpenCard.style.viewTransitionName = 'project-media'
+  const transition = document.startViewTransition(run)
+  transition.finished.finally(() => {
+    if (vtOpenCard) vtOpenCard.style.viewTransitionName = ''
+    focusBack()
+    vtOpenCard = null
+  })
+}
+
+vtGrid.addEventListener('click', (event) => {
+  const card = event.target.closest('.vt-card')
+  if (card) openDetail(card)
+})
+document.getElementById('vt-close').addEventListener('click', closeDetail)
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && !vtDetail.hidden) closeDetail()
+})
+
+/* ---------- 09 · ticker drift with a float accumulator ---------- */
+const TICKER_NOTES = [
+  ['AR', 'Fast, calm, unbelievably thorough.', 'Ana Reyes'],
+  ['JT', 'Shipped a system before our round.', 'Jonas Thorne'],
+  ['TW', "Best handoff I've ever received.", 'Theo Walsh'],
+  ['SL', 'Found the real problem in an hour.', 'Sofia Lund'],
+]
+const ticker = document.getElementById('demo-ticker')
+
+function noteMarkup([initials, quote, name], clone) {
+  const note = document.createElement('article')
+  note.className = 'ticker__note tilt'
+  if (clone) note.setAttribute('aria-hidden', 'true')
+  note.innerHTML =
+    `<span class="ticker__avatar">${initials}</span>` +
+    `<strong>${quote}</strong>` +
+    `<span>${name}</span>`
+  return note
+}
+for (const note of TICKER_NOTES) ticker.append(noteMarkup(note, false))
+for (const note of TICKER_NOTES) ticker.append(noteMarkup(note, true))   // duplicate for the wrap
+initTilt()
+
+let hovering = false
+ticker.addEventListener('pointerenter', () => { hovering = true })
+ticker.addEventListener('pointerleave', () => { hovering = false })
+ticker.addEventListener('focusin', () => { hovering = true })
+ticker.addEventListener('focusout', () => { hovering = false })
+
+if (!REDUCED.matches) {
+  const SPEED = 28 / 1000            // px per ms
+  let pos = 0
+  let speed = 0
+  let last = performance.now()
+  const tick = (now) => {
+    const dt = Math.min(now - last, 48)
+    last = now
+    speed += ((hovering ? 0 : SPEED) - speed) * (1 - Math.exp(-dt / 180))
+    pos += speed * dt
+    const half = ticker.scrollWidth / 2
+    if (half > 0 && pos >= half) pos -= half
+    ticker.scrollLeft = pos           // write only — reading rounds the float away
+    requestAnimationFrame(tick)
+  }
+  requestAnimationFrame(tick)
+}
+
+/* ---------- 10 · condense fallback for browsers without scroll-driven animation ---------- */
+const scroller = document.getElementById('demo-scroller')
+if (!CSS.supports('(animation-timeline: scroll()) and (animation-range: 0% 100%)')) {
+  scroller.dataset.fallback = 'true'
+  const RANGE = 120
+  const update = () => {
+    const p = Math.min(1, Math.max(0, scroller.scrollTop / RANGE))
+    scroller.style.setProperty('--condense', REDUCED.matches ? '0' : p.toFixed(3))
+  }
+  scroller.addEventListener('scroll', update, { passive: true })
+  update()
+}
+</script>
+</body>
+</html>

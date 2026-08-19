@@ -1,0 +1,1381 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="AColorBright — the achromatic editorial design system behind David Lafond Designs. Colors, type scale, spacing, components, and copyable tokens."
+    />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 44'%3E%3Cpath d='M0 44V0h27.5C38.82 0 48 9.18 48 20.5V44H33.5V22c0-4.14-3.36-7.5-7.5-7.5H14.5V44H0Z'/%3E%3C/svg%3E" />
+    <title>Design system — AColorBright</title>
+    <style>
+      :root {
+        --color-ink-black: #1a1a1a;
+        --color-charcoal: #262626;
+        --color-graphite: #666666;
+        --color-ash: #999999;
+        --color-fog: #e6e6e6;
+        --color-mist: #f2f2f2;
+        --color-paper: #ffffff;
+        --color-pure-black: #000000;
+
+        --font-riformallweb: 'RiformaLLWeb', 'Inter Tight', Inter, ui-sans-serif, system-ui,
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+        --text-caption: 12px;
+        --leading-caption: 1.2;
+        --text-body-sm: 16px;
+        --leading-body-sm: 1.25;
+        --text-body: 18px;
+        --leading-body: 1.25;
+        --text-subheading: 24px;
+        --leading-subheading: 1.15;
+        --text-heading: 40px;
+        --leading-heading: 1.1;
+        --text-display: 64px;
+        --leading-display: 1;
+
+        --spacing-8: 8px;
+        --spacing-16: 16px;
+        --spacing-24: 24px;
+        --spacing-32: 32px;
+        --spacing-64: 64px;
+
+        --page-max-width: 1200px;
+        --radius-buttons: 8px;
+        --radius-images: 12px;
+        --radius-nav: 16px;
+      }
+
+      * {
+        box-sizing: border-box;
+        letter-spacing: -0.01em;
+      }
+
+      html {
+        background: var(--color-paper);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        font-synthesis: none;
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        background: var(--color-paper);
+        color: var(--color-ink-black);
+        font-family: var(--font-riformallweb);
+        font-size: var(--text-body-sm);
+        font-weight: 400;
+        line-height: var(--leading-body-sm);
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      button {
+        margin: 0;
+        border: 0;
+        background: none;
+        color: inherit;
+        font: inherit;
+        letter-spacing: inherit;
+      }
+
+      a:focus-visible,
+      button:focus-visible {
+        outline: 2px solid var(--color-ink-black);
+        outline-offset: 3px;
+      }
+
+      /* ─── Page frame ─────────────────────────────────────────── */
+
+      .page {
+        max-width: var(--page-max-width);
+        margin-inline: auto;
+        padding-inline: var(--spacing-32);
+      }
+
+      .nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--spacing-16);
+        padding-block: var(--spacing-24);
+        background: transparent;
+      }
+
+      .nav__wordmark {
+        font-size: var(--text-body);
+        line-height: var(--leading-body);
+      }
+
+      .nav__actions {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-16);
+      }
+
+      .nav__link {
+        color: var(--color-graphite);
+        font-size: var(--text-body-sm);
+      }
+
+      .nav__link:hover {
+        color: var(--color-ink-black);
+      }
+
+      .nav__menu {
+        display: grid;
+        width: 40px;
+        height: 40px;
+        align-content: center;
+        justify-items: center;
+        gap: 5px;
+        border: 1px solid var(--color-ink-black);
+        border-radius: var(--radius-nav);
+        background: var(--color-paper);
+      }
+
+      .nav__menu span {
+        width: 18px;
+        height: 1px;
+        background: var(--color-pure-black);
+      }
+
+      .hero {
+        padding-top: 256px;
+        padding-bottom: var(--spacing-64);
+      }
+
+      .hero__statement {
+        max-width: 720px;
+        margin: 0;
+        font-size: var(--text-heading);
+        font-weight: 400;
+        line-height: var(--leading-heading);
+      }
+
+      .hero__meta {
+        max-width: 640px;
+        margin: var(--spacing-32) 0 0;
+        color: var(--color-graphite);
+        font-size: var(--text-body);
+        line-height: var(--leading-body);
+      }
+
+      .hero__contents {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--spacing-16);
+        margin-top: var(--spacing-32);
+        padding: 0;
+        list-style: none;
+      }
+
+      .hero__contents a {
+        color: var(--color-graphite);
+        font-size: var(--text-body-sm);
+      }
+
+      .hero__contents a:hover {
+        color: var(--color-ink-black);
+      }
+
+      /* ─── Chapter spine ──────────────────────────────────────── */
+
+      .chapter {
+        padding-top: var(--spacing-64);
+      }
+
+      .chapter__heading {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-16);
+        margin: 0;
+        font-size: var(--text-heading);
+        font-weight: 400;
+        line-height: var(--leading-heading);
+      }
+
+      .chapter__badge {
+        display: grid;
+        width: 32px;
+        height: 32px;
+        flex: 0 0 32px;
+        place-items: center;
+        border-radius: 50%;
+        background: var(--color-pure-black);
+        color: var(--color-paper);
+        font-size: var(--text-body);
+        line-height: 1;
+      }
+
+      .chapter__body {
+        max-width: 640px;
+        margin: var(--spacing-24) 0 var(--spacing-32);
+        color: var(--color-graphite);
+        font-size: var(--text-body);
+        line-height: var(--leading-body);
+      }
+
+      .chapter__part {
+        margin: 0;
+        padding-top: var(--spacing-32);
+        font-size: var(--text-subheading);
+        font-weight: 400;
+        line-height: var(--leading-subheading);
+      }
+
+      .note {
+        max-width: 640px;
+        margin: var(--spacing-16) 0 0;
+        color: var(--color-graphite);
+        font-size: var(--text-body-sm);
+      }
+
+      .caption {
+        color: var(--color-graphite);
+        font-size: var(--text-caption);
+        line-height: var(--leading-caption);
+      }
+
+      /* ─── 1 — Swatches ──────────────────────────────────────── */
+
+      .swatches {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: var(--spacing-32) var(--spacing-16);
+        margin-top: var(--spacing-32);
+      }
+
+      .swatch__chip {
+        aspect-ratio: 4 / 3;
+        border-radius: var(--radius-images);
+      }
+
+      .swatch__chip--paper {
+        border: 1px solid var(--color-fog);
+        background: var(--color-paper);
+      }
+
+      .swatch__chip--mist {
+        background: var(--color-mist);
+      }
+      .swatch__chip--fog {
+        background: var(--color-fog);
+      }
+      .swatch__chip--ash {
+        background: var(--color-ash);
+      }
+      .swatch__chip--graphite {
+        background: var(--color-graphite);
+      }
+      .swatch__chip--charcoal {
+        background: var(--color-charcoal);
+      }
+      .swatch__chip--ink {
+        background: var(--color-ink-black);
+      }
+      .swatch__chip--pure {
+        background: var(--color-pure-black);
+      }
+
+      .swatch__name {
+        margin: var(--spacing-16) 0 0;
+        font-size: var(--text-body-sm);
+      }
+
+      .swatch__value {
+        margin: 12px 0 0;
+        color: var(--color-graphite);
+        font-size: var(--text-body-sm);
+      }
+
+      .swatch__role {
+        margin: 12px 0 0;
+      }
+
+      /* ─── 2 — Type specimens ────────────────────────────────── */
+
+      .specimen {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 248px;
+        gap: var(--spacing-16) var(--spacing-32);
+        align-items: baseline;
+        padding-block: var(--spacing-24);
+      }
+
+      .specimen + .specimen {
+        border-top: 1px solid var(--color-fog);
+      }
+
+      .specimen__spec {
+        text-align: right;
+      }
+
+      .specimen__line {
+        margin: 0;
+        font-weight: 400;
+      }
+
+      .specimen__line--display {
+        font-size: var(--text-display);
+        line-height: var(--leading-display);
+      }
+      .specimen__line--heading {
+        font-size: var(--text-heading);
+        line-height: var(--leading-heading);
+      }
+      .specimen__line--subheading {
+        font-size: var(--text-subheading);
+        line-height: var(--leading-subheading);
+      }
+      .specimen__line--body {
+        font-size: var(--text-body);
+        line-height: var(--leading-body);
+      }
+      .specimen__line--body-sm {
+        font-size: var(--text-body-sm);
+        line-height: var(--leading-body-sm);
+      }
+      .specimen__line--caption {
+        font-size: var(--text-caption);
+        line-height: var(--leading-caption);
+      }
+
+      .tracking-proof {
+        display: grid;
+        gap: var(--spacing-16);
+        margin-top: var(--spacing-32);
+      }
+
+      .tracking-proof p {
+        margin: 0;
+        font-size: var(--text-subheading);
+        line-height: var(--leading-subheading);
+      }
+
+      .tracking-proof p:first-child {
+        letter-spacing: normal;
+        color: var(--color-graphite);
+      }
+
+      /* ─── 3 — Space, shape, grid ────────────────────────────── */
+
+      .scale {
+        margin: var(--spacing-32) 0 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .scale__row {
+        display: grid;
+        grid-template-columns: 64px 96px minmax(0, 1fr);
+        gap: var(--spacing-16);
+        align-items: center;
+        padding: var(--spacing-16);
+      }
+
+      .scale__row:nth-child(odd) {
+        background: var(--color-mist);
+      }
+
+      .scale__bar {
+        display: block;
+        height: 16px;
+        background: var(--color-ink-black);
+      }
+
+      .scale__role {
+        color: var(--color-graphite);
+      }
+
+      .radii {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: var(--spacing-32);
+        max-width: 720px;
+        margin-top: var(--spacing-32);
+      }
+
+      .radii__shape {
+        aspect-ratio: 3 / 2;
+        background: var(--color-ink-black);
+      }
+
+      .radii__shape--buttons {
+        border-radius: var(--radius-buttons);
+      }
+      .radii__shape--images {
+        border-radius: var(--radius-images);
+      }
+      .radii__shape--nav {
+        border-radius: var(--radius-nav);
+      }
+
+      .radii__label {
+        margin: var(--spacing-16) 0 0;
+        font-size: var(--text-body-sm);
+      }
+
+      .radii__value {
+        margin: 12px 0 0;
+        color: var(--color-graphite);
+        font-size: var(--text-body-sm);
+      }
+
+      .grid-proof {
+        margin-top: var(--spacing-32);
+        padding: var(--spacing-32);
+        border: 1px solid var(--color-fog);
+      }
+
+      .grid-proof__columns {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: var(--spacing-32);
+      }
+
+      .grid-proof__column {
+        height: 64px;
+        background: var(--color-mist);
+      }
+
+      .grid-proof__caption {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--spacing-16);
+        margin: var(--spacing-16) 0 0;
+      }
+
+      /* ─── 4 — Components ───────────────────────────────────── */
+
+      .component {
+        padding-top: var(--spacing-32);
+      }
+
+      .component__title {
+        margin: 0;
+        font-size: var(--text-subheading);
+        font-weight: 400;
+        line-height: var(--leading-subheading);
+      }
+
+      .component__spec {
+        margin: 12px 0 var(--spacing-24);
+        max-width: 640px;
+      }
+
+      .component__stage {
+        padding: var(--spacing-32);
+        border: 1px solid var(--color-fog);
+      }
+
+      .stage-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--spacing-16);
+        align-items: center;
+      }
+
+      .stage-row + .stage-row {
+        margin-top: var(--spacing-32);
+      }
+
+      .demo-heading {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-16);
+        margin: 0;
+        font-size: var(--text-heading);
+        font-weight: 400;
+        line-height: var(--leading-heading);
+      }
+
+      .card-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: var(--spacing-32);
+      }
+
+      .card__image {
+        aspect-ratio: 4 / 3;
+        border-radius: var(--radius-images);
+        background: var(--color-mist);
+      }
+
+      .card__image--fog {
+        background: var(--color-fog);
+      }
+      .card__image--ash {
+        background: var(--color-ash);
+      }
+
+      .card__name {
+        margin: var(--spacing-16) 0 0;
+        font-size: var(--text-body-sm);
+      }
+
+      .card__description {
+        margin: 12px 0 0;
+        color: var(--color-graphite);
+        font-size: var(--text-body-sm);
+      }
+
+      .band-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .band-row {
+        display: grid;
+        grid-template-columns: 32px minmax(0, 1fr) 160px 64px;
+        align-items: center;
+        gap: var(--spacing-16);
+        padding: var(--spacing-16);
+        font-size: var(--text-body-sm);
+      }
+
+      .band-row:nth-child(odd) {
+        background: var(--color-mist);
+      }
+
+      .band-row span:nth-child(3),
+      .band-row span:nth-child(4) {
+        color: var(--color-graphite);
+      }
+
+      .band-row span:nth-child(4) {
+        text-align: right;
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 96px;
+        padding: 12px 6px;
+        border-radius: var(--radius-buttons);
+        font-size: var(--text-body-sm);
+        line-height: var(--leading-body-sm);
+        cursor: pointer;
+      }
+
+      .button--filled {
+        background: var(--color-charcoal);
+        color: var(--color-paper);
+      }
+
+      .button--outlined {
+        border: 1px solid var(--color-fog);
+        background: transparent;
+        color: var(--color-ink-black);
+      }
+
+      .button--outlined:hover {
+        border-color: var(--color-ash);
+      }
+
+      .subscribe {
+        display: flex;
+        gap: var(--spacing-8);
+        width: 100%;
+        max-width: 480px;
+      }
+
+      .subscribe__field {
+        display: flex;
+        flex: 1 1 auto;
+        align-items: center;
+        padding: 12px var(--spacing-16);
+        border: 1px solid var(--color-fog);
+        border-radius: var(--radius-buttons);
+        color: var(--color-ash);
+        font-size: var(--text-body-sm);
+      }
+
+      .demo-nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--spacing-16);
+      }
+
+      /* ─── 5 — Rules and tokens ─────────────────────────────── */
+
+      .rules {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--spacing-32);
+        margin-top: var(--spacing-32);
+      }
+
+      .rules__list {
+        margin: var(--spacing-16) 0 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .rules__list li {
+        padding-block: 12px;
+        color: var(--color-graphite);
+        font-size: var(--text-body-sm);
+      }
+
+      .rules__list li + li {
+        border-top: 1px solid var(--color-fog);
+      }
+
+      .rules__title {
+        margin: 0;
+        font-size: var(--text-subheading);
+        font-weight: 400;
+        line-height: var(--leading-subheading);
+      }
+
+      .tokens {
+        margin: var(--spacing-32) 0 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .tokens__row {
+        display: grid;
+        grid-template-columns: minmax(0, 240px) 160px minmax(0, 1fr);
+        gap: var(--spacing-16);
+        align-items: baseline;
+        padding: var(--spacing-16);
+        font-size: var(--text-body-sm);
+      }
+
+      .tokens__row:nth-child(odd) {
+        background: var(--color-mist);
+      }
+
+      .tokens__row span:nth-child(2) {
+        color: var(--color-ink-black);
+      }
+
+      .tokens__row span:nth-child(3) {
+        color: var(--color-graphite);
+      }
+
+      .tokens__group {
+        padding: var(--spacing-16) var(--spacing-16) var(--spacing-8);
+        font-size: var(--text-caption);
+        line-height: var(--leading-caption);
+        color: var(--color-graphite);
+      }
+
+      .copy {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--spacing-16);
+        align-items: center;
+        margin-top: var(--spacing-32);
+      }
+
+      .copy__status {
+        color: var(--color-graphite);
+        font-size: var(--text-body-sm);
+      }
+
+      /* ─── Footer ───────────────────────────────────────────── */
+
+      .footer {
+        margin-top: var(--spacing-64);
+        padding-block: var(--spacing-64) var(--spacing-32);
+        color: var(--color-graphite);
+        font-size: var(--text-body-sm);
+      }
+
+      .footer a {
+        color: var(--color-ink-black);
+      }
+
+      @media (max-width: 900px) {
+        .swatches {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .card-grid,
+        .rules {
+          grid-template-columns: minmax(0, 1fr);
+        }
+
+        .specimen {
+          grid-template-columns: minmax(0, 1fr);
+        }
+
+        .specimen__spec {
+          text-align: left;
+        }
+
+        .tokens__row {
+          grid-template-columns: minmax(0, 1fr) 120px;
+        }
+
+        .tokens__row span:nth-child(3) {
+          display: none;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .page {
+          padding-inline: var(--spacing-16);
+        }
+
+        .hero {
+          padding-top: 128px;
+        }
+
+        .hero__statement,
+        .chapter__heading,
+        .demo-heading {
+          font-size: var(--text-subheading);
+          line-height: var(--leading-subheading);
+        }
+
+        .specimen__line--display {
+          font-size: var(--text-heading);
+          line-height: var(--leading-heading);
+        }
+
+        .radii {
+          grid-template-columns: minmax(0, 1fr);
+        }
+
+        .component__stage,
+        .grid-proof {
+          padding: var(--spacing-16);
+        }
+
+        .scale__row {
+          grid-template-columns: 48px 64px minmax(0, 1fr);
+        }
+
+        .band-row {
+          grid-template-columns: 24px minmax(0, 1fr) 64px;
+        }
+
+        .band-row span:nth-child(3) {
+          display: none;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header class="nav">
+        <span class="nav__wordmark">David Lafond Designs</span>
+        <div class="nav__actions">
+          <a class="nav__link" href="variants/index.html">Variants</a>
+          <a class="nav__link" href="hub.html">Hub</a>
+          <span aria-hidden="true" class="nav__menu">
+            <span></span>
+            <span></span>
+            <span></span>
+          </span>
+        </div>
+      </header>
+
+      <section class="hero">
+        <h1 class="hero__statement">
+          AColorBright is one typeface at one weight on white paper — hierarchy comes from size,
+          tracking, and the space you leave empty.
+        </h1>
+        <p class="hero__meta">
+          This is the working reference for the portfolio surfaces: eight neutrals, six type sizes,
+          one 8px spacing unit, three radii, and ten components. Nothing here has a hue, a shadow,
+          or a font weight above 400. Photography is the only color the system accepts.
+        </p>
+        <ul class="hero__contents">
+          <li><a href="#ink-and-paper">1 Ink and paper</a></li>
+          <li><a href="#one-typeface">2 One typeface, one weight</a></li>
+          <li><a href="#space-and-shape">3 Space, shape, and grid</a></li>
+          <li><a href="#components">4 Components</a></li>
+          <li><a href="#rules-and-tokens">5 Rules and tokens</a></li>
+        </ul>
+      </section>
+
+      <section class="chapter" id="ink-and-paper">
+        <h2 class="chapter__heading"><span class="chapter__badge">1</span>Ink and paper</h2>
+        <p class="chapter__body">
+          Eight neutrals, zero hues. Read the ramp as two families: text tones from ink to ash, and
+          surfaces from paper to charcoal. Text never uses pure black; badges and icon fills always
+          do.
+        </p>
+        <div class="swatches">
+          <article>
+            <div class="swatch__chip swatch__chip--ink"></div>
+            <p class="swatch__name">Ink Black</p>
+            <p class="swatch__value">#1a1a1a</p>
+            <p class="swatch__role caption">Primary text, structural borders</p>
+          </article>
+          <article>
+            <div class="swatch__chip swatch__chip--charcoal"></div>
+            <p class="swatch__name">Charcoal</p>
+            <p class="swatch__value">#262626</p>
+            <p class="swatch__role caption">Filled button surfaces, dark nav</p>
+          </article>
+          <article>
+            <div class="swatch__chip swatch__chip--graphite"></div>
+            <p class="swatch__name">Graphite</p>
+            <p class="swatch__value">#666666</p>
+            <p class="swatch__role caption">Body copy, captions, secondary text</p>
+          </article>
+          <article>
+            <div class="swatch__chip swatch__chip--ash"></div>
+            <p class="swatch__name">Ash</p>
+            <p class="swatch__value">#999999</p>
+            <p class="swatch__role caption">Control outlines, input placeholders</p>
+          </article>
+          <article>
+            <div class="swatch__chip swatch__chip--fog"></div>
+            <p class="swatch__name">Fog</p>
+            <p class="swatch__value">#e6e6e6</p>
+            <p class="swatch__role caption">Hairlines, dividers, outlined buttons</p>
+          </article>
+          <article>
+            <div class="swatch__chip swatch__chip--mist"></div>
+            <p class="swatch__name">Mist</p>
+            <p class="swatch__value">#f2f2f2</p>
+            <p class="swatch__role caption">Alternating list bands and image wells only</p>
+          </article>
+          <article>
+            <div class="swatch__chip swatch__chip--paper"></div>
+            <p class="swatch__name">Paper</p>
+            <p class="swatch__value">#ffffff</p>
+            <p class="swatch__role caption">Page canvas, card surface, text on dark fills</p>
+          </article>
+          <article>
+            <div class="swatch__chip swatch__chip--pure"></div>
+            <p class="swatch__name">Pure Black</p>
+            <p class="swatch__value">#000000</p>
+            <p class="swatch__role caption">Numbered badges and SVG fills, never text</p>
+          </article>
+        </div>
+        <p class="note">
+          Ash clears contrast only against paper at 16px and above; keep 12px captions on graphite.
+        </p>
+      </section>
+
+      <section class="chapter" id="one-typeface">
+        <h2 class="chapter__heading"><span class="chapter__badge">2</span>One typeface, one weight</h2>
+        <p class="chapter__body">
+          RiformaLLWeb at 400, falling back to Inter Tight. Six sizes, each with a fixed line height.
+          If a heading is not loud enough, take the next size up — never the next weight up.
+        </p>
+        <div class="specimen">
+          <p class="specimen__line specimen__line--display">Portfolio</p>
+          <p class="specimen__spec caption">display · 64/1.0 · --text-display</p>
+        </div>
+        <div class="specimen">
+          <p class="specimen__line specimen__line--heading">Editorial masonry</p>
+          <p class="specimen__spec caption">heading · 40/1.1 · --text-heading</p>
+        </div>
+        <div class="specimen">
+          <p class="specimen__line specimen__line--subheading">Case study grid</p>
+          <p class="specimen__spec caption">subheading · 24/1.15 · --text-subheading</p>
+        </div>
+        <div class="specimen">
+          <p class="specimen__line specimen__line--body">
+            Long-form section copy sits in a single column no wider than 640px, straight on the white
+            page with no container around it.
+          </p>
+          <p class="specimen__spec caption">body · 18/1.25 · --text-body</p>
+        </div>
+        <div class="specimen">
+          <p class="specimen__line specimen__line--body-sm">
+            Interface text: card titles, list rows, navigation links, and button labels.
+          </p>
+          <p class="specimen__spec caption">body-sm · 16/1.25 · --text-body-sm</p>
+        </div>
+        <div class="specimen">
+          <p class="specimen__line specimen__line--caption">Discipline · Year · Index numeral</p>
+          <p class="specimen__spec caption">caption · 12/1.2 · --text-caption</p>
+        </div>
+
+        <h3 class="chapter__part">Tracking is the fingerprint</h3>
+        <p class="note">
+          Every element carries −0.01em, applied once with a universal selector. Without it the type
+          reads as a default UI font; with it, as a set page.
+        </p>
+        <div class="tracking-proof">
+          <p>Northbound — brand system, set at normal tracking</p>
+          <p>Northbound — brand system, set at −0.01em</p>
+        </div>
+      </section>
+
+      <section class="chapter" id="space-and-shape">
+        <h2 class="chapter__heading"><span class="chapter__badge">3</span>Space, shape, and grid</h2>
+        <p class="chapter__body">
+          One 8px unit, five steps. Chapters are separated by 64px of nothing — the system has no
+          section dividers, so vertical space is the only structure between them.
+        </p>
+        <ul class="scale">
+          <li class="scale__row">
+            <span>8px</span>
+            <span><span class="scale__bar" style="width: 8px"></span></span>
+            <span class="scale__role">Field-to-button gap, badge inset</span>
+          </li>
+          <li class="scale__row">
+            <span>16px</span>
+            <span><span class="scale__bar" style="width: 16px"></span></span>
+            <span class="scale__role">Element gap, list row padding, masonry gutter</span>
+          </li>
+          <li class="scale__row">
+            <span>24px</span>
+            <span><span class="scale__bar" style="width: 24px"></span></span>
+            <span class="scale__role">Nav block padding, heading-to-copy</span>
+          </li>
+          <li class="scale__row">
+            <span>32px</span>
+            <span><span class="scale__bar" style="width: 32px"></span></span>
+            <span class="scale__role">Page edge padding, grid gutters, copy-to-grid</span>
+          </li>
+          <li class="scale__row">
+            <span>64px</span>
+            <span><span class="scale__bar" style="width: 64px"></span></span>
+            <span class="scale__role">Chapter separation, footer offset</span>
+          </li>
+        </ul>
+
+        <h3 class="chapter__part">Three radii, never swapped</h3>
+        <div class="radii">
+          <article>
+            <div class="radii__shape radii__shape--buttons"></div>
+            <p class="radii__label">Buttons and inputs</p>
+            <p class="radii__value">8px · --radius-buttons</p>
+          </article>
+          <article>
+            <div class="radii__shape radii__shape--images"></div>
+            <p class="radii__label">Imagery and tiles</p>
+            <p class="radii__value">12px · --radius-images</p>
+          </article>
+          <article>
+            <div class="radii__shape radii__shape--nav"></div>
+            <p class="radii__label">Nav containers</p>
+            <p class="radii__value">16px · --radius-nav</p>
+          </article>
+        </div>
+        <p class="note">Cards get 0px — a card is defined by its image radius and caption, not by a frame.</p>
+
+        <h3 class="chapter__part">Page grid</h3>
+        <div class="grid-proof">
+          <div class="grid-proof__columns">
+            <div class="grid-proof__column"></div>
+            <div class="grid-proof__column"></div>
+            <div class="grid-proof__column"></div>
+          </div>
+          <p class="grid-proof__caption caption">
+            <span>1200px max width</span><span>32px edge padding</span><span>3 columns</span
+            ><span>32px gutters</span><span>2 columns under 900px</span><span>1 column under 640px</span>
+          </p>
+        </div>
+      </section>
+
+      <section class="chapter" id="components">
+        <h2 class="chapter__heading"><span class="chapter__badge">4</span>Components</h2>
+        <p class="chapter__body">
+          Ten pieces cover every portfolio surface. Each is borderless and shadowless by default; the
+          hairline frames below mark the specimen stage, not the component.
+        </p>
+
+        <article class="component">
+          <h3 class="component__title">Numbered section heading</h3>
+          <p class="component__spec caption">
+            32px #000000 circle · white numeral at 18px · inline 40px heading · 64px top margin ·
+            introduces every chapter, so numerals stay sequential down the page
+          </p>
+          <div class="component__stage">
+            <p class="demo-heading"><span class="chapter__badge">2</span>Case study grid</p>
+          </div>
+        </article>
+
+        <article class="component">
+          <h3 class="component__title">Navigation bar</h3>
+          <p class="component__spec caption">
+            Wordmark 18px left · links 16px graphite · 40px hamburger container, 1px ink border, 16px
+            radius, right · transparent background · 24px block padding
+          </p>
+          <div class="component__stage">
+            <div class="demo-nav">
+              <span class="nav__wordmark">David Lafond Designs</span>
+              <span class="nav__actions">
+                <span class="nav__link">Live index</span>
+                <span aria-hidden="true" class="nav__menu">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </span>
+              </span>
+            </div>
+          </div>
+        </article>
+
+        <article class="component">
+          <h3 class="component__title">Hero intro statement</h3>
+          <p class="component__spec caption">
+            40px/1.1 ink, max-width 720px, 256px top padding · 18px graphite meta paragraph at
+            max-width 640px · no button, no subhead
+          </p>
+          <div class="component__stage">
+            <p class="specimen__line specimen__line--heading" style="max-width: 720px">
+              Five ways to read the same body of product design work.
+            </p>
+            <p class="chapter__body" style="margin-bottom: 0">
+              One achromatic canvas, one typeface, one weight, and nothing else competing with the
+              work itself.
+            </p>
+          </div>
+        </article>
+
+        <article class="component">
+          <h3 class="component__title">Case study card</h3>
+          <p class="component__spec caption">
+            Image 100% width, 12px radius, no padding · name 16px ink · description 16px graphite ·
+            12px between lines · 3 columns, 32px gutters · no border, no shadow, no fill
+          </p>
+          <div class="component__stage">
+            <div class="card-grid">
+              <article>
+                <div class="card__image"></div>
+                <p class="card__name">Ledger</p>
+                <p class="card__description">Reconciliation tooling for finance teams.</p>
+              </article>
+              <article>
+                <div class="card__image card__image--fog"></div>
+                <p class="card__name">Northbound</p>
+                <p class="card__description">Identity and packaging for an alpine outfitter.</p>
+              </article>
+              <article>
+                <div class="card__image card__image--ash"></div>
+                <p class="card__name">Atlas</p>
+                <p class="card__description">Editorial marketing site with a live data spine.</p>
+              </article>
+            </div>
+          </div>
+        </article>
+
+        <article class="component">
+          <h3 class="component__title">Banded index row</h3>
+          <p class="component__spec caption">
+            Grid 32px / 1fr / 160px / 64px · 16px padding · mist on odd rows, paper on even · 12px
+            caption numeral · no row borders — the band is the separator
+          </p>
+          <div class="component__stage">
+            <ul class="band-list">
+              <li class="band-row">
+                <span class="caption">01</span><span>Ledger — payments console</span
+                ><span>Product</span><span>2026</span>
+              </li>
+              <li class="band-row">
+                <span class="caption">02</span><span>Northbound — brand system</span
+                ><span>Branding</span><span>2026</span>
+              </li>
+              <li class="band-row">
+                <span class="caption">03</span><span>Atlas — marketing site</span><span>Web</span
+                ><span>2026</span>
+              </li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="component">
+          <h3 class="component__title">Buttons</h3>
+          <p class="component__spec caption">
+            Filled: charcoal fill, paper text. Outlined: transparent, 1px fog border, ink text. Both
+            16px, 12px/6px padding, 8px radius, 96px minimum width · hover shifts the outline to ash,
+            nothing else moves
+          </p>
+          <div class="component__stage">
+            <div class="stage-row">
+              <button class="button button--filled" type="button">All</button>
+              <button class="button button--outlined" type="button">Web</button>
+              <button class="button button--outlined" type="button">Branding</button>
+              <button class="button button--outlined" type="button">Product</button>
+              <button class="button button--outlined" type="button">Motion</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="component">
+          <h3 class="component__title">Subscribe field</h3>
+          <p class="component__spec caption">
+            Field: 1px fog border, 8px radius, 12px/16px padding, ash placeholder · 8px gap to the
+            filled button · pair max-width 480px
+          </p>
+          <div class="component__stage">
+            <form class="subscribe" action="#" method="post" novalidate>
+              <label class="subscribe__field">
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="you@email.com"
+                  aria-label="Email address"
+                  style="
+                    width: 100%;
+                    border: 0;
+                    background: transparent;
+                    color: var(--color-ink-black);
+                    font: inherit;
+                    letter-spacing: inherit;
+                    outline: none;
+                  "
+                />
+              </label>
+              <button class="button button--filled" type="submit">Subscribe</button>
+            </form>
+          </div>
+        </article>
+
+        <article class="component">
+          <h3 class="component__title">Full-bleed panel</h3>
+          <p class="component__spec caption">
+            Three equal tiles, 3/4 aspect, 12px radius, 16px gutters · the image is the tile · caption
+            block sits below the whole set, never above
+          </p>
+          <div class="component__stage">
+            <div class="card-grid" style="gap: var(--spacing-16)">
+              <div class="card__image" style="aspect-ratio: 3 / 4; background: var(--color-ink-black)"></div>
+              <div class="card__image" style="aspect-ratio: 3 / 4; background: var(--color-graphite)"></div>
+              <div class="card__image card__image--fog" style="aspect-ratio: 3 / 4"></div>
+            </div>
+            <p class="card__name">Selected brand work</p>
+            <p class="card__description">Three long-running identity engagements, 2024—2026.</p>
+          </div>
+        </article>
+
+        <article class="component">
+          <h3 class="component__title">Caption block</h3>
+          <p class="component__spec caption">
+            Two lines, no box: name 16px ink, description 16px graphite, 12px gap · used under every
+            image, tile, and panel
+          </p>
+          <div class="component__stage">
+            <p class="card__name" style="margin-top: 0">Signal — motion study</p>
+            <p class="card__description">Motion · 2025</p>
+          </div>
+        </article>
+
+        <article class="component">
+          <h3 class="component__title">Footer</h3>
+          <p class="component__spec caption">
+            Same white canvas as the page · 64px top margin · 16px graphite text, ink links · never
+            an inverted dark block
+          </p>
+          <div class="component__stage">
+            <p style="margin: 0; color: var(--color-graphite)">
+              David Lafond Designs — AColorBright system.
+              <span style="color: var(--color-ink-black)">Return to the live index</span>.
+            </p>
+          </div>
+        </article>
+      </section>
+
+      <section class="chapter" id="rules-and-tokens">
+        <h2 class="chapter__heading"><span class="chapter__badge">5</span>Rules and tokens</h2>
+        <p class="chapter__body">
+          The constraints are the system. Most review notes on these surfaces trace back to one of
+          the lines below.
+        </p>
+        <div class="rules">
+          <div>
+            <h3 class="rules__title">Do</h3>
+            <ul class="rules__list">
+              <li>Keep every weight at 400 and let size carry hierarchy.</li>
+              <li>Apply −0.01em tracking at every size, without exception.</li>
+              <li>Open each chapter with the numbered black badge.</li>
+              <li>Use 12px radius on imagery and 8px on controls.</li>
+              <li>Leave 64px between chapters and 256px above the hero.</li>
+              <li>Let photography be the only saturated thing on the page.</li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="rules__title">Don't</h3>
+            <ul class="rules__list">
+              <li>Add an accent hue, gradient, or tinted UI chrome.</li>
+              <li>Reach for a shadow, blur, or any raised surface.</li>
+              <li>Use font weight 600 or 700 to fix weak hierarchy.</li>
+              <li>Wrap body copy in a bordered or filled card.</li>
+              <li>Invent a font size outside 12, 16, 18, 24, 40, 64.</li>
+              <li>Fill panels with mist — banding lists is its only job.</li>
+              <li>Add icons beyond the hamburger glyph.</li>
+              <li>Set readable text in pure black.</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3 class="chapter__part">Token ledger</h3>
+        <p class="note">
+          The values below are the source for every surface in this project. Copy them straight into
+          a stylesheet.
+        </p>
+        <ul class="tokens" id="token-ledger">
+          <li class="tokens__group">Color</li>
+          <li class="tokens__row" data-token="--color-ink-black" data-value="#1a1a1a">
+            <span>--color-ink-black</span><span>#1a1a1a</span><span>Primary text, structural borders</span>
+          </li>
+          <li class="tokens__row" data-token="--color-charcoal" data-value="#262626">
+            <span>--color-charcoal</span><span>#262626</span><span>Filled button surfaces</span>
+          </li>
+          <li class="tokens__row" data-token="--color-graphite" data-value="#666666">
+            <span>--color-graphite</span><span>#666666</span><span>Body copy, captions</span>
+          </li>
+          <li class="tokens__row" data-token="--color-ash" data-value="#999999">
+            <span>--color-ash</span><span>#999999</span><span>Control outlines, placeholders</span>
+          </li>
+          <li class="tokens__row" data-token="--color-fog" data-value="#e6e6e6">
+            <span>--color-fog</span><span>#e6e6e6</span><span>Hairlines, outlined buttons</span>
+          </li>
+          <li class="tokens__row" data-token="--color-mist" data-value="#f2f2f2">
+            <span>--color-mist</span><span>#f2f2f2</span><span>List bands, image wells</span>
+          </li>
+          <li class="tokens__row" data-token="--color-paper" data-value="#ffffff">
+            <span>--color-paper</span><span>#ffffff</span><span>Canvas, card surface</span>
+          </li>
+          <li class="tokens__row" data-token="--color-pure-black" data-value="#000000">
+            <span>--color-pure-black</span><span>#000000</span><span>Badges, SVG fills</span>
+          </li>
+
+          <li class="tokens__group">Typography</li>
+          <li
+            class="tokens__row"
+            data-token="--font-riformallweb"
+            data-value="'RiformaLLWeb', 'Inter Tight', Inter, ui-sans-serif, system-ui, sans-serif"
+          >
+            <span>--font-riformallweb</span><span>RiformaLLWeb</span
+            ><span>Sole family; Inter Tight substitute</span>
+          </li>
+          <li class="tokens__row" data-token="--text-caption" data-value="12px">
+            <span>--text-caption</span><span>12px</span><span>Line height 1.2</span>
+          </li>
+          <li class="tokens__row" data-token="--text-body-sm" data-value="16px">
+            <span>--text-body-sm</span><span>16px</span><span>Line height 1.25</span>
+          </li>
+          <li class="tokens__row" data-token="--text-body" data-value="18px">
+            <span>--text-body</span><span>18px</span><span>Line height 1.25</span>
+          </li>
+          <li class="tokens__row" data-token="--text-subheading" data-value="24px">
+            <span>--text-subheading</span><span>24px</span><span>Line height 1.15</span>
+          </li>
+          <li class="tokens__row" data-token="--text-heading" data-value="40px">
+            <span>--text-heading</span><span>40px</span><span>Line height 1.1</span>
+          </li>
+          <li class="tokens__row" data-token="--text-display" data-value="64px">
+            <span>--text-display</span><span>64px</span><span>Line height 1.0</span>
+          </li>
+          <li class="tokens__row" data-token="--tracking-all" data-value="-0.01em">
+            <span>--tracking-all</span><span>-0.01em</span><span>Applied to every element</span>
+          </li>
+          <li class="tokens__row" data-token="--font-weight-regular" data-value="400">
+            <span>--font-weight-regular</span><span>400</span><span>The only weight</span>
+          </li>
+
+          <li class="tokens__group">Space, shape, layout</li>
+          <li class="tokens__row" data-token="--spacing-8" data-value="8px">
+            <span>--spacing-8</span><span>8px</span><span>Base unit</span>
+          </li>
+          <li class="tokens__row" data-token="--spacing-16" data-value="16px">
+            <span>--spacing-16</span><span>16px</span><span>Element gap</span>
+          </li>
+          <li class="tokens__row" data-token="--spacing-24" data-value="24px">
+            <span>--spacing-24</span><span>24px</span><span>Block padding</span>
+          </li>
+          <li class="tokens__row" data-token="--spacing-32" data-value="32px">
+            <span>--spacing-32</span><span>32px</span><span>Edge padding, gutters</span>
+          </li>
+          <li class="tokens__row" data-token="--spacing-64" data-value="64px">
+            <span>--spacing-64</span><span>64px</span><span>Chapter separation</span>
+          </li>
+          <li class="tokens__row" data-token="--radius-buttons" data-value="8px">
+            <span>--radius-buttons</span><span>8px</span><span>Buttons, inputs</span>
+          </li>
+          <li class="tokens__row" data-token="--radius-images" data-value="12px">
+            <span>--radius-images</span><span>12px</span><span>Imagery, tiles</span>
+          </li>
+          <li class="tokens__row" data-token="--radius-nav" data-value="16px">
+            <span>--radius-nav</span><span>16px</span><span>Nav containers</span>
+          </li>
+          <li class="tokens__row" data-token="--page-max-width" data-value="1200px">
+            <span>--page-max-width</span><span>1200px</span><span>Centered page width</span>
+          </li>
+        </ul>
+        <div class="copy">
+          <button class="button button--filled" id="copy-tokens" type="button">
+            Copy CSS variables
+          </button>
+          <span aria-live="polite" class="copy__status" id="copy-status"></span>
+        </div>
+      </section>
+
+      <footer class="footer">
+        David Lafond Designs — AColorBright design system.
+        <a href="variants/index.html">See the five index variants</a> or
+        <a href="hub.html">return to the hub</a>.
+      </footer>
+    </div>
+
+    <script>
+      (function () {
+        const trigger = document.getElementById('copy-tokens');
+        const status = document.getElementById('copy-status');
+        const ledger = document.getElementById('token-ledger');
+
+        function buildCss() {
+          const lines = [':root {'];
+          let count = 0;
+          for (const node of ledger.children) {
+            if (node.classList.contains('tokens__group')) {
+              lines.push('  /* ' + node.textContent.trim() + ' */');
+              continue;
+            }
+            lines.push('  ' + node.dataset.token + ': ' + node.dataset.value + ';');
+            count += 1;
+          }
+          lines.push('}');
+          return { css: lines.join('\n'), count: count };
+        }
+
+        async function copy(text) {
+          if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(text);
+            return;
+          }
+          const field = document.createElement('textarea');
+          field.value = text;
+          field.setAttribute('readonly', '');
+          field.style.position = 'fixed';
+          field.style.opacity = '0';
+          document.body.appendChild(field);
+          field.select();
+          document.execCommand('copy');
+          field.remove();
+        }
+
+        trigger.addEventListener('click', async function () {
+          const tokens = buildCss();
+          try {
+            await copy(tokens.css);
+            status.textContent = 'Copied ' + tokens.count + ' variables to the clipboard.';
+          } catch (error) {
+            status.textContent = 'Copy blocked by the browser — select the ledger and copy manually.';
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>

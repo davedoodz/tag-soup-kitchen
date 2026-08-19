@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Six top-nav variants for a product designer portfolio, built in the Harbour Manrope system."
+    />
+    <meta name="theme-color" content="#e6ebee" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 44'%3E%3Cpath d='M0 44V0h27.5C38.82 0 48 9.18 48 20.5V44H33.5V22c0-4.14-3.36-7.5-7.5-7.5H14.5V44H0Z'/%3E%3C/svg%3E" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@300..800&family=IBM+Plex+Mono:wght@400&display=swap"
+    />
+    <link rel="stylesheet" href="shared/harbour.css" />
+    <title>Top nav variants — Harbour</title>
+  </head>
+  <body class="hb">
+    <main class="hb-page">
+      <header class="hb-masthead hb-gutter">
+        <div>
+          <p class="hb-eyebrow">TOP NAV · HARBOUR · SIX VARIANTS</p>
+          <h1 class="hb-display">Nav, six ways</h1>
+        </div>
+        <p class="hb-lede">
+          Each bar carries one name token from the set and answers a different portfolio question:
+          who is this, what is the work, and is he available.
+        </p>
+      </header>
+
+      <!-- 01 — editorial rail -->
+      <section class="nav-case">
+        <p class="nav-case__label"><i>01</i><b>Editorial rail — stacked mark, four links, hairline</b></p>
+        <nav class="nav nav--rail" aria-label="Editorial rail">
+          <a class="nav-mark-stack" href="#01"><div><b>David</b><span>Lafond</span></div></a>
+          <div class="nav__group nav__group--links">
+            <a class="nav__link" href="#work" aria-current="page">Work</a>
+            <a class="nav__link" href="#studio">Studio</a>
+            <a class="nav__link" href="#notes">Notes</a>
+            <a class="nav__link" href="#contact">Contact</a>
+          </div>
+        </nav>
+      </section>
+
+      <!-- 02 — numbered index -->
+      <section class="nav-case">
+        <p class="nav-case__label"><i>02</i><b>Numbered index — monogram, mono numerals, availability</b></p>
+        <nav class="nav nav--index" aria-label="Numbered index">
+          <a class="nav-mark-square" href="#02"><i>DL</i><b>David Lafond</b></a>
+          <div class="nav__group nav__group--links">
+            <a class="nav-numbered" href="#selected" aria-current="page"><i>01</i><span>Selected work</span></a>
+            <a class="nav-numbered" href="#systems"><i>02</i><span>Systems</span></a>
+            <a class="nav-numbered" href="#about"><i>03</i><span>About</span></a>
+          </div>
+          <span class="nav-status">Open for Sep</span>
+        </nav>
+      </section>
+
+      <!-- 03 — navy bar -->
+      <section class="nav-case">
+        <p class="nav-case__label"><i>03</i><b>Navy bar — caps lockup, inverted, one outlined action</b></p>
+        <nav class="nav nav--navy" aria-label="Navy bar">
+          <a class="nav-mark-caps" href="#03"><b>DAVID</b><span>LAFOND</span></a>
+          <div class="nav__group nav__group--links">
+            <a class="nav__link" href="#work" aria-current="page">Work</a>
+            <a class="nav__link" href="#process">Process</a>
+            <a class="nav__link" href="#writing">Writing</a>
+            <a class="nav__link" href="#cv">CV</a>
+          </div>
+          <div class="nav__group" style="gap: var(--spacing-hb-16)">
+            <span class="nav-clock">MTL 14:20</span>
+            <a class="nav-cta nav-cta--ghost" href="#call">Book a call</a>
+          </div>
+        </nav>
+      </section>
+
+      <!-- 04 — floating pill -->
+      <section class="nav-case">
+        <p class="nav-case__label"><i>04</i><b>Floating pill — tight wordmark, sticky over work</b></p>
+        <div class="nav-stage">
+          <nav class="nav-pill" aria-label="Floating pill">
+            <a class="nav-pill__mark" href="#04">davidlafond<i>.</i></a>
+            <div class="nav-pill__links">
+              <a href="#work" aria-current="page">Work</a>
+              <a href="#studio">Studio</a>
+              <a href="#notes">Notes</a>
+            </div>
+            <a class="nav-cta" href="#hello">Say hello</a>
+          </nav>
+        </div>
+      </section>
+
+      <!-- 05 — two-tier utility -->
+      <section class="nav-case">
+        <p class="nav-case__label"><i>05</i><b>Two-tier utility — rule lockup, subscribe, filter tier</b></p>
+        <div class="nav-tiers">
+          <nav class="nav-tiers__top" aria-label="Two-tier utility">
+            <a class="nav-mark-rule" href="#05">david<i></i>lafond</a>
+            <form class="nav-subscribe" action="#subscribe" method="post">
+              <label class="visually-hidden" for="nav-email">Email address</label>
+              <input id="nav-email" type="email" name="email" placeholder="you@studio.com" />
+              <button type="submit">Subscribe</button>
+            </form>
+          </nav>
+          <div class="nav-tiers__bottom">
+            <div class="nav-chips">
+              <button class="nav-chip" type="button" aria-pressed="true">All 24</button>
+              <button class="nav-chip" type="button" aria-pressed="false">Product</button>
+              <button class="nav-chip" type="button" aria-pressed="false">Systems</button>
+              <button class="nav-chip" type="button" aria-pressed="false">Motion</button>
+              <button class="nav-chip" type="button" aria-pressed="false">Writing</button>
+            </div>
+            <span class="nav-sort">
+              Newest first
+              <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true">
+                <path
+                  d="m4 6 4 4 4-4"
+                  fill="none"
+                  stroke="var(--color-hb-graphite)"
+                  stroke-width="1.4"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 06 — archive rail -->
+      <section class="nav-case">
+        <p class="nav-case__label"><i>06</i><b>Archive rail — index token, keyboard-first, centred meta</b></p>
+        <nav class="nav nav--archive" aria-label="Archive rail">
+          <a class="nav-mark-index" href="#06"><i>DL—01</i><b>DAVID LAFOND</b></a>
+          <p class="nav__meta">24 PROJECTS · 2019—26 · PRODUCT DESIGN</p>
+          <div class="nav__group" style="gap: 18px">
+            <a class="nav__link" href="#contact" aria-current="page">Contact</a>
+            <span class="nav-key"><i>⌘K</i>Search</span>
+          </div>
+        </nav>
+      </section>
+
+      <footer class="hb-footer">
+        <span>Harbour — Manrope, harbour fog, channel navy.</span>
+        <span><a href="name-tokens.html">Name tokens</a> · <a href="hub.html">Hub</a></span>
+      </footer>
+    </main>
+  </body>
+</html>

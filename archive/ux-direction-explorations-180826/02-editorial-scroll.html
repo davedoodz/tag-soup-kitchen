@@ -1,0 +1,780 @@
+<!doctype html>
+<html lang="en" data-design-id="02-editorial-scroll" data-design-title="Editorial scroll">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Editorial scroll — David Lafond Designs</title>
+    <link rel="stylesheet" href="../../shared/review.css" />
+    <script src="../../shared/review.js" defer></script>
+    <style>
+      :root {
+        --paper: #e8e9e4;
+        --paper-deep: #d9dbd4;
+        --ink: #202326;
+        --ink-muted: #676b6b;
+        --accent: #752c37;
+        --focus: #2458a7;
+        --swatch-ledger: #b8c1b2;
+        --swatch-northbound: #d6b7a3;
+        --swatch-atlas: #9baeb8;
+        --swatch-signal: #c9b8c9;
+        --swatch-foundry: #b6a797;
+        --swatch-quarter: #c7c19b;
+        --swatch-meridian: #9fbeb4;
+        --swatch-harbour: #a9b8c9;
+        --swatch-cadence: #c6aeb1;
+        --swatch-solstice: #bfb398;
+        --swatch-terrace: #b4b8a0;
+        --swatch-prism: #a7a3bd;
+        --space-1: 4px;
+        --space-2: 8px;
+        --space-3: 12px;
+        --space-4: 16px;
+        --space-6: 24px;
+        --space-8: 32px;
+        --space-12: 48px;
+        --space-16: 64px;
+        --space-24: 96px;
+        --edge: clamp(24px, 5vw, 96px);
+        --measure: 34rem;
+        --rule: 1px;
+        --rail-width: 2px;
+        --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+        scroll-snap-type: y mandatory;
+        background: var(--paper);
+      }
+
+      body {
+        margin: 0;
+        padding-bottom: 96px;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 16px;
+        line-height: 1.4;
+      }
+
+      a,
+      button {
+        color: inherit;
+      }
+
+      a:focus-visible,
+      button:focus-visible {
+        outline: 3px solid var(--focus);
+        outline-offset: var(--space-1);
+      }
+
+      .site-link {
+        position: fixed;
+        z-index: 20;
+        top: var(--space-6);
+        left: var(--edge);
+        padding-block: var(--space-1);
+        border-bottom: var(--rule) solid currentColor;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-decoration: none;
+        text-transform: uppercase;
+      }
+
+      .counter {
+        position: fixed;
+        z-index: 20;
+        top: var(--space-6);
+        right: clamp(52px, 5vw, 80px);
+        min-width: 5.4em;
+        color: var(--ink-muted);
+        font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-align: right;
+      }
+
+      .progress {
+        position: fixed;
+        z-index: 20;
+        top: 50%;
+        right: clamp(12px, 2vw, 32px);
+        display: grid;
+        gap: var(--space-3);
+        width: var(--space-6);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        transform: translateY(-50%);
+      }
+
+      .progress button {
+        display: grid;
+        width: 100%;
+        height: var(--space-4);
+        padding: 0;
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+        place-items: center end;
+      }
+
+      .progress button::before {
+        width: 50%;
+        height: var(--rail-width);
+        background: var(--ink-muted);
+        content: "";
+        opacity: 0.4;
+        transition:
+          width 240ms var(--ease),
+          background-color 240ms var(--ease),
+          opacity 240ms var(--ease);
+      }
+
+      .progress button:hover::before,
+      .progress button:focus-visible::before {
+        width: 75%;
+        opacity: 0.8;
+      }
+
+      .progress button[aria-current="true"]::before {
+        width: 100%;
+        background: var(--accent);
+        opacity: 1;
+      }
+
+      .snap-section {
+        position: relative;
+        height: 100svh;
+        min-height: 100svh;
+        overflow: hidden;
+        scroll-snap-align: start;
+        scroll-snap-stop: always;
+      }
+
+      .hero,
+      .closing {
+        display: grid;
+        align-content: end;
+        padding: var(--space-24) calc(var(--edge) + var(--space-8)) var(--space-16) var(--edge);
+      }
+
+      .hero::before,
+      .closing::before {
+        position: absolute;
+        inset: var(--space-16) calc(var(--edge) + var(--space-8)) var(--space-16) var(--edge);
+        border-top: var(--rule) solid var(--ink-muted);
+        border-bottom: var(--rule) solid var(--ink-muted);
+        content: "";
+        opacity: 0.45;
+        pointer-events: none;
+      }
+
+      .hero-kicker,
+      .closing-kicker,
+      .project-meta {
+        margin: 0 0 var(--space-4);
+        color: var(--accent);
+        font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .hero h1,
+      .closing h2 {
+        max-width: 13ch;
+        margin: 0;
+        font-family: "Iowan Old Style", Baskerville, Georgia, serif;
+        font-size: clamp(64px, 12vw, 184px);
+        font-weight: 400;
+        letter-spacing: -0.055em;
+        line-height: 0.82;
+      }
+
+      .direction,
+      .closing-copy {
+        max-width: var(--measure);
+        margin: var(--space-8) 0 0;
+        font-family: "Iowan Old Style", Baskerville, Georgia, serif;
+        font-size: clamp(19px, 2vw, 28px);
+        line-height: 1.25;
+      }
+
+      .scroll-cue {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-3);
+        margin-top: var(--space-8);
+        color: var(--ink-muted);
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      .scroll-cue::before {
+        width: var(--space-12);
+        height: var(--rule);
+        background: currentColor;
+        content: "";
+      }
+
+      .project {
+        display: grid;
+        grid-template-columns: minmax(15rem, 0.82fr) minmax(20rem, 1.18fr);
+        gap: clamp(32px, 6vw, 112px);
+        align-items: center;
+        padding: var(--space-16) calc(var(--edge) + var(--space-8)) var(--space-16) var(--edge);
+        border-top: var(--rule) solid var(--paper-deep);
+      }
+
+      .project--reverse {
+        grid-template-columns: minmax(20rem, 1.18fr) minmax(15rem, 0.82fr);
+      }
+
+      .project--reverse .project-copy {
+        grid-column: 2;
+      }
+
+      .project--reverse .media-stage {
+        grid-row: 1;
+        grid-column: 1;
+        justify-content: flex-start;
+      }
+
+      .project-copy {
+        position: relative;
+        z-index: 1;
+        align-self: center;
+        max-width: 38rem;
+      }
+
+      .project-number {
+        display: block;
+        margin-bottom: clamp(-36px, -3vw, -20px);
+        color: var(--paper-deep);
+        font-family: "Iowan Old Style", Baskerville, Georgia, serif;
+        font-size: clamp(128px, 19vw, 320px);
+        font-weight: 400;
+        letter-spacing: -0.08em;
+        line-height: 0.7;
+        user-select: none;
+      }
+
+      .project h2 {
+        position: relative;
+        margin: 0;
+        font-family: "Iowan Old Style", Baskerville, Georgia, serif;
+        font-size: clamp(40px, 6.4vw, 96px);
+        font-weight: 400;
+        letter-spacing: -0.045em;
+        line-height: 0.92;
+      }
+
+      .project-description {
+        max-width: 31rem;
+        margin: var(--space-6) 0 0;
+        font-family: "Iowan Old Style", Baskerville, Georgia, serif;
+        font-size: clamp(17px, 1.5vw, 22px);
+        line-height: 1.35;
+      }
+
+      .project-meta {
+        margin-top: var(--space-6);
+        margin-bottom: 0;
+        color: var(--ink-muted);
+      }
+
+      .media-stage {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        min-width: 0;
+      }
+
+      .project-media {
+        position: relative;
+        width: min(100%, calc(70svh * var(--aspect)));
+        aspect-ratio: var(--ratio);
+        overflow: hidden;
+        background: var(--media-color);
+      }
+
+      .project-media::before,
+      .project-media::after {
+        position: absolute;
+        content: "";
+        pointer-events: none;
+      }
+
+      .project-media::before {
+        inset: var(--space-4);
+        border: var(--rule) solid var(--ink);
+        opacity: 0.18;
+      }
+
+      .project-media::after {
+        right: var(--space-6);
+        bottom: var(--space-6);
+        width: var(--space-12);
+        height: var(--rule);
+        background: var(--ink);
+        opacity: 0.38;
+      }
+
+      .reveal {
+        opacity: 0;
+        transform: translateY(var(--space-8));
+        transition:
+          opacity 800ms var(--ease),
+          transform 900ms var(--ease);
+      }
+
+      .media-stage.reveal {
+        transition-delay: 110ms;
+      }
+
+      .snap-section.is-visible .reveal {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .closing {
+        background: var(--ink);
+        color: var(--paper);
+      }
+
+      .closing::before {
+        border-color: var(--paper);
+        opacity: 0.28;
+      }
+
+      .closing-kicker {
+        color: var(--swatch-northbound);
+      }
+
+      .closing a {
+        width: fit-content;
+        margin-top: var(--space-8);
+        padding-bottom: var(--space-2);
+        border-bottom: var(--rule) solid currentColor;
+        font-family: "Iowan Old Style", Baskerville, Georgia, serif;
+        font-size: clamp(20px, 2.5vw, 36px);
+        text-decoration: none;
+      }
+
+      @media (max-width: 860px) {
+        .site-link,
+        .counter {
+          top: var(--space-4);
+        }
+
+        .project,
+        .project--reverse {
+          grid-template-columns: minmax(0, 1fr);
+          grid-template-rows: auto minmax(0, 1fr);
+          gap: var(--space-6);
+          align-content: center;
+          padding: var(--space-16) calc(var(--edge) + var(--space-8)) var(--space-8) var(--edge);
+        }
+
+        .project--reverse .project-copy,
+        .project--reverse .media-stage {
+          grid-row: auto;
+          grid-column: 1;
+        }
+
+        .project--reverse .project-copy {
+          order: 1;
+          text-align: right;
+          justify-self: end;
+        }
+
+        .project--reverse .project-description {
+          margin-left: auto;
+        }
+
+        .project--reverse .media-stage {
+          order: 2;
+          justify-content: flex-end;
+        }
+
+        .project-number {
+          position: absolute;
+          top: -10px;
+          right: 0;
+          margin: 0;
+          font-size: clamp(96px, 28vw, 180px);
+          line-height: 0.75;
+        }
+
+        .project--reverse .project-number {
+          right: auto;
+          left: 0;
+        }
+
+        .project h2 {
+          max-width: 10ch;
+        }
+
+        .project--reverse h2 {
+          margin-left: auto;
+        }
+
+        .project-description {
+          margin-top: var(--space-4);
+        }
+
+        .project-meta {
+          margin-top: var(--space-3);
+        }
+
+        .project-media {
+          width: min(100%, calc(42svh * var(--aspect)));
+          max-height: 42svh;
+        }
+
+        .hero,
+        .closing {
+          padding: var(--space-24) calc(var(--edge) + var(--space-8)) var(--space-12) var(--edge);
+        }
+      }
+
+      @media (max-width: 520px) {
+        :root {
+          --edge: 20px;
+          --review-clearance: 216px;
+        }
+
+        .site-link {
+          font-size: 10px;
+        }
+
+        .counter {
+          right: 48px;
+          font-size: 10px;
+        }
+
+        .progress {
+          right: var(--space-2);
+          gap: var(--space-2);
+          width: var(--space-4);
+        }
+
+        .hero,
+        .closing {
+          padding-right: calc(var(--edge) + var(--space-8));
+          padding-bottom: var(--review-clearance);
+        }
+
+        .hero::before,
+        .closing::before {
+          inset: var(--space-12) calc(var(--edge) + var(--space-8)) var(--review-clearance) var(--edge);
+        }
+
+        .hero h1,
+        .closing h2 {
+          font-size: clamp(56px, 21vw, 88px);
+        }
+
+        .project,
+        .project--reverse {
+          gap: var(--space-4);
+          padding-top: var(--space-12);
+          padding-right: calc(var(--edge) + var(--space-8));
+          padding-bottom: var(--review-clearance);
+        }
+
+        .project-number {
+          top: -4px;
+        }
+
+        .project h2 {
+          font-size: clamp(40px, 14vw, 64px);
+        }
+
+        .project-description {
+          font-size: 16px;
+        }
+
+        .project-media {
+          width: min(100%, calc(30svh * var(--aspect)));
+          max-height: 30svh;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          scroll-behavior: auto !important;
+          transition-duration: 0.01ms !important;
+        }
+
+        .reveal,
+        .snap-section.is-visible .reveal {
+          opacity: 1;
+          transform: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a class="site-link" href="index.html">All designs</a>
+    <output class="counter" aria-live="polite" aria-label="Current project">00 / 12</output>
+
+    <nav aria-label="Project progress">
+      <ol class="progress">
+        <li><button type="button" data-project="1" aria-label="Go to project 1, Ledger"></button></li>
+        <li><button type="button" data-project="2" aria-label="Go to project 2, Northbound"></button></li>
+        <li><button type="button" data-project="3" aria-label="Go to project 3, Atlas"></button></li>
+        <li><button type="button" data-project="4" aria-label="Go to project 4, Signal"></button></li>
+        <li><button type="button" data-project="5" aria-label="Go to project 5, Foundry"></button></li>
+        <li><button type="button" data-project="6" aria-label="Go to project 6, Quarter"></button></li>
+        <li><button type="button" data-project="7" aria-label="Go to project 7, Meridian"></button></li>
+        <li><button type="button" data-project="8" aria-label="Go to project 8, Harbour"></button></li>
+        <li><button type="button" data-project="9" aria-label="Go to project 9, Cadence"></button></li>
+        <li><button type="button" data-project="10" aria-label="Go to project 10, Solstice"></button></li>
+        <li><button type="button" data-project="11" aria-label="Go to project 11, Terrace"></button></li>
+        <li><button type="button" data-project="12" aria-label="Go to project 12, Prism"></button></li>
+      </ol>
+    </nav>
+
+    <main>
+      <section class="hero snap-section" id="hero" data-position="0" aria-labelledby="hero-title">
+        <div class="reveal">
+          <p class="hero-kicker">David Lafond Designs · Selected work 2023–2026</p>
+          <h1 id="hero-title">Work, in sequence.</h1>
+          <p class="direction">A slow editorial portfolio: one project, one frame, one considered pause at a time.</p>
+          <span class="scroll-cue" aria-hidden="true">Scroll to read</span>
+        </div>
+      </section>
+
+      <section class="project snap-section" id="project-1" data-position="1" aria-labelledby="project-1-title" style="--ratio: 4 / 3; --aspect: 1.333; --media-color: var(--swatch-ledger)">
+        <div class="project-copy reveal">
+          <span class="project-number" aria-hidden="true">01</span>
+          <h2 id="project-1-title">Ledger</h2>
+          <p class="project-description">A calm payments console that turns complex money movement into a clear daily rhythm.</p>
+          <p class="project-meta">Payments console · Product · 2026</p>
+        </div>
+        <div class="media-stage reveal"><div class="project-media" role="img" aria-label="Placeholder for Ledger project media, four by three"></div></div>
+      </section>
+
+      <section class="project project--reverse snap-section" id="project-2" data-position="2" aria-labelledby="project-2-title" style="--ratio: 1 / 1; --aspect: 1; --media-color: var(--swatch-northbound)">
+        <div class="project-copy reveal">
+          <span class="project-number" aria-hidden="true">02</span>
+          <h2 id="project-2-title">Northbound</h2>
+          <p class="project-description">A flexible identity system built to orient an outdoor brand without limiting its range.</p>
+          <p class="project-meta">Brand system · Branding · 2026</p>
+        </div>
+        <div class="media-stage reveal"><div class="project-media" role="img" aria-label="Placeholder for Northbound project media, square"></div></div>
+      </section>
+
+      <section class="project snap-section" id="project-3" data-position="3" aria-labelledby="project-3-title" style="--ratio: 16 / 9; --aspect: 1.778; --media-color: var(--swatch-atlas)">
+        <div class="project-copy reveal">
+          <span class="project-number" aria-hidden="true">03</span>
+          <h2 id="project-3-title">Atlas</h2>
+          <p class="project-description">A modular marketing site that gives a growing product story room to travel.</p>
+          <p class="project-meta">Marketing site · Web · 2026</p>
+        </div>
+        <div class="media-stage reveal"><div class="project-media" role="img" aria-label="Placeholder for Atlas project media, sixteen by nine"></div></div>
+      </section>
+
+      <section class="project project--reverse snap-section" id="project-4" data-position="4" aria-labelledby="project-4-title" style="--ratio: 16 / 10; --aspect: 1.6; --media-color: var(--swatch-signal)">
+        <div class="project-copy reveal">
+          <span class="project-number" aria-hidden="true">04</span>
+          <h2 id="project-4-title">Signal</h2>
+          <p class="project-description">A motion language study exploring how pace, pause, and response can carry meaning.</p>
+          <p class="project-meta">Motion study · Motion · 2025</p>
+        </div>
+        <div class="media-stage reveal"><div class="project-media" role="img" aria-label="Placeholder for Signal project media, sixteen by ten"></div></div>
+      </section>
+
+      <section class="project snap-section" id="project-5" data-position="5" aria-labelledby="project-5-title" style="--ratio: 4 / 3; --aspect: 1.333; --media-color: var(--swatch-foundry)">
+        <div class="project-copy reveal">
+          <span class="project-number" aria-hidden="true">05</span>
+          <h2 id="project-5-title">Foundry</h2>
+          <p class="project-description">Material studies in volume, light, and form made to test ideas before they become objects.</p>
+          <p class="project-meta">3D explorations · 3D · 2025</p>
+        </div>
+        <div class="media-stage reveal"><div class="project-media" role="img" aria-label="Placeholder for Foundry project media, four by three"></div></div>
+      </section>
+
+      <section class="project project--reverse snap-section" id="project-6" data-position="6" aria-labelledby="project-6-title" style="--ratio: 3 / 4; --aspect: 0.75; --media-color: var(--swatch-quarter)">
+        <div class="project-copy reveal">
+          <span class="project-number" aria-hidden="true">06</span>
+          <h2 id="project-6-title">Quarter</h2>
+          <p class="project-description">An annual report paced like a magazine, giving dense business stories a human cadence.</p>
+          <p class="project-meta">Print annual · Print · 2025</p>
+        </div>
+        <div class="media-stage reveal"><div class="project-media" role="img" aria-label="Placeholder for Quarter project media, three by four"></div></div>
+      </section>
+
+      <section class="project snap-section" id="project-7" data-position="7" aria-labelledby="project-7-title" style="--ratio: 1 / 1; --aspect: 1; --media-color: var(--swatch-meridian)">
+        <div class="project-copy reveal">
+          <span class="project-number" aria-hidden="true">07</span>
+          <h2 id="project-7-title">Meridian</h2>
+          <p class="project-description">An illustrated wayfinding family that makes unfamiliar civic spaces easier to read.</p>
+          <p class="project-meta">Wayfinding kit · Illustration · 2025</p>
+        </div>
+        <div class="media-stage reveal"><div class="project-media" role="img" aria-label="Placeholder for Meridian project media, square"></div></div>
+      </section>
+
+      <section class="project project--reverse snap-section" id="project-8" data-position="8" aria-labelledby="project-8-title" style="--ratio: 4 / 3; --aspect: 1.333; --media-color: var(--swatch-harbour)">
+        <div class="project-copy reveal">
+          <span class="project-number" aria-hidden="true">08</span>
+          <h2 id="project-8-title">Harbour</h2>
+          <p class="project-description">A booking flow that keeps changing plans legible from first search to final confirmation.</p>
+          <p class="project-meta">Booking flow · Product · 2024</p>
+        </div>
+        <div class="media-stage reveal"><div class="project-media" role="img" aria-label="Placeholder for Harbour project media, four by three"></div></div>
+      </section>
+
+      <section class="project snap-section" id="project-9" data-position="9" aria-labelledby="project-9-title" style="--ratio: 16 / 9; --aspect: 1.778; --media-color: var(--swatch-cadence)">
+        <div class="project-copy reveal">
+          <span class="project-number" aria-hidden="true">09</span>
+          <h2 id="project-9-title">Cadence</h2>
+          <p class="project-description">A practical design system that helps product teams move quickly without losing coherence.</p>
+          <p class="project-meta">Design system · Product · 2024</p>
+        </div>
+        <div class="media-stage reveal"><div class="project-media" role="img" aria-label="Placeholder for Cadence project media, sixteen by nine"></div></div>
+      </section>
+
+      <section class="project project--reverse snap-section" id="project-10" data-position="10" aria-labelledby="project-10-title" style="--ratio: 16 / 9; --aspect: 1.778; --media-color: var(--swatch-solstice)">
+        <div class="project-copy reveal">
+          <span class="project-number" aria-hidden="true">10</span>
+          <h2 id="project-10-title">Solstice</h2>
+          <p class="project-description">A campaign film shaped around long light, quiet transitions, and a single seasonal turn.</p>
+          <p class="project-meta">Campaign film · Motion · 2024</p>
+        </div>
+        <div class="media-stage reveal"><div class="project-media" role="img" aria-label="Placeholder for Solstice project media, sixteen by nine"></div></div>
+      </section>
+
+      <section class="project snap-section" id="project-11" data-position="11" aria-labelledby="project-11-title" style="--ratio: 1 / 1; --aspect: 1; --media-color: var(--swatch-terrace)">
+        <div class="project-copy reveal">
+          <span class="project-number" aria-hidden="true">11</span>
+          <h2 id="project-11-title">Terrace</h2>
+          <p class="project-description">A retail identity with enough structure for consistency and enough warmth for daily life.</p>
+          <p class="project-meta">Retail identity · Branding · 2024</p>
+        </div>
+        <div class="media-stage reveal"><div class="project-media" role="img" aria-label="Placeholder for Terrace project media, square"></div></div>
+      </section>
+
+      <section class="project project--reverse snap-section" id="project-12" data-position="12" aria-labelledby="project-12-title" style="--ratio: 3 / 2; --aspect: 1.5; --media-color: var(--swatch-prism)">
+        <div class="project-copy reveal">
+          <span class="project-number" aria-hidden="true">12</span>
+          <h2 id="project-12-title">Prism</h2>
+          <p class="project-description">A data visualisation suite that turns layered evidence into decisions people can explain.</p>
+          <p class="project-meta">Data viz suite · Web · 2023</p>
+        </div>
+        <div class="media-stage reveal"><div class="project-media" role="img" aria-label="Placeholder for Prism project media, three by two"></div></div>
+      </section>
+
+      <section class="closing snap-section" id="contact" data-position="13" aria-labelledby="contact-title">
+        <div class="reveal">
+          <p class="closing-kicker">End matter · New work welcome</p>
+          <h2 id="contact-title">Let’s make the next one.</h2>
+          <p class="closing-copy">Available for thoughtful product, brand, and digital collaborations.</p>
+          <a href="mailto:hello@davidlafond.design">Start a conversation</a>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      ;(() => {
+        const sections = [...document.querySelectorAll('.snap-section')]
+        const projects = [...document.querySelectorAll('.project')]
+        const ticks = [...document.querySelectorAll('[data-project]')]
+        const counter = document.querySelector('.counter')
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
+        let currentProject = 0
+
+        const paint = (position) => {
+          const nextProject = Math.min(12, Math.max(0, position))
+          if (nextProject === currentProject && counter.textContent !== '00 / 12') return
+          currentProject = nextProject
+          counter.textContent = `${String(nextProject).padStart(2, '0')} / 12`
+          counter.setAttribute('aria-label', nextProject ? `Project ${nextProject} of 12` : 'Portfolio introduction')
+
+          ticks.forEach((tick, index) => {
+            if (index + 1 === nextProject) tick.setAttribute('aria-current', 'true')
+            else tick.removeAttribute('aria-current')
+          })
+        }
+
+        ticks.forEach((tick) => {
+          tick.addEventListener('click', () => {
+            const project = projects[Number(tick.dataset.project) - 1]
+            project.scrollIntoView({
+              behavior: reducedMotion.matches ? 'auto' : 'smooth',
+              block: 'start',
+            })
+          })
+        })
+
+        document.addEventListener('keydown', (event) => {
+          if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return
+          if (event.target.matches('input, textarea, select, [contenteditable]')) return
+
+          const direction =
+            event.key === 'ArrowDown' || event.key === 'PageDown'
+              ? 1
+              : event.key === 'ArrowUp' || event.key === 'PageUp'
+                ? -1
+                : 0
+          if (!direction) return
+
+          const currentIndex = sections.reduce(
+            (nearest, section, index) =>
+              Math.abs(section.getBoundingClientRect().top) <
+              Math.abs(sections[nearest].getBoundingClientRect().top)
+                ? index
+                : nearest,
+            0,
+          )
+          const nextIndex = Math.min(sections.length - 1, Math.max(0, currentIndex + direction))
+          if (nextIndex === currentIndex) return
+          event.preventDefault()
+          sections[nextIndex].scrollIntoView({
+            behavior: reducedMotion.matches ? 'auto' : 'smooth',
+            block: 'start',
+          })
+        })
+
+        const observer = new IntersectionObserver(
+          (entries) => {
+            const visible = entries
+              .filter((entry) => entry.isIntersecting)
+              .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0]
+            if (!visible) return
+
+            visible.target.classList.add('is-visible')
+            const position = Number(visible.target.dataset.position)
+            if (position === 0) paint(0)
+            else if (position > 12) paint(12)
+            else paint(position)
+          },
+          { threshold: [0.35, 0.55, 0.75] },
+        )
+
+        sections.forEach((section) => observer.observe(section))
+        requestAnimationFrame(() => sections[0].classList.add('is-visible'))
+      })()
+    </script>
+  </body>
+</html>

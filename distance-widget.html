@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Distance-to-Montréal widget — 9 variations (System: TRANSIT)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   SYSTEM: TRANSIT
+   One widget, one job: how long until the visitor and I are in
+   the same room. Montréal (YUL) is the fixed end of every trip.
+
+   Three states, derived — never authored by hand:
+     SAME    great-circle < 30 km   -> "same city", no duration
+     DRIVE   30–900 km              -> road distance + drive time
+     FLIGHT  > 900 km               -> IATA pair + door-to-door time
+
+   Hard rules for the round:
+     - two families only: Manrope (UI) + IBM Plex Mono (data)
+     - every number is tabular; nothing reflows when it changes
+     - mode is carried by data-mode on the widget root; CSS
+       switches glyph + copy, JS never writes markup
+     - each widget sits in its own size container, so the same
+       component survives a 260px rail and a 640px canvas
+     - every animated readout has a reduced-motion path
+     - the control bar is real form controls, keyboard-first
+   ============================================================ */
+@property --sweep { syntax:"<angle>"; inherits:false; initial-value:0deg; }
+
+:root{
+  --paper:#E8E8E6;
+  --paper-2:#F3F3F1;
+  --ink:#0B0B0C;
+  --ink-2:#17181A;
+  --line:#CFCFCB;
+  --line-2:#DEDEDA;
+  --mute:#6E6E68;
+  --mute-2:#8C8C86;
+  --onink:#FAFAF8;
+  --onink-mute:#8A8A85;
+  --onink-line:#242528;
+  --live:#3DDC97;
+  --road:#F2A63C;
+
+  --ui:"Manrope", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --t-micro:10px; --t-meta:11px; --t-ui:13px; --t-lead:15px;
+  --s4:4px; --s6:6px; --s8:8px; --s12:12px; --s16:16px; --s20:20px;
+  --s24:24px; --s32:32px; --s40:40px; --s56:56px; --s72:72px;
+  --r-card:18px; --r-pill:999px;
+  --canvas:1240px;
+}
+*{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:var(--ui); font-weight:500;
+  font-synthesis:none; -webkit-font-smoothing:antialiased;
+}
+:where(a){color:inherit;}
+.wrap{max-width:var(--canvas); margin:0 auto; padding:var(--s40) var(--s24) var(--s72);}
+.meta{
+  font-family:var(--mono); font-weight:400; font-size:var(--t-meta);
+  letter-spacing:.08em; text-transform:uppercase; color:var(--mute);
+}
+.num{font-family:var(--mono); font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1;}
+
+/* ---------- page head ---------- */
+.head{border-bottom:1px solid var(--line); padding-bottom:var(--s24); margin-bottom:var(--s24);}
+.head h1{margin:var(--s12) 0 var(--s8); font-size:34px; font-weight:800; letter-spacing:-.03em;}
+.head p{margin:0; max-width:62ch; font-size:var(--t-lead); line-height:24px; color:var(--mute);}
+
+/* ---------- control bar ---------- */
+.bar{
+  position:sticky; top:0; z-index:20;
+  display:flex; flex-wrap:wrap; align-items:center; gap:var(--s12);
+  padding:var(--s12) 0; margin-bottom:var(--s32);
+  background:color-mix(in oklab, var(--paper) 88%, transparent);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.bar__label{margin-right:auto; display:flex; align-items:center; gap:var(--s8);}
+.dot{width:7px; height:7px; border-radius:50%; background:var(--live); flex:0 0 auto;}
+select.pick{
+  appearance:none;
+  font-family:var(--mono); font-size:var(--t-ui); color:var(--ink);
+  background:var(--paper-2) no-repeat right var(--s12) center;
+  background-image:linear-gradient(45deg,transparent 50%,var(--mute) 50%),linear-gradient(135deg,var(--mute) 50%,transparent 50%);
+  background-size:6px 6px,6px 6px; background-position:right 18px center,right 12px center;
+  border:1px solid var(--line); border-radius:var(--r-pill);
+  padding:9px var(--s32) 9px var(--s16); min-width:250px;
+}
+select.pick:focus-visible{outline:2px solid var(--ink); outline-offset:2px;}
+@supports (appearance:base-select){
+  select.pick{appearance:base-select; background-image:none; padding-right:var(--s16);}
+  select.pick::picker-icon{color:var(--mute); transition:transform .18s ease;}
+  select.pick:open::picker-icon{transform:rotate(180deg);}
+  select.pick::picker(select){
+    border:1px solid var(--line); border-radius:14px; background:var(--paper-2);
+    padding:var(--s6); margin-top:var(--s6); box-shadow:0 18px 40px rgb(0 0 0 / .14);
+  }
+  select.pick option{border-radius:9px; padding:7px var(--s12); font-family:var(--mono); font-size:var(--t-ui);}
+  select.pick option:checked{background:var(--ink); color:var(--onink);}
+}
+.btn{
+  font-family:var(--mono); font-size:var(--t-meta); letter-spacing:.06em; text-transform:uppercase;
+  color:var(--ink); background:transparent; border:1px solid var(--line);
+  border-radius:var(--r-pill); padding:9px var(--s16); cursor:pointer;
+  transition:background .16s ease, color .16s ease, border-color .16s ease;
+}
+.btn:hover{background:var(--ink); color:var(--onink); border-color:var(--ink);}
+.btn:focus-visible{outline:2px solid var(--ink); outline-offset:2px;}
+.btn[aria-pressed="true"]{background:var(--ink); color:var(--onink); border-color:var(--ink);}
+.bar__note{font-family:var(--mono); font-size:var(--t-micro); letter-spacing:.06em; color:var(--mute-2);}
+
+/* ---------- specimen scaffold ---------- */
+.grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(360px,1fr)); gap:var(--s32);}
+.spec{display:flex; flex-direction:column; gap:var(--s12); min-width:0;}
+.spec__head{display:flex; align-items:baseline; gap:var(--s12); border-top:1px solid var(--line); padding-top:var(--s12);}
+.spec__id{font-family:var(--mono); font-size:var(--t-micro); letter-spacing:.1em; color:var(--mute-2);}
+.spec__name{font-size:15px; font-weight:800; letter-spacing:-.01em;}
+.spec__why{margin:0; font-size:12px; line-height:18px; color:var(--mute);}
+.canvas{
+  container-type:inline-size;
+  display:flex; align-items:center; justify-content:center;
+  min-height:210px; padding:var(--s24);
+  background:var(--paper-2); border:1px solid var(--line-2); border-radius:var(--r-card);
+}
+.canvas--wide{align-items:stretch;}
+
+/* ---------- shared glyphs ---------- */
+.glyph{display:none; flex:0 0 auto;}
+[data-mode="flight"] .g-plane,
+[data-mode="drive"]  .g-car,
+[data-mode="same"]   .g-pin{display:block;}
+.glyph svg{display:block;}
+
+/* mode-conditional copy: one row per mode, only the live one renders */
+[data-only]{display:none;}
+[data-mode="flight"] [data-only~="flight"],
+[data-mode="drive"]  [data-only~="drive"],
+[data-mode="same"]   [data-only~="same"]{display:revert;}
+
+/* change pulse — the only motion the numeric readouts get */
+@media (prefers-reduced-motion:no-preference){
+  .pulse{animation:pulse .42s cubic-bezier(.22,1,.36,1);}
+  @keyframes pulse{
+    from{opacity:0; transform:translateY(6px); filter:blur(3px);}
+    to{opacity:1; transform:none; filter:blur(0);}
+  }
+}
+
+/* ============================================================
+   01 — TICKET  (the reference, tightened)
+   ============================================================ */
+.tk{
+  width:100%; max-width:420px; padding:var(--s20) var(--s24) var(--s24);
+  background:var(--ink); color:var(--onink); border-radius:var(--r-card);
+}
+.tk__top{display:flex; align-items:center; justify-content:space-between; gap:var(--s16);}
+.tk__label{font-size:var(--t-lead); font-weight:700; letter-spacing:-.01em;}
+.tk__glyph{color:var(--onink);}
+.tk__route{
+  margin:var(--s20) 0 var(--s6);
+  font-family:var(--mono); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--onink-mute);
+}
+.tk__big{
+  margin:0; font-family:var(--mono); font-weight:600; font-size:clamp(30px,10cqi,46px);
+  line-height:1.04; letter-spacing:-.03em; font-variant-numeric:tabular-nums;
+}
+.tk__sub{margin:var(--s8) 0 0; font-family:var(--mono); font-size:var(--t-meta); letter-spacing:.06em; color:var(--onink-mute);}
+
+/* ============================================================
+   02 — STUB  (boarding pass, perforated)
+   ============================================================ */
+.st{width:100%; max-width:460px; display:flex; background:var(--ink); color:var(--onink); border-radius:var(--r-card); overflow:hidden;}
+.st__main{flex:1 1 auto; padding:var(--s20) var(--s24); min-width:0;}
+.st__perf{
+  flex:0 0 1px; background:
+    repeating-linear-gradient(to bottom, var(--onink-line) 0 7px, transparent 7px 14px);
+}
+.st__side{flex:0 0 96px; padding:var(--s20) var(--s16); display:flex; flex-direction:column; justify-content:space-between; gap:var(--s16);}
+.st__row{display:flex; align-items:baseline; justify-content:space-between; gap:var(--s16);}
+.st__eyebrow{font-family:var(--mono); font-size:var(--t-micro); letter-spacing:.14em; text-transform:uppercase; color:var(--onink-mute);}
+.st__pair{margin:var(--s16) 0 var(--s12); display:flex; align-items:center; gap:var(--s12);}
+.st__code{font-family:var(--mono); font-weight:600; font-size:26px; letter-spacing:-.01em;}
+.st__dashes{flex:1 1 auto; height:1px; background:repeating-linear-gradient(to right,var(--onink-line) 0 4px,transparent 4px 8px);}
+.st__grid{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--s12); border-top:1px solid var(--onink-line); padding-top:var(--s12);}
+.st__k{font-family:var(--mono); font-size:var(--t-micro); letter-spacing:.1em; text-transform:uppercase; color:var(--onink-mute); margin:0 0 3px;}
+.st__v{font-family:var(--mono); font-size:var(--t-ui); font-variant-numeric:tabular-nums; margin:0;}
+.st__big{margin:0; font-family:var(--mono); font-weight:600; font-size:clamp(22px,7cqi,30px); letter-spacing:-.02em; font-variant-numeric:tabular-nums;}
+.st__bars{
+  height:44px; align-self:stretch;
+  background:repeating-linear-gradient(to right,
+    var(--onink) 0 2px, transparent 2px 4px, var(--onink) 4px 5px, transparent 5px 9px,
+    var(--onink) 9px 12px, transparent 12px 14px);
+  opacity:.85;
+}
+@container (max-width:330px){ .st__side{display:none;} .st__perf{display:none;} }
+
+/* ============================================================
+   03 — ARC  (great circle, drawn)
+   ============================================================ */
+.arc{width:100%; max-width:440px; text-align:center;}
+.arc__fig{display:block; width:100%; height:auto; overflow:visible;}
+.arc__path{fill:none; stroke:var(--ink); stroke-width:1.25; stroke-dasharray:4 4;}
+.arc__path--live{stroke-dasharray:none; stroke-width:1.5;}
+.arc__pin{fill:var(--ink);}
+.arc__pin--hollow{fill:var(--paper-2); stroke:var(--ink); stroke-width:1.5;}
+.arc__mover{fill:var(--ink);}
+.arc__cap{font-family:var(--mono); font-size:10px; letter-spacing:.12em; fill:var(--mute); text-transform:uppercase;}
+.arc__big{margin:var(--s8) 0 2px; font-family:var(--mono); font-weight:600; font-size:clamp(26px,8cqi,34px); letter-spacing:-.02em; font-variant-numeric:tabular-nums;}
+.arc__sub{margin:0; font-family:var(--mono); font-size:var(--t-meta); letter-spacing:.06em; color:var(--mute);}
+@media (prefers-reduced-motion:no-preference){
+  .arc__mover{animation:travel 5.5s linear infinite;}
+  @keyframes travel{from{offset-distance:0%}to{offset-distance:100%}}
+}
+
+/* ============================================================
+   04 — FLAP  (split-flap departure board)
+   ============================================================ */
+.fl{width:100%; max-width:430px; background:var(--ink); color:var(--onink); border-radius:14px; padding:var(--s20);}
+.fl__top{display:flex; align-items:center; justify-content:space-between; gap:var(--s12); margin-bottom:var(--s16);}
+.fl__dest{font-family:var(--mono); font-size:var(--t-meta); letter-spacing:.16em; text-transform:uppercase; color:var(--onink-mute);}
+.fl__tiles{display:flex; flex-wrap:wrap; gap:5px;}
+.fl__tile{
+  flex:0 0 auto; min-width:clamp(22px,8.5cqi,34px); padding:10px 0;
+  background:var(--ink-2); border-radius:5px;
+  font-family:var(--mono); font-weight:600; font-size:clamp(20px,6.5cqi,28px);
+  text-align:center; font-variant-numeric:tabular-nums;
+  box-shadow:inset 0 -1px 0 #000, inset 0 1px 0 #2A2C30;
+  position:relative;
+}
+.fl__tile::after{content:""; position:absolute; inset:auto 0 50% 0; height:1px; background:#000; opacity:.7;}
+.fl__tile--sep{min-width:20px; background:transparent; box-shadow:none; color:var(--onink-mute); font-weight:400;}
+.fl__tile--sep::after{display:none;}
+.fl__foot{margin:var(--s16) 0 0; font-family:var(--mono); font-size:var(--t-micro); letter-spacing:.1em; text-transform:uppercase; color:var(--onink-mute);}
+@media (prefers-reduced-motion:no-preference){
+  .fl__tile.flip{animation:flap .34s cubic-bezier(.3,0,.2,1) both;}
+  @keyframes flap{
+    0%{transform:perspective(180px) rotateX(-88deg); filter:brightness(.35);}
+    100%{transform:none; filter:none;}
+  }
+}
+
+/* ============================================================
+   05 — DIAL  (share of one day)
+   ============================================================ */
+.dl{display:flex; align-items:center; gap:var(--s24); width:100%; max-width:420px;}
+.dl__ring{
+  --sweep:0deg;
+  flex:0 0 auto; width:132px; aspect-ratio:1; border-radius:50%;
+  background:conic-gradient(var(--ink) var(--sweep), var(--line) 0);
+  display:grid; place-items:center;
+  transition:--sweep .95s cubic-bezier(.22,1,.36,1);
+}
+.dl__hole{width:104px; aspect-ratio:1; border-radius:50%; background:var(--paper-2); display:grid; place-items:center; text-align:center;}
+.dl__h{font-family:var(--mono); font-weight:600; font-size:26px; letter-spacing:-.02em; font-variant-numeric:tabular-nums; line-height:1;}
+.dl__u{display:block; font-family:var(--mono); font-size:var(--t-micro); letter-spacing:.12em; text-transform:uppercase; color:var(--mute); margin-top:5px;}
+.dl__side{min-width:0;}
+.dl__side h3{margin:0 0 var(--s6); font-size:17px; font-weight:800; letter-spacing:-.02em;}
+.dl__side p{margin:0; font-size:12px; line-height:19px; color:var(--mute);}
+.dl__stat{margin-top:var(--s12); font-family:var(--mono); font-size:var(--t-meta); letter-spacing:.06em; color:var(--ink);}
+@media (prefers-reduced-motion:reduce){ .dl__ring{transition:none;} }
+@container (max-width:330px){ .dl{flex-direction:column; align-items:flex-start;} }
+
+/* ============================================================
+   06 — SENTENCE  (the widget as a line of copy)
+   ============================================================ */
+.sn{width:100%; max-width:460px;}
+.sn__eyebrow{margin:0 0 var(--s12);}
+.sn__line{margin:0; font-size:clamp(19px,6cqi,25px); line-height:1.34; letter-spacing:-.02em; font-weight:600;}
+.sn__line b{font-family:var(--mono); font-weight:600; letter-spacing:-.03em; font-variant-numeric:tabular-nums; border-bottom:2px solid var(--ink); padding-bottom:1px;}
+.sn__foot{margin:var(--s16) 0 0; font-family:var(--mono); font-size:var(--t-meta); letter-spacing:.06em; color:var(--mute);}
+
+/* ============================================================
+   07 — LEDGER  (all the maths, on the record)
+   ============================================================ */
+.lg{width:100%; max-width:440px; background:var(--paper); border:1px solid var(--line); border-radius:12px; overflow:hidden;}
+.lg__head{display:flex; align-items:center; justify-content:space-between; gap:var(--s12); padding:var(--s12) var(--s16); border-bottom:1px solid var(--line);}
+.lg__title{font-family:var(--mono); font-size:var(--t-meta); letter-spacing:.12em; text-transform:uppercase;}
+.lg__body{padding:var(--s6) var(--s16) var(--s16);}
+.lg__row{display:flex; align-items:baseline; justify-content:space-between; gap:var(--s16); padding:9px 0; border-bottom:1px solid var(--line-2);}
+.lg__row:last-child{border-bottom:0;}
+/* the shared [data-only] gate loses to .lg__row at equal specificity — restate it here */
+.lg__row[data-only]{display:none;}
+[data-mode="drive"] .lg__row[data-only~="drive"],
+[data-mode="flight"] .lg__row[data-only~="flight"],
+[data-mode="same"] .lg__row[data-only~="same"]{display:flex;}
+.lg__k{font-family:var(--mono); font-size:var(--t-micro); letter-spacing:.1em; text-transform:uppercase; color:var(--mute);}
+.lg__v{font-family:var(--mono); font-size:var(--t-ui); font-variant-numeric:tabular-nums; text-align:right;}
+.lg__v--hero{font-size:19px; font-weight:600; letter-spacing:-.02em;}
+
+/* ============================================================
+   08 — GLOBE  (two pins on a wireframe sphere)
+   ============================================================ */
+.gl{width:100%; max-width:400px; text-align:center;}
+.gl__fig{display:block; width:100%; height:auto;}
+.gl__sphere{fill:none; stroke:var(--line); stroke-width:1;}
+.gl__grid{fill:none; stroke:var(--line); stroke-width:.75; opacity:.8;}
+.gl__link{fill:none; stroke:var(--ink); stroke-width:1.4; stroke-dasharray:5 4;}
+.gl__pin{fill:var(--ink);}
+.gl__halo{fill:none; stroke:var(--ink); stroke-width:1; opacity:.35;}
+.gl__lab{font-family:var(--mono); font-size:9.5px; letter-spacing:.1em; fill:var(--mute); text-transform:uppercase;}
+.gl__read{display:flex; align-items:baseline; justify-content:center; gap:var(--s12); margin-top:var(--s8);}
+.gl__big{margin:0; font-family:var(--mono); font-weight:600; font-size:clamp(22px,7cqi,28px); letter-spacing:-.02em; font-variant-numeric:tabular-nums;}
+.gl__sub{margin:0; font-family:var(--mono); font-size:var(--t-meta); letter-spacing:.06em; color:var(--mute);}
+@media (prefers-reduced-motion:no-preference){
+  .gl__halo{animation:halo 2.6s ease-out infinite;}
+  @keyframes halo{0%{r:3; opacity:.5}100%{r:13; opacity:0}}
+}
+
+/* ============================================================
+   09 — CHIP  (nav-bar scale: one line, two sizes)
+   ============================================================ */
+.chipset{display:flex; flex-direction:column; align-items:center; gap:var(--s16);}
+.chip{
+  display:inline-flex; align-items:center; gap:var(--s8);
+  padding:8px var(--s16) 8px var(--s12);
+  background:var(--ink); color:var(--onink); border-radius:var(--r-pill);
+  font-family:var(--mono); font-size:var(--t-ui); font-variant-numeric:tabular-nums; letter-spacing:.01em;
+}
+.chip .dot{background:var(--live);}
+.chip--drive .dot{background:var(--road);}
+.chip--light{background:transparent; color:var(--ink); border:1px solid var(--line);}
+.chip__sep{color:var(--onink-mute);}
+.chip--light .chip__sep{color:var(--mute-2);}
+.chip__ghost{font-family:var(--mono); font-size:var(--t-micro); letter-spacing:.1em; text-transform:uppercase; color:var(--mute-2);}
+@media (prefers-reduced-motion:no-preference){
+  .chip .dot{animation:blip 2.4s ease-in-out infinite;}
+  @keyframes blip{0%,100%{opacity:1}50%{opacity:.35}}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="head">
+    <p class="meta">System: TRANSIT · YUL is always the destination</p>
+    <h1>How far are we, really?</h1>
+    <p>Nine takes on the same widget. It reads the visitor's city, measures the great circle to Montréal,
+      and answers in the only unit that matters: time until we're in the same room. Same city → it says so.
+      Same region → road distance and a drive. Anything further → an IATA pair and a door-to-door figure.</p>
+  </header>
+
+  <div class="bar">
+    <span class="bar__label"><span class="dot" aria-hidden="true"></span>
+      <label class="meta" for="city">Visitor city</label>
+    </span>
+    <select class="pick" id="city" aria-describedby="detected"></select>
+    <button class="btn" type="button" id="detect">Detect me</button>
+    <button class="btn" type="button" data-jump="yul">Same city</button>
+    <button class="btn" type="button" data-jump="yow">Drive</button>
+    <button class="btn" type="button" data-jump="hnd">Flight</button>
+    <span class="bar__note" id="detected"></span>
+  </div>
+
+  <div class="grid">
+
+    <!-- 01 TICKET -->
+    <section class="spec">
+      <div class="spec__head"><span class="spec__id">01</span><h2 class="spec__name">Ticket</h2></div>
+      <p class="spec__why">The reference, tightened: one label, one route, one hero figure. Road distance only surfaces in drive mode, because that is the whole answer there.</p>
+      <div class="canvas">
+        <article class="tk" data-w="ticket" data-mode="flight">
+          <header class="tk__top">
+            <span class="tk__label" data-f="modeword">Flight</span>
+            <span class="tk__glyph" aria-hidden="true">
+              <span class="glyph g-plane"></span><span class="glyph g-car"></span><span class="glyph g-pin"></span>
+            </span>
+          </header>
+          <p class="tk__route" data-f="route">HND → YUL</p>
+          <p class="tk__big num" data-f="hero">17h 20m</p>
+          <p class="tk__sub" data-only="drive" data-f="road">— km by road</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- 02 STUB -->
+    <section class="spec">
+      <div class="spec__head"><span class="spec__id">02</span><h2 class="spec__name">Stub</h2></div>
+      <p class="spec__why">Boarding-pass anatomy: perforation, three metadata columns, barcode. The extra fields earn their place — legs, layover, time-zone shift.</p>
+      <div class="canvas">
+        <article class="st" data-w="stub" data-mode="flight">
+          <div class="st__main">
+            <div class="st__row">
+              <span class="st__eyebrow" data-f="modeword">Flight</span>
+              <span class="st__eyebrow num" data-f="dateline">TODAY</span>
+            </div>
+            <div class="st__pair">
+              <span class="st__code num" data-f="from">HND</span>
+              <span class="st__dashes" aria-hidden="true"></span>
+              <span class="glyph g-plane" aria-hidden="true"></span><span class="glyph g-car" aria-hidden="true"></span><span class="glyph g-pin" aria-hidden="true"></span>
+              <span class="st__dashes" aria-hidden="true"></span>
+              <span class="st__code num">YUL</span>
+            </div>
+            <div class="st__grid">
+              <div><p class="st__k">Legs</p><p class="st__v" data-f="legs">2</p></div>
+              <div><p class="st__k">Layover</p><p class="st__v" data-f="layover">2h 24m</p></div>
+              <div><p class="st__k">Clock shift</p><p class="st__v" data-f="tz">+13h</p></div>
+            </div>
+          </div>
+          <div class="st__perf" aria-hidden="true"></div>
+          <div class="st__side">
+            <div>
+              <p class="st__k">Together in</p>
+              <p class="st__big" data-f="hero">17h 20m</p>
+            </div>
+            <div class="st__bars" aria-hidden="true"></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- 03 ARC -->
+    <section class="spec">
+      <div class="spec__head"><span class="spec__id">03</span><h2 class="spec__name">Arc</h2></div>
+      <p class="spec__why">The trip drawn as a great circle with a dot walking it. Arc height tracks distance, so short hops look like short hops.</p>
+      <div class="canvas">
+        <div class="arc" data-w="arc" data-mode="flight">
+          <svg class="arc__fig" viewBox="0 0 300 96" role="img" aria-labelledby="arcTitle">
+            <title id="arcTitle" data-f="a11y">Route</title>
+            <path class="arc__path" id="arcPath" d="M28,80 Q150,4 272,80"></path>
+            <circle class="arc__pin arc__pin--hollow" cx="28" cy="80" r="5"></circle>
+            <circle class="arc__pin" cx="272" cy="80" r="5"></circle>
+            <circle class="arc__mover" r="3.5" style="offset-path:path('M28,80 Q150,4 272,80'); offset-rotate:0deg;"></circle>
+            <text class="arc__cap" x="28" y="94" text-anchor="middle" data-f="from">HND</text>
+            <text class="arc__cap" x="272" y="94" text-anchor="middle">YUL</text>
+          </svg>
+          <p class="arc__big num" data-f="hero">17h 20m</p>
+          <p class="arc__sub" data-f="line2">10 400 km · 2 legs</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 FLAP -->
+    <section class="spec">
+      <div class="spec__head"><span class="spec__id">04</span><h2 class="spec__name">Flap board</h2></div>
+      <p class="spec__why">Airport split-flap. Only the tiles whose character actually changed flip, staggered left to right; reduced motion swaps them silently.</p>
+      <div class="canvas">
+        <article class="fl" data-w="flap" data-mode="flight">
+          <div class="fl__top">
+            <span class="fl__dest" data-f="route">HND → YUL</span>
+            <span class="glyph g-plane" aria-hidden="true"></span><span class="glyph g-car" aria-hidden="true"></span><span class="glyph g-pin" aria-hidden="true"></span>
+          </div>
+          <div class="fl__tiles" data-f="tiles" role="text" aria-label="Time apart"></div>
+          <p class="fl__foot" data-f="line2">Door to door · 2 legs</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- 05 DIAL -->
+    <section class="spec">
+      <div class="spec__head"><span class="spec__id">05</span><h2 class="spec__name">Dial</h2></div>
+      <p class="spec__why">Time apart as a share of one day — the ring makes "half a day away" legible before the digits are read. Sweep is an animated <code>@property</code> angle.</p>
+      <div class="canvas">
+        <div class="dl" data-w="dial" data-mode="flight">
+          <div class="dl__ring" data-f="ring" role="img" aria-labelledby="dialRead">
+            <div class="dl__hole">
+              <p class="dl__h num" id="dialRead"><span data-f="hero">17h 20m</span><span class="dl__u" data-f="unit">of a day</span></p>
+            </div>
+          </div>
+          <div class="dl__side">
+            <h3 data-f="headline">Tokyo → Montréal</h3>
+            <p data-f="prose">Two flights, one layover, and we're in the same room.</p>
+            <p class="dl__stat" data-f="line2">10 400 km</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 06 SENTENCE -->
+    <section class="spec">
+      <div class="spec__head"><span class="spec__id">06</span><h2 class="spec__name">Sentence</h2></div>
+      <p class="spec__why">No card at all — the figure set inside a line of copy, localised with <code>Intl.DurationFormat</code>. The version that survives being dropped into an about page.</p>
+      <div class="canvas">
+        <div class="sn" data-w="sentence" data-mode="flight">
+          <p class="meta sn__eyebrow" data-f="eyebrow">Tokyo → Montréal</p>
+          <p class="sn__line" data-f="prose"></p>
+          <p class="sn__foot" data-f="line2">10 400 km apart · worth it</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 07 LEDGER -->
+    <section class="spec">
+      <div class="spec__head"><span class="spec__id">07</span><h2 class="spec__name">Ledger</h2></div>
+      <p class="spec__why">Every input on the record, so the hero number is auditable: straight line, road or air, legs, clock shift, both local times.</p>
+      <div class="canvas canvas--wide">
+        <article class="lg" data-w="ledger" data-mode="flight">
+          <header class="lg__head">
+            <span class="lg__title" data-f="modeword">Flight</span>
+            <span class="glyph g-plane" aria-hidden="true"></span><span class="glyph g-car" aria-hidden="true"></span><span class="glyph g-pin" aria-hidden="true"></span>
+          </header>
+          <div class="lg__body">
+            <div class="lg__row"><span class="lg__k">Together in</span><span class="lg__v lg__v--hero" data-f="hero">17h 20m</span></div>
+            <div class="lg__row"><span class="lg__k">From</span><span class="lg__v" data-f="fromlong">Tokyo (HND)</span></div>
+            <div class="lg__row"><span class="lg__k">Great circle</span><span class="lg__v" data-f="gc">10 400 km</span></div>
+            <div class="lg__row" data-only="drive"><span class="lg__k">By road</span><span class="lg__v" data-f="road">— km</span></div>
+            <div class="lg__row" data-only="flight"><span class="lg__k">Legs · layover</span><span class="lg__v" data-f="legline">2 · 2h 24m</span></div>
+            <div class="lg__row"><span class="lg__k">Clock shift</span><span class="lg__v" data-f="tz">+13h</span></div>
+            <div class="lg__row"><span class="lg__k">Their time · mine</span><span class="lg__v" data-f="clocks">—</span></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- 08 GLOBE -->
+    <section class="spec">
+      <div class="spec__head"><span class="spec__id">08</span><h2 class="spec__name">Globe</h2></div>
+      <p class="spec__why">Wireframe sphere, two pins placed from real latitude and longitude, dashed link between them. Pings on the visitor's pin, never on mine.</p>
+      <div class="canvas">
+        <div class="gl" data-w="globe" data-mode="flight">
+          <svg class="gl__fig" viewBox="0 0 260 150" role="img" aria-labelledby="globeTitle">
+            <title id="globeTitle" data-f="a11y">Route</title>
+            <circle class="gl__sphere" cx="130" cy="72" r="62"></circle>
+            <ellipse class="gl__grid" cx="130" cy="72" rx="62" ry="21"></ellipse>
+            <ellipse class="gl__grid" cx="130" cy="72" rx="62" ry="44"></ellipse>
+            <ellipse class="gl__grid" cx="130" cy="72" rx="21" ry="62"></ellipse>
+            <ellipse class="gl__grid" cx="130" cy="72" rx="44" ry="62"></ellipse>
+            <line class="gl__grid" x1="68" y1="72" x2="192" y2="72"></line>
+            <path class="gl__link" data-f="link" d=""></path>
+            <circle class="gl__halo" data-f="halo" cx="0" cy="0" r="3"></circle>
+            <circle class="gl__pin" data-f="pinA" cx="0" cy="0" r="3.4"></circle>
+            <circle class="gl__pin" data-f="pinB" cx="0" cy="0" r="3.4"></circle>
+            <text class="gl__lab" data-f="labA" x="0" y="0" text-anchor="middle">HND</text>
+            <text class="gl__lab" data-f="labB" x="0" y="0" text-anchor="middle">YUL</text>
+          </svg>
+          <div class="gl__read">
+            <p class="gl__big num" data-f="hero">17h 20m</p>
+            <p class="gl__sub" data-f="line2">10 400 km</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 09 CHIP -->
+    <section class="spec">
+      <div class="spec__head"><span class="spec__id">09</span><h2 class="spec__name">Chip</h2></div>
+      <p class="spec__why">Nav-bar scale, two densities. Dot colour carries mode — green for air and same-city, amber for road — so the label stays short.</p>
+      <div class="canvas">
+        <div class="chipset" data-w="chip" data-mode="flight">
+          <span class="chip" data-f="chipDark">
+            <span class="dot" aria-hidden="true"></span>
+            <span class="glyph g-plane" aria-hidden="true"></span><span class="glyph g-car" aria-hidden="true"></span><span class="glyph g-pin" aria-hidden="true"></span>
+            <span class="num" data-f="hero">17h 20m</span>
+            <span class="chip__sep" aria-hidden="true">/</span>
+            <span data-f="tail">to Montréal</span>
+          </span>
+          <span class="chip chip--light" data-f="chipLight">
+            <span class="dot" aria-hidden="true"></span>
+            <span class="num" data-f="hero2">17h 20m</span>
+          </span>
+          <span class="chip__ghost">Both fed by the same state object</span>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script type="module">
+/* ------------------------------------------------------------
+   MODEL — Montréal is fixed; everything else is derived.
+------------------------------------------------------------ */
+const HOME = { city:'Montréal', iata:'YUL', lat:45.5019, lon:-73.5674, tz:'America/Toronto' };
+
+const CITIES = [
+  { g:'Québec & Ontario', id:'yul', city:'Montréal',      iata:'YUL', lat:45.5019, lon:-73.5674, tz:'America/Toronto' },
+  { g:'Québec & Ontario', id:'ymx', city:'Laval',         iata:'YUL', lat:45.6066, lon:-73.7124, tz:'America/Toronto' },
+  { g:'Québec & Ontario', id:'yms', city:'Sherbrooke',    iata:'YSC', lat:45.4040, lon:-71.8929, tz:'America/Toronto' },
+  { g:'Québec & Ontario', id:'yqb', city:'Québec City',   iata:'YQB', lat:46.8139, lon:-71.2080, tz:'America/Toronto' },
+  { g:'Québec & Ontario', id:'yow', city:'Ottawa',        iata:'YOW', lat:45.4215, lon:-75.6972, tz:'America/Toronto' },
+  { g:'Québec & Ontario', id:'ygk', city:'Kingston',      iata:'YGK', lat:44.2312, lon:-76.4860, tz:'America/Toronto' },
+  { g:'Québec & Ontario', id:'yyz', city:'Toronto',       iata:'YYZ', lat:43.6532, lon:-79.3832, tz:'America/Toronto' },
+  { g:'Northeast US',     id:'btv', city:'Burlington VT', iata:'BTV', lat:44.4759, lon:-73.2121, tz:'America/New_York' },
+  { g:'Northeast US',     id:'bos', city:'Boston',        iata:'BOS', lat:42.3601, lon:-71.0589, tz:'America/New_York' },
+  { g:'Northeast US',     id:'nyc', city:'New York',      iata:'JFK', lat:40.7128, lon:-74.0060, tz:'America/New_York' },
+  { g:'Americas',         id:'ord', city:'Chicago',       iata:'ORD', lat:41.8781, lon:-87.6298, tz:'America/Chicago' },
+  { g:'Americas',         id:'mia', city:'Miami',         iata:'MIA', lat:25.7617, lon:-80.1918, tz:'America/New_York' },
+  { g:'Americas',         id:'yvr', city:'Vancouver',     iata:'YVR', lat:49.2827, lon:-123.1207, tz:'America/Vancouver' },
+  { g:'Americas',         id:'sfo', city:'San Francisco', iata:'SFO', lat:37.7749, lon:-122.4194, tz:'America/Los_Angeles' },
+  { g:'Americas',         id:'lax', city:'Los Angeles',   iata:'LAX', lat:34.0522, lon:-118.2437, tz:'America/Los_Angeles' },
+  { g:'Americas',         id:'mex', city:'Mexico City',   iata:'MEX', lat:19.4326, lon:-99.1332, tz:'America/Mexico_City' },
+  { g:'Americas',         id:'bog', city:'Bogotá',        iata:'BOG', lat:4.7110,  lon:-74.0721, tz:'America/Bogota' },
+  { g:'Americas',         id:'gru', city:'São Paulo',     iata:'GRU', lat:-23.5505, lon:-46.6333, tz:'America/Sao_Paulo' },
+  { g:'Americas',         id:'eze', city:'Buenos Aires',  iata:'EZE', lat:-34.6037, lon:-58.3816, tz:'America/Argentina/Buenos_Aires' },
+  { g:'Europe & Africa',  id:'lis', city:'Lisbon',        iata:'LIS', lat:38.7223, lon:-9.1393,  tz:'Europe/Lisbon' },
+  { g:'Europe & Africa',  id:'lon', city:'London',        iata:'LHR', lat:51.5074, lon:-0.1278,  tz:'Europe/London' },
+  { g:'Europe & Africa',  id:'par', city:'Paris',         iata:'CDG', lat:48.8566, lon:2.3522,   tz:'Europe/Paris' },
+  { g:'Europe & Africa',  id:'ber', city:'Berlin',        iata:'BER', lat:52.5200, lon:13.4050,  tz:'Europe/Berlin' },
+  { g:'Europe & Africa',  id:'cmn', city:'Casablanca',    iata:'CMN', lat:33.5731, lon:-7.5898,  tz:'Africa/Casablanca' },
+  { g:'Europe & Africa',  id:'los', city:'Lagos',         iata:'LOS', lat:6.5244,  lon:3.3792,   tz:'Africa/Lagos' },
+  { g:'Europe & Africa',  id:'nbo', city:'Nairobi',       iata:'NBO', lat:-1.2921, lon:36.8219,  tz:'Africa/Nairobi' },
+  { g:'Asia & Oceania',   id:'dxb', city:'Dubai',         iata:'DXB', lat:25.2048, lon:55.2708,  tz:'Asia/Dubai' },
+  { g:'Asia & Oceania',   id:'bom', city:'Mumbai',        iata:'BOM', lat:19.0760, lon:72.8777,  tz:'Asia/Kolkata' },
+  { g:'Asia & Oceania',   id:'sin', city:'Singapore',     iata:'SIN', lat:1.3521,  lon:103.8198, tz:'Asia/Singapore' },
+  { g:'Asia & Oceania',   id:'icn', city:'Seoul',         iata:'ICN', lat:37.5665, lon:126.9780, tz:'Asia/Seoul' },
+  { g:'Asia & Oceania',   id:'hnd', city:'Tokyo',         iata:'HND', lat:35.6762, lon:139.6503, tz:'Asia/Tokyo' },
+  { g:'Asia & Oceania',   id:'syd', city:'Sydney',        iata:'SYD', lat:-33.8688, lon:151.2093, tz:'Australia/Sydney' },
+];
+
+const rad = d => d * Math.PI / 180;
+const deg = r => r * 180 / Math.PI;
+
+function greatCircle(a, b){
+  const R = 6371, dLat = rad(b.lat - a.lat), dLon = rad(b.lon - a.lon);
+  const h = Math.sin(dLat/2)**2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLon/2)**2;
+  return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
+}
+
+function tzOffsetMinutes(tz, at = new Date()){
+  const part = new Intl.DateTimeFormat('en-US', { timeZone:tz, timeZoneName:'longOffset' })
+    .formatToParts(at).find(p => p.type === 'timeZoneName')?.value ?? 'GMT+00:00';
+  const m = /GMT([+-])(\d{1,2}):?(\d{2})?/.exec(part);
+  if (!m) return 0;
+  return (m[1] === '-' ? -1 : 1) * (Number(m[2]) * 60 + Number(m[3] ?? 0));
+}
+const clockIn = tz => new Intl.DateTimeFormat('en-GB', { timeZone:tz, hour:'2-digit', minute:'2-digit', hour12:false }).format(new Date());
+
+const km = n => `${Math.round(n).toLocaleString('en-US').replace(/,/g, ' ')} km`;
+function hm(minutes){
+  const t = Math.round(minutes / 5) * 5, h = Math.floor(t / 60), m = t % 60;
+  return h ? `${h}h ${String(m).padStart(2,'0')}m` : `${m} min`;
+}
+
+/* Derivation: the single source of every readout on the page. */
+function derive(loc){
+  const gc = greatCircle(loc, HOME);
+  const shift = (tzOffsetMinutes(loc.tz) - tzOffsetMinutes(HOME.tz)) / 60;
+  const base = {
+    loc, gc, shift,
+    theirClock: clockIn(loc.tz), myClock: clockIn(HOME.tz),
+    from: loc.iata, fromCity: loc.city,
+  };
+
+  if (gc < 30) return { ...base, mode:'same', minutes:0, legs:0, road:gc, layover:0 };
+
+  if (gc <= 900){
+    const road = gc * 1.15;
+    let hours = road / 100;
+    hours += Math.floor(hours / 3) * 0.25;          // one stretch break per 3h
+    return { ...base, mode:'drive', road, minutes:hours * 60, legs:1, layover:0 };
+  }
+
+  const air = gc / 820;                              // cruise + winds, hours
+  const stops = gc > 12000 ? 2 : gc > 6500 ? 1 : 0;
+  const layover = stops * 2.4;
+  return { ...base, mode:'flight', minutes:(air + 0.75 + layover) * 60,
+           air:air * 60, legs:stops + 1, stops, layover:layover * 60 };
+}
+
+/* ------------------------------------------------------------
+   COPY — every string a mode can need, in one place.
+------------------------------------------------------------ */
+const durationFmt = typeof Intl.DurationFormat === 'function'
+  ? new Intl.DurationFormat('en', { style:'long' })
+  : null;
+function spellDuration(minutes){
+  const t = Math.round(minutes / 5) * 5, hours = Math.floor(t / 60), mins = t % 60;
+  if (durationFmt) return durationFmt.format(hours ? { hours, minutes:mins } : { minutes:mins });
+  const parts = [];
+  if (hours) parts.push(`${hours} hour${hours === 1 ? '' : 's'}`);
+  if (mins)  parts.push(`${mins} minute${mins === 1 ? '' : 's'}`);
+  return parts.join(' and ');
+}
+
+function copy(s){
+  const city = s.fromCity;
+  if (s.mode === 'same') return {
+    modeword:'Here',
+    hero:'Same city',
+    route:`${city} · ${HOME.city}`,
+    line2:'No travel required',
+    tail:'we\u2019re both here',
+    headline:`${city} · ${HOME.city}`,
+    prose:`We live in the same city. Nothing between us but a walk and whoever picks the café.`,
+    sentence:['We\u2019re in the same city — ', 'Montréal', '. Coffee is a walk away.'],
+    a11y:`Same city: ${city} and ${HOME.city}`,
+    unit:'no travel',
+    flap:'SAME CITY',
+  };
+  if (s.mode === 'drive') return {
+    modeword:'Drive',
+    hero:hm(s.minutes),
+    route:`${city} → ${HOME.city}`,
+    line2:`${km(s.road)} by road`,
+    tail:'of driving',
+    headline:`${city} → ${HOME.city}`,
+    prose:`Close enough to drive. ${km(s.road)} of road, one coffee stop, same table by evening.`,
+    sentence:[`${km(s.road)} of road between us — about `, hm(s.minutes), ' behind the wheel.'],
+    a11y:`Drive from ${city} to ${HOME.city}, ${km(s.road)}`,
+    unit:'of a day',
+    flap:hm(s.minutes),
+  };
+  return {
+    modeword:'Flight',
+    hero:hm(s.minutes),
+    route:`${s.from} → ${HOME.iata}`,
+    line2:`${km(s.gc)} · ${s.legs} leg${s.legs === 1 ? '' : 's'}`,
+    tail:'to Montréal',
+    headline:`${city} → ${HOME.city}`,
+    prose:s.stops
+      ? `${s.legs} flights and ${hm(s.layover)} on the ground, then we\u2019re in the same room.`
+      : `One nonstop, ${hm(s.air)} in the air, then we\u2019re in the same room.`,
+    sentence:['We\u2019re ', spellDuration(s.minutes), ` apart — ${city} to ${HOME.city}, door to door.`],
+    a11y:`Flight from ${city} (${s.from}) to Montréal (YUL)`,
+    unit:'of a day',
+    flap:hm(s.minutes),
+  };
+}
+
+/* ------------------------------------------------------------
+   VIEW — find every [data-f] hook once, write text on change.
+------------------------------------------------------------ */
+const PLANE = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 13.5 21.5 4l-4.2 8.2L21 21l-5.6-3.4-3.6 3.1-.5-4.4z"/></svg>';
+const CAR   = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15v-2.2L5.2 7h13.6L21 12.8V15h-2.2M3 15h2.2m13.6 0H8.6M3 15v2h1.4M21 15v2h-1.4"/><circle cx="6.8" cy="16.6" r="1.7"/><circle cx="17.2" cy="16.6" r="1.7"/></svg>';
+const PIN   = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21.5s7-6.2 7-11.3A7 7 0 0 0 5 10.2c0 5.1 7 11.3 7 11.3z"/><circle cx="12" cy="10" r="2.4"/></svg>';
+for (const el of document.querySelectorAll('.g-plane')) el.innerHTML = PLANE;
+for (const el of document.querySelectorAll('.g-car'))   el.innerHTML = CAR;
+for (const el of document.querySelectorAll('.g-pin'))   el.innerHTML = PIN;
+
+const widgets = [...document.querySelectorAll('[data-w]')].map(root => ({
+  root,
+  f: [...root.querySelectorAll('[data-f]')].reduce((acc, el) => {
+    (acc[el.dataset.f] ??= []).push(el);
+    return acc;
+  }, {}),
+}));
+const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+
+function set(w, key, value){
+  for (const el of w.f[key] ?? []){
+    if (el.textContent !== value){
+      el.textContent = value;
+      if (!reduced.matches && el.classList.contains('num')){
+        el.classList.remove('pulse');
+        void el.offsetWidth;
+        el.classList.add('pulse');
+      }
+    }
+  }
+}
+const attr = (w, key, name, value) => { for (const el of w.f[key] ?? []) el.setAttribute(name, value); };
+
+/* 04 — split-flap tiles, only changed characters flip */
+function flap(host, text){
+  const chars = [...text];
+  while (host.children.length > chars.length) host.lastElementChild.remove();
+  chars.forEach((ch, i) => {
+    let tile = host.children[i];
+    if (!tile){
+      tile = document.createElement('span');
+      host.append(tile);
+    }
+    const sep = ch === ' ' || ch === '→' || ch === '·';
+    tile.className = 'fl__tile' + (sep ? ' fl__tile--sep' : '');
+    if (tile.textContent === ch) return;
+    tile.textContent = ch === ' ' ? '\u00A0' : ch;
+    if (reduced.matches) return;
+    tile.classList.remove('flip');
+    void tile.offsetWidth;
+    tile.style.animationDelay = `${i * 45}ms`;
+    tile.classList.add('flip');
+  });
+}
+
+/* 08 — orthographic projection, rotated so both pins stay on the near face */
+function project(lat, lon, lon0){
+  const φ = rad(lat), λ = rad(lon - lon0);
+  return { x:130 + 62 * Math.cos(φ) * Math.sin(λ), y:72 - 62 * Math.sin(φ),
+           front:Math.cos(φ) * Math.cos(λ) >= -0.05 };
+}
+
+/* Clock shift: whole hours, plus the half- and quarter-hour zones. */
+function shiftLabel(hours){
+  if (hours === 0) return 'same hour';
+  const abs = Math.abs(hours), whole = Math.trunc(abs), mins = Math.round((abs - whole) * 60);
+  return `${hours > 0 ? '+' : '\u2212'}${whole}h${mins ? ` ${mins}m` : ''}`;
+}
+
+function render(s){
+  const c = copy(s);
+  const shiftTxt = shiftLabel(s.shift);
+
+  for (const w of widgets){
+    w.root.dataset.mode = s.mode;
+    const kind = w.root.dataset.w;
+
+    set(w, 'modeword', c.modeword);
+    set(w, 'hero',  c.hero);
+    set(w, 'hero2', c.hero);
+    set(w, 'route', c.route);
+    set(w, 'line2', c.line2);
+    set(w, 'tail',  c.tail);
+    set(w, 'from',  s.mode === 'same' ? HOME.iata : s.from);
+    set(w, 'road',  km(s.road ?? 0));
+    set(w, 'headline', c.headline);
+    set(w, 'prose', c.prose);
+    set(w, 'unit',  c.unit);
+    set(w, 'eyebrow', c.headline);
+    set(w, 'a11y', c.a11y);
+    set(w, 'tz', shiftTxt);
+    set(w, 'gc', km(s.gc));
+    set(w, 'fromlong', s.mode === 'same' ? `${HOME.city} (YUL)` : `${s.fromCity} (${s.from})`);
+    set(w, 'legline', `${s.legs} · ${s.layover ? hm(s.layover) : 'none'}`);
+    set(w, 'legs', String(s.legs || '—'));
+    set(w, 'layover', s.layover ? hm(s.layover) : 'none');
+    set(w, 'clocks', `${s.theirClock} · ${s.myClock}`);
+    set(w, 'dateline', s.theirClock);
+
+    if (kind === 'sentence'){
+      const [pre, strong, post] = c.sentence;
+      const p = w.f.prose[0];
+      p.replaceChildren(document.createTextNode(pre),
+        Object.assign(document.createElement('b'), { textContent:strong }),
+        document.createTextNode(post));
+    }
+
+    if (kind === 'flap') flap(w.f.tiles[0], c.flap);
+
+    if (kind === 'arc'){
+      const lift = s.mode === 'same' ? 78 : Math.round(76 - Math.min(1, s.gc / 14000) * 72);
+      const d = `M28,80 Q150,${lift} 272,80`;
+      w.root.querySelector('#arcPath').setAttribute('d', d);
+      const mover = w.root.querySelector('.arc__mover');
+      mover.style.offsetPath = `path('${d}')`;
+      mover.style.display = s.mode === 'same' ? 'none' : '';
+      w.root.querySelector('.arc__path').classList.toggle('arc__path--live', s.mode !== 'same');
+    }
+
+    if (kind === 'dial'){
+      const frac = Math.min(1, s.minutes / 1440);
+      w.f.ring[0].style.setProperty('--sweep', `${(frac * 360).toFixed(1)}deg`);
+      w.f.ring[0].setAttribute('aria-label', `${c.hero} ${c.unit}`);
+    }
+
+    if (kind === 'globe'){
+      const lon0 = s.mode === 'same' ? HOME.lon : (HOME.lon + s.loc.lon) / 2;
+      const A = project(s.loc.lat, s.loc.lon, lon0);
+      const B = project(HOME.lat, HOME.lon, lon0);
+      const mx = (A.x + B.x) / 2, my = (A.y + B.y) / 2;
+      const pull = 1 + Math.min(0.34, s.gc / 45000);
+      w.f.link[0].setAttribute('d', s.mode === 'same' ? '' :
+        `M${A.x.toFixed(1)},${A.y.toFixed(1)} Q${(130 + (mx - 130) * pull).toFixed(1)},${(72 + (my - 72) * pull).toFixed(1)} ${B.x.toFixed(1)},${B.y.toFixed(1)}`);
+      for (const [key, P] of [['pinA', A], ['pinB', B], ['halo', A]]){
+        const el = w.f[key][0];
+        el.setAttribute('cx', P.x.toFixed(1));
+        el.setAttribute('cy', P.y.toFixed(1));
+        el.style.opacity = P.front ? '' : '.3';
+      }
+      const labA = w.f.labA[0], labB = w.f.labB[0];
+      labA.textContent = s.mode === 'same' ? 'BOTH OF US' : s.from;
+      labB.textContent = 'YUL';
+      labB.style.display = s.mode === 'same' ? 'none' : '';
+      const tight = Math.hypot(A.x - B.x, A.y - B.y) < 16;
+      labA.setAttribute('x', A.x.toFixed(1)); labA.setAttribute('y', (A.y - (tight ? 13 : 9)).toFixed(1));
+      labB.setAttribute('x', B.x.toFixed(1)); labB.setAttribute('y', (B.y + 16).toFixed(1));
+    }
+
+    if (kind === 'chip'){
+      for (const el of [...w.f.chipDark, ...w.f.chipLight]) el.classList.toggle('chip--drive', s.mode === 'drive');
+    }
+  }
+}
+
+/* ------------------------------------------------------------
+   CONTROL — select, geolocation, timezone guess.
+------------------------------------------------------------ */
+const select = document.getElementById('city');
+const note = document.getElementById('detected');
+for (const group of [...new Set(CITIES.map(c => c.g))]){
+  const og = document.createElement('optgroup');
+  og.label = group;
+  for (const c of CITIES.filter(x => x.g === group)){
+    og.append(Object.assign(document.createElement('option'), { value:c.id, textContent:c.city }));
+  }
+  select.append(og);
+}
+
+let state;
+function show(loc, why){
+  state = derive(loc);
+  select.value = loc.id ?? select.value;
+  note.textContent = why;
+  render(state);
+}
+const byId = id => CITIES.find(c => c.id === id);
+
+select.addEventListener('change', () => show(byId(select.value), 'picked from the list'));
+for (const btn of document.querySelectorAll('[data-jump]')){
+  btn.addEventListener('click', () => show(byId(btn.dataset.jump), 'preset state'));
+}
+
+document.getElementById('detect').addEventListener('click', () => {
+  if (!navigator.geolocation){ note.textContent = 'geolocation unavailable — using time zone'; return; }
+  note.textContent = 'asking the browser…';
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const here = { id:null, city:'Your location', iata:'YOU',
+        lat:pos.coords.latitude, lon:pos.coords.longitude,
+        tz:Intl.DateTimeFormat().resolvedOptions().timeZone };
+      const near = CITIES.reduce((a, b) => greatCircle(here, b) < greatCircle(here, a) ? b : a);
+      show(greatCircle(here, near) < 60 ? near : here,
+        greatCircle(here, near) < 60 ? `GPS → nearest known city (${near.city})` : 'GPS coordinates');
+    },
+    () => { note.textContent = 'permission denied — using time zone guess'; },
+    { timeout:8000, maximumAge:600000 });
+});
+
+/* First paint: guess from the visitor's IANA zone, then their UTC offset. */
+function guess(){
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const exact = CITIES.find(c => c.tz === tz);
+  if (exact) return [exact, `time zone ${tz}`];
+  const mine = tzOffsetMinutes(tz);
+  const near = CITIES.reduce((a, b) =>
+    Math.abs(tzOffsetMinutes(b.tz) - mine) < Math.abs(tzOffsetMinutes(a.tz) - mine) ? b : a);
+  return [near, `closest zone to ${tz}`];
+}
+show(...guess());
+
+/* Local clocks drift; re-derive every half minute. */
+setInterval(() => state && show(state.loc, note.textContent), 30000);
+</script>
+</body>
+</html>

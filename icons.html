@@ -1,0 +1,1181 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Icon study for AColorBright — five icon directions, a live 24px grid set, and the system rules each direction keeps or breaks."
+    />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 44'%3E%3Cpath d='M0 44V0h27.5C38.82 0 48 9.18 48 20.5V44H33.5V22c0-4.14-3.36-7.5-7.5-7.5H14.5V44H0Z'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="shared/acolorbright.css" />
+    <title>Icon study — AColorBright</title>
+    <style>
+      /* ─── Icon primitives ─────────────────────────────────────
+         One geometry set (24×24), four render parameters:
+         size, stroke, terminals, container. Nothing else. */
+
+      .lab {
+        --icon-size: 24px;
+        --icon-stroke: 1.5;
+        --icon-cap: round;
+        --icon-join: round;
+        --frame-size: 40px;
+        accent-color: var(--color-ink-black);
+      }
+
+      .icon {
+        display: block;
+        width: var(--icon-size);
+        height: var(--icon-size);
+        flex: 0 0 auto;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: var(--icon-stroke);
+        stroke-linecap: var(--icon-cap);
+        stroke-linejoin: var(--icon-join);
+      }
+
+      .icon-frame {
+        display: grid;
+        width: var(--frame-size);
+        height: var(--frame-size);
+        flex: 0 0 auto;
+        place-items: center;
+      }
+
+      .icon-frame--badge {
+        border-radius: 50%;
+        background: var(--color-pure-black);
+        color: var(--color-paper);
+      }
+
+      .icon-frame--framed {
+        border: 1px solid currentColor;
+        border-radius: var(--radius-nav);
+      }
+
+      /* ─── Chapter 1 — directions ──────────────────────────────── */
+
+      .directions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--spacing-32);
+      }
+
+      .direction {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-16);
+        padding: 0;
+        border: 0;
+        background: none;
+        color: inherit;
+        font: inherit;
+        letter-spacing: inherit;
+        text-align: left;
+        cursor: pointer;
+      }
+
+      .direction__stage {
+        display: flex;
+        min-height: 96px;
+        align-items: center;
+        justify-content: center;
+        gap: var(--spacing-16);
+        border-radius: var(--radius-images);
+        background: var(--color-mist);
+      }
+
+      .direction[aria-pressed='true'] .direction__stage {
+        background: var(--color-fog);
+      }
+
+      .direction__name {
+        display: flex;
+        align-items: baseline;
+        gap: var(--spacing-8);
+        font-size: var(--text-body);
+        line-height: var(--leading-body);
+      }
+
+      .direction__note {
+        margin: 0;
+        color: var(--color-graphite);
+        font-size: var(--text-body-sm);
+        line-height: var(--leading-body-sm);
+      }
+
+      .direction__spec {
+        color: var(--color-ash);
+        font-size: var(--text-caption);
+        line-height: var(--leading-caption);
+      }
+
+      /* ─── Chapter 2 — controls and set ────────────────────────── */
+
+      .controls {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: var(--spacing-24) var(--spacing-32);
+        margin-bottom: var(--spacing-32);
+        padding: var(--spacing-24) 0;
+        border-top: 1px solid var(--color-fog);
+        border-bottom: 1px solid var(--color-fog);
+      }
+
+      .control {
+        display: flex;
+        min-width: 0;
+        flex-direction: column;
+        gap: var(--spacing-8);
+        margin: 0;
+        padding: 0;
+        border: 0;
+      }
+
+      .control__legend {
+        padding: 0;
+        color: var(--color-ash);
+        font-size: var(--text-caption);
+        line-height: var(--leading-caption);
+      }
+
+      .control__value {
+        color: var(--color-graphite);
+        font-size: var(--text-caption);
+        line-height: var(--leading-caption);
+      }
+
+      .tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--spacing-8);
+      }
+
+      .tag {
+        position: relative;
+        padding: 8px var(--spacing-16);
+        border: 1px solid var(--color-fog);
+        border-radius: var(--radius-buttons);
+        color: var(--color-ink-black);
+        cursor: pointer;
+        font-size: var(--text-body-sm);
+        line-height: var(--leading-body-sm);
+      }
+
+      .tag input {
+        position: absolute;
+        inset: 0;
+        margin: 0;
+        opacity: 0;
+        cursor: pointer;
+      }
+
+      .tag:has(:checked) {
+        border-color: var(--color-charcoal);
+        background: var(--color-charcoal);
+        color: var(--color-paper);
+      }
+
+      .tag:has(:focus-visible) {
+        outline: 2px solid var(--color-ink-black);
+        outline-offset: 3px;
+      }
+
+      .control input[type='range'] {
+        width: 100%;
+        margin: 0;
+      }
+
+      .control__row {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: var(--spacing-8);
+      }
+
+      .switch {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-8);
+        font-size: var(--text-body-sm);
+        line-height: var(--leading-body-sm);
+      }
+
+      .switch input {
+        width: 16px;
+        height: 16px;
+        margin: 0;
+      }
+
+      .gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+        border-top: 1px solid var(--color-fog);
+        border-left: 1px solid var(--color-fog);
+        border-radius: var(--radius-images);
+        background: var(--color-paper);
+        color: var(--color-ink-black);
+        overflow: clip;
+      }
+
+      .gallery--mist {
+        background: var(--color-mist);
+      }
+
+      .gallery--ink {
+        border-color: var(--color-ink-black);
+        background: var(--color-ink-black);
+        color: var(--color-paper);
+      }
+
+      .gallery--ink .icon-frame--badge {
+        background: var(--color-paper);
+        color: var(--color-ink-black);
+      }
+
+      .cell {
+        display: flex;
+        min-height: 148px;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: var(--spacing-16);
+        padding: var(--spacing-16) var(--spacing-8);
+        border-right: 1px solid var(--color-fog);
+        border-bottom: 1px solid var(--color-fog);
+        border-radius: 0;
+        background: none;
+        color: inherit;
+        cursor: copy;
+        text-align: center;
+      }
+
+      .gallery--ink .cell {
+        border-color: var(--color-charcoal);
+      }
+
+      .cell__stage {
+        display: grid;
+        grid-template-areas: 'stack';
+        place-items: center;
+      }
+
+      .cell__stage > * {
+        grid-area: stack;
+      }
+
+      .cell:focus-visible {
+        outline-offset: -4px;
+      }
+
+      .cell__label {
+        color: currentColor;
+        font-size: var(--text-caption);
+        line-height: var(--leading-caption);
+        opacity: 0.6;
+      }
+
+      .cell:hover .cell__label,
+      .cell:focus-visible .cell__label {
+        opacity: 1;
+      }
+
+      /* 24-unit keyline grid, drawn only when asked for */
+      .gallery--grid .cell__stage::before {
+        grid-area: stack;
+        width: var(--icon-size);
+        height: var(--icon-size);
+        background-image:
+          repeating-linear-gradient(
+            to right,
+            currentColor 0 1px,
+            transparent 1px calc(var(--icon-size) / 6)
+          ),
+          repeating-linear-gradient(
+            to bottom,
+            currentColor 0 1px,
+            transparent 1px calc(var(--icon-size) / 6)
+          );
+        content: '';
+        opacity: 0.2;
+      }
+
+      .status {
+        min-height: var(--spacing-24);
+        margin-top: var(--spacing-16);
+        color: var(--color-graphite);
+        font-size: var(--text-caption);
+        line-height: var(--leading-caption);
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--spacing-8);
+        margin-top: var(--spacing-16);
+      }
+
+      button.button {
+        cursor: pointer;
+        padding-inline: var(--spacing-16);
+      }
+
+      span.button {
+        padding-inline: var(--spacing-16);
+      }
+
+      /* ─── Chapter 3 — anatomy ─────────────────────────────────── */
+
+      .anatomy {
+        display: grid;
+        grid-template-columns: 288px minmax(0, 1fr);
+        gap: var(--spacing-32);
+        align-items: start;
+      }
+
+      .anatomy__plate {
+        position: relative;
+        display: grid;
+        width: 288px;
+        height: 288px;
+        place-items: center;
+        border-radius: var(--radius-images);
+        background: var(--color-mist);
+      }
+
+      .anatomy__plate::before,
+      .anatomy__plate::after {
+        position: absolute;
+        content: '';
+      }
+
+      /* 24-unit grid at 10px per unit */
+      .anatomy__plate::before {
+        width: 240px;
+        height: 240px;
+        background-image:
+          repeating-linear-gradient(to right, var(--color-fog) 0 1px, transparent 1px 10px),
+          repeating-linear-gradient(to bottom, var(--color-fog) 0 1px, transparent 1px 10px);
+      }
+
+      /* the 2-unit keyline the geometry never crosses */
+      .anatomy__plate::after {
+        width: 200px;
+        height: 200px;
+        border: 1px solid var(--color-ash);
+      }
+
+      .anatomy__icon {
+        position: relative;
+        width: 240px;
+        height: 240px;
+        fill: none;
+        stroke: var(--color-ink-black);
+        stroke-linecap: var(--icon-cap);
+        stroke-linejoin: var(--icon-join);
+      }
+
+      .specs {
+        display: grid;
+        margin: 0;
+        grid-template-columns: 160px minmax(0, 1fr);
+      }
+
+      .specs dt,
+      .specs dd {
+        margin: 0;
+        padding: var(--spacing-8) var(--spacing-16);
+        font-size: var(--text-body-sm);
+        line-height: var(--leading-body-sm);
+      }
+
+      .specs dt {
+        color: var(--color-ink-black);
+      }
+
+      .specs dd {
+        color: var(--color-graphite);
+      }
+
+      .specs > :nth-child(4n + 1),
+      .specs > :nth-child(4n + 2) {
+        background: var(--color-mist);
+      }
+
+      /* ─── Chapter 4 — in place ────────────────────────────────── */
+
+      .placements {
+        display: grid;
+        gap: var(--spacing-32);
+      }
+
+      .placement__caption {
+        margin-bottom: var(--spacing-8);
+      }
+
+      .demo-nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: var(--spacing-16) var(--spacing-24);
+        border-radius: var(--radius-images);
+        background: var(--color-mist);
+        font-size: var(--text-body);
+        line-height: var(--leading-body);
+      }
+
+      .demo-nav__actions {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-16);
+      }
+
+      .demo-nav .icon-frame--framed {
+        background: var(--color-paper);
+      }
+
+      .button--icon {
+        gap: var(--spacing-8);
+        min-width: 0;
+      }
+
+      .button--icon .icon {
+        --icon-size: 18px;
+      }
+
+      .button--icon [data-slot] {
+        display: flex;
+      }
+
+      .demo-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .demo-row {
+        display: grid;
+        align-items: center;
+        gap: var(--spacing-16);
+        padding: var(--spacing-16);
+        grid-template-columns: 40px minmax(0, 1fr) minmax(0, 1fr) 24px;
+        font-size: var(--text-body-sm);
+        line-height: var(--leading-body-sm);
+      }
+
+      .demo-row:nth-child(odd) {
+        background: var(--color-mist);
+      }
+
+      .demo-row span:nth-child(3) {
+        color: var(--color-graphite);
+      }
+
+      .demo-row .icon {
+        --icon-size: 18px;
+        justify-self: end;
+      }
+
+      .demo-caption {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-8);
+        font-size: var(--text-body-sm);
+        line-height: var(--leading-body-sm);
+      }
+
+      .demo-caption .icon {
+        --icon-size: 16px;
+      }
+
+      /* ─── Chapter 5 — verdict ─────────────────────────────────── */
+
+      .rules {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: var(--spacing-32);
+      }
+
+      .rules h3 {
+        margin: 0 0 var(--spacing-16);
+        font-size: var(--text-subheading);
+        font-weight: 400;
+        line-height: var(--leading-subheading);
+      }
+
+      .rules ul {
+        margin: 0;
+        padding-left: var(--spacing-16);
+        color: var(--color-graphite);
+        font-size: var(--text-body-sm);
+        line-height: var(--leading-body-sm);
+      }
+
+      .rules li + li {
+        margin-top: var(--spacing-8);
+      }
+
+      .callout {
+        max-width: 640px;
+        margin-top: var(--spacing-32);
+        padding: var(--spacing-24);
+        background: var(--color-mist);
+        font-size: var(--text-body-sm);
+        line-height: var(--leading-body-sm);
+      }
+
+      /* ─── Manual-copy fallback ────────────────────────────────── */
+
+      .fallback {
+        max-width: 640px;
+        padding: var(--spacing-24);
+        border: 1px solid var(--color-ink-black);
+        border-radius: var(--radius-images);
+        background: var(--color-paper);
+        color: var(--color-ink-black);
+      }
+
+      .fallback::backdrop {
+        background: rgb(26 26 26 / 0.4);
+      }
+
+      .fallback__text {
+        width: 100%;
+        margin: var(--spacing-16) 0;
+        padding: var(--spacing-16);
+        border: 1px solid var(--color-fog);
+        border-radius: var(--radius-buttons);
+        background: var(--color-mist);
+        color: var(--color-ink-black);
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: var(--text-caption);
+        line-height: var(--leading-body-sm);
+        resize: vertical;
+      }
+
+      @media (max-width: 900px) {
+        .anatomy {
+          grid-template-columns: minmax(0, 1fr);
+        }
+
+        .anatomy__plate {
+          width: 100%;
+          max-width: 288px;
+        }
+
+        .specs {
+          grid-template-columns: 120px minmax(0, 1fr);
+        }
+
+        .demo-row {
+          grid-template-columns: 32px minmax(0, 1fr) 24px;
+        }
+
+        .demo-row span:nth-child(3) {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body class="lab">
+    <div class="page">
+      <header class="nav">
+        <span class="nav__wordmark">David Lafond Designs</span>
+        <div class="nav__actions">
+          <a class="nav__link" href="design-system.html">Design system</a>
+          <a class="nav__link" href="hub.html">Hub</a>
+          <span aria-hidden="true" class="nav__menu">
+            <span></span>
+            <span></span>
+            <span></span>
+          </span>
+        </div>
+      </header>
+
+      <section class="hero">
+        <h1 class="hero__statement">
+          AColorBright bans icons past the hamburger glyph, so every mark here is a proposal —
+          five ways a 24-unit set could enter the system without breaking its achromatic, shadowless,
+          weight-400 discipline.
+        </h1>
+        <p class="hero__meta">
+          One geometry set, sixteen icons, four render parameters: size, stroke, terminals,
+          container. Change the parameters, judge the result on paper, mist, and ink, then copy any
+          icon — or the whole set as a sprite — with the settings baked in.
+        </p>
+      </section>
+
+      <section class="chapter">
+        <h2 class="chapter__heading"><span class="chapter__badge">1</span>Five directions</h2>
+        <p class="chapter__body">
+          Each direction is a preset over the same paths — no direction adds a second geometry set,
+          because two drawings would mean two systems. Pick one to load it into the lab below.
+        </p>
+        <div class="directions" id="directions"></div>
+      </section>
+
+      <section class="chapter">
+        <h2 class="chapter__heading"><span class="chapter__badge">2</span>The set</h2>
+        <p class="chapter__body">
+          Sixteen marks covering the interactions the portfolio actually has: navigate, filter,
+          switch layout, play, download, leave for an external link. Click any cell to copy its SVG
+          at the current settings.
+        </p>
+
+        <div class="controls">
+          <fieldset class="control">
+            <legend class="control__legend">Container</legend>
+            <div class="tags" id="container-tags"></div>
+          </fieldset>
+
+          <fieldset class="control">
+            <legend class="control__legend">Terminals</legend>
+            <div class="tags" id="terminal-tags"></div>
+          </fieldset>
+
+          <fieldset class="control">
+            <legend class="control__legend">Surface</legend>
+            <div class="tags" id="surface-tags"></div>
+          </fieldset>
+
+          <div class="control">
+            <div class="control__row">
+              <label class="control__legend" for="size">Size</label>
+              <output class="control__value" id="size-value">24px</output>
+            </div>
+            <input id="size" type="range" min="16" max="48" step="2" value="24" />
+          </div>
+
+          <div class="control">
+            <div class="control__row">
+              <label class="control__legend" for="stroke">Stroke</label>
+              <output class="control__value" id="stroke-value">1.5px</output>
+            </div>
+            <input id="stroke" type="range" min="0.75" max="3" step="0.25" value="1.5" />
+          </div>
+
+          <fieldset class="control">
+            <legend class="control__legend">Rendering</legend>
+            <label class="switch">
+              <input id="optical" type="checkbox" checked />
+              Hold stroke at px while size changes
+            </label>
+            <label class="switch">
+              <input id="grid" type="checkbox" />
+              Show the 24-unit grid
+            </label>
+          </fieldset>
+        </div>
+
+        <div class="gallery" id="gallery"></div>
+        <p class="status" id="status" role="status">Click a cell to copy its SVG.</p>
+        <div class="actions">
+          <button class="button button--filled" id="copy-sprite" type="button">Copy set as sprite</button>
+          <button class="button button--outlined" id="copy-css" type="button">Copy CSS</button>
+          <button class="button button--outlined" id="reset" type="button">Reset</button>
+        </div>
+      </section>
+
+      <section class="chapter">
+        <h2 class="chapter__heading"><span class="chapter__badge">3</span>Anatomy</h2>
+        <p class="chapter__body">
+          Every path lives on a 24-unit box with a 2-unit keyline it never crosses, and every
+          straight edge sits on a half-unit so a 1px stroke lands on a device pixel. That is the same
+          reason the nav hamburger reads crisp at 1px.
+        </p>
+        <div class="anatomy">
+          <div class="anatomy__plate">
+            <svg class="anatomy__icon" id="anatomy-icon" viewBox="0 0 24 24" aria-hidden="true"></svg>
+          </div>
+          <dl class="specs">
+            <dt>Grid</dt>
+            <dd>24 × 24 units, 10px per unit shown here</dd>
+            <dt>Keyline</dt>
+            <dd>2 units of padding on every side — 20-unit live area</dd>
+            <dt>Stroke</dt>
+            <dd id="spec-stroke">1.5px, uniform, no tapering</dd>
+            <dt>Terminals</dt>
+            <dd id="spec-terminals">round cap, round join</dd>
+            <dt>Alignment</dt>
+            <dd>horizontals and verticals on .5 offsets, diagonals at 45°</dd>
+            <dt>Colour</dt>
+            <dd>currentColor only — #1a1a1a on paper, #ffffff on ink, never a hue</dd>
+            <dt>Corners</dt>
+            <dd>0px on geometry; container radii stay 8 / 12 / 16px</dd>
+            <dt>Elevation</dt>
+            <dd>none — no shadow, no blur, no gradient fill</dd>
+          </dl>
+        </div>
+      </section>
+
+      <section class="chapter">
+        <h2 class="chapter__heading"><span class="chapter__badge">4</span>In place</h2>
+        <p class="chapter__body">
+          The test is not the grid, it is the page. These are existing AColorBright components with
+          the current settings dropped in — if an icon shouts louder than the type beside it, the
+          setting is wrong, not the component.
+        </p>
+        <div class="placements">
+          <div class="placement">
+            <p class="caption placement__caption">Navigation — framed container, 16px radius</p>
+            <div class="demo-nav">
+              <span>AColorBright</span>
+              <span class="demo-nav__actions">
+                <span class="icon-frame icon-frame--framed" data-slot="search"></span>
+                <span class="icon-frame icon-frame--framed" data-slot="menu"></span>
+              </span>
+            </div>
+          </div>
+
+          <div class="placement">
+            <p class="caption placement__caption">Buttons — icon at 18px, label at 16px</p>
+            <div class="chrome">
+              <span class="button button--filled button--icon"
+                ><span data-slot="download"></span>Download CV</span
+              >
+              <span class="button button--outlined button--icon"
+                ><span data-slot="arrow-up-right"></span>View project</span
+              >
+              <span class="button button--outlined button--icon"
+                ><span data-slot="filter"></span>Filter</span
+              >
+            </div>
+          </div>
+
+          <div class="placement">
+            <p class="caption placement__caption">Banded index — trailing chevron, mist rows</p>
+            <ul class="demo-list">
+              <li class="demo-row">
+                <span class="caption">01</span>
+                <span>Editorial masonry</span>
+                <span>Ragged columns, captions on the page</span>
+                <span data-slot="chevron-right"></span>
+              </li>
+              <li class="demo-row">
+                <span class="caption">02</span>
+                <span>Case study grid</span>
+                <span>Three columns, borderless cards</span>
+                <span data-slot="chevron-right"></span>
+              </li>
+              <li class="demo-row">
+                <span class="caption">03</span>
+                <span>Banded index</span>
+                <span>The archive as a list</span>
+                <span data-slot="chevron-right"></span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="placement">
+            <p class="caption placement__caption">Project caption — 16px inline mark</p>
+            <p class="demo-caption">
+              <span data-slot="external"></span>
+              <span>Vercel deployment — david-lafond-designs.vercel.app</span>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="chapter">
+        <h2 class="chapter__heading"><span class="chapter__badge">5</span>Verdict</h2>
+        <p class="chapter__body">
+          Adopting any of this is an amendment to the system, so it should be the smallest amendment
+          that does the job.
+        </p>
+        <div class="rules">
+          <div>
+            <h3>Keeps the system</h3>
+            <ul>
+              <li>currentColor only — the set inherits #1a1a1a, #666666, or #ffffff and adds no hue.</li>
+              <li>No shadows, no gradients, no filled plates other than the existing badge circle.</li>
+              <li>Container radii reuse the sanctioned 8 / 12 / 16px; icon geometry has none.</li>
+              <li>Optical stroke keeps every mark at one weight, the drawn equivalent of weight 400.</li>
+              <li>The framed direction is literally the nav hamburger container, reused.</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Costs the system</h3>
+            <ul>
+              <li>Any adoption contradicts “no iconography beyond the hamburger glyph”.</li>
+              <li>Graphic at 2.5px competes with 40px headings — it reads as a second bold weight.</li>
+              <li>Hairline at 1px disappears on ink; it needs 1.25px minimum on dark surfaces.</li>
+              <li>Badge borrows the numbered-chapter circle and dilutes the serial motif.</li>
+              <li>Sixteen marks is a set to maintain; the page currently needs five.</li>
+            </ul>
+          </div>
+        </div>
+        <p class="callout">
+          Recommendation: adopt Editorial at 24px / 1.5px for inline use and Framed for the nav,
+          drop Badge entirely so the numbered circle stays unique, and ship only the marks a screen
+          actually uses — arrow-up-right, chevron-right, menu, close, filter.
+        </p>
+      </section>
+
+      <footer class="footer">
+        David Lafond Designs — icon study against
+        <a href="design-system.html">the AColorBright system</a>. Every mark is drawn on a 24-unit
+        grid and copied straight from this page.
+      </footer>
+    </div>
+
+    <dialog class="fallback" id="fallback">
+      <p class="caption">Clipboard blocked by the browser — select the markup and copy it.</p>
+      <textarea class="fallback__text" id="fallback-text" rows="12" readonly></textarea>
+      <form method="dialog">
+        <button class="button button--outlined" type="submit">Close</button>
+      </form>
+    </dialog>
+
+    <script>
+      const ICONS = [
+        { name: 'arrow-right', body: '<path d="M3.5 12h17"/><path d="M13.5 5l7 7-7 7"/>' },
+        { name: 'arrow-up-right', body: '<path d="M6 18L18 6"/><path d="M9 6h9v9"/>' },
+        { name: 'chevron-right', body: '<path d="M9.5 5l7 7-7 7"/>' },
+        { name: 'menu', body: '<path d="M3.5 6.5h17"/><path d="M3.5 12h17"/><path d="M3.5 17.5h17"/>' },
+        { name: 'close', body: '<path d="M5.5 5.5l13 13"/><path d="M18.5 5.5l-13 13"/>' },
+        { name: 'search', body: '<circle cx="11" cy="11" r="6.5"/><path d="M15.8 15.8l4.7 4.7"/>' },
+        {
+          name: 'grid',
+          body:
+            '<rect x="3.5" y="3.5" width="7" height="7"/><rect x="13.5" y="3.5" width="7" height="7"/>' +
+            '<rect x="3.5" y="13.5" width="7" height="7"/><rect x="13.5" y="13.5" width="7" height="7"/>',
+        },
+        {
+          name: 'list',
+          body:
+            '<path d="M3.5 6.5h2"/><path d="M9 6.5h11.5"/><path d="M3.5 12h2"/>' +
+            '<path d="M9 12h11.5"/><path d="M3.5 17.5h2"/><path d="M9 17.5h11.5"/>',
+        },
+        { name: 'filter', body: '<path d="M3.5 4.5h17L14 12.5v5.5l-4 2.5v-8L3.5 4.5Z"/>' },
+        { name: 'play', body: '<path d="M8 5.5l11 6.5-11 6.5V5.5Z"/>' },
+        {
+          name: 'download',
+          body: '<path d="M12 3.5v11.5"/><path d="M7 10.5l5 5 5-5"/><path d="M3.5 20.5h17"/>',
+        },
+        {
+          name: 'external',
+          body: '<path d="M11 4.5H4.5v15h15V13"/><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5l-9 9"/>',
+        },
+        {
+          name: 'mail',
+          body: '<rect x="3.5" y="5.5" width="17" height="13"/><path d="M3.5 6.5L12 13l8.5-6.5"/>',
+        },
+        { name: 'plus', body: '<path d="M12 4.5v15"/><path d="M4.5 12h15"/>' },
+        { name: 'check', body: '<path d="M4.5 12.5l5 5 10-11"/>' },
+        {
+          name: 'copy',
+          body: '<rect x="8.5" y="8.5" width="12" height="12"/><path d="M15.5 4.5h-11v11"/>',
+        },
+      ]
+
+      const TERMINALS = {
+        blunt: { label: 'Blunt', cap: 'butt', join: 'miter' },
+        round: { label: 'Round', cap: 'round', join: 'round' },
+        square: { label: 'Square', cap: 'square', join: 'miter' },
+      }
+
+      const CONTAINERS = {
+        none: { label: 'None' },
+        badge: { label: 'Badge' },
+        framed: { label: 'Framed' },
+      }
+
+      const SURFACES = {
+        paper: { label: 'Paper' },
+        mist: { label: 'Mist' },
+        ink: { label: 'Ink' },
+      }
+
+      const DIRECTIONS = [
+        {
+          id: 'hairline',
+          name: 'Hairline',
+          note: 'The nav rules, extended. 1px marks that sit at the weight of a hairline border and never compete with type.',
+          sample: ['menu', 'search', 'plus'],
+          state: { size: 20, stroke: 1, terminals: 'blunt', container: 'none' },
+        },
+        {
+          id: 'editorial',
+          name: 'Editorial',
+          note: 'The default proposal. 1.5px round marks at 24px — legible inline beside 16px and 18px copy on any surface.',
+          sample: ['arrow-up-right', 'filter', 'download'],
+          state: { size: 24, stroke: 1.5, terminals: 'round', container: 'none' },
+        },
+        {
+          id: 'graphic',
+          name: 'Graphic',
+          note: 'Poster weight. 2.5px square marks that match the black badge as shape — and start behaving like a bold weight.',
+          sample: ['play', 'grid', 'close'],
+          state: { size: 28, stroke: 2.5, terminals: 'square', container: 'none' },
+        },
+        {
+          id: 'badge',
+          name: 'Badge',
+          note: 'The numbered circle, reused as an icon plate. Maximum contrast, but it borrows the chapter motif.',
+          sample: ['arrow-right', 'check', 'mail'],
+          state: { size: 16, stroke: 1.5, terminals: 'round', container: 'badge' },
+        },
+        {
+          id: 'framed',
+          name: 'Framed',
+          note: 'The existing hamburger container: 40px white box, 1px ink border, 16px radius. Zero new precedent.',
+          sample: ['menu', 'close', 'list'],
+          state: { size: 18, stroke: 1.25, terminals: 'blunt', container: 'framed' },
+        },
+      ]
+
+      const DEFAULTS = { size: 24, stroke: 1.5, terminals: 'round', container: 'none', surface: 'paper', optical: true, grid: false }
+      const state = { ...DEFAULTS }
+
+      const svgns = 'http://www.w3.org/2000/svg'
+      const $ = (id) => document.getElementById(id)
+      const byName = new Map(ICONS.map((icon) => [icon.name, icon]))
+
+      /* Stroke is authored in px at the 24-unit baseline. In optical mode the
+         user-unit width is rescaled so the rendered weight stays constant. */
+      const strokeUnits = (size, stroke, optical) => (optical ? (stroke * 24) / size : stroke)
+      const frameSize = (size) => Math.max(32, Math.ceil((size * 2) / 8) * 8)
+      const round = (value) => Math.round(value * 1000) / 1000
+
+      function iconMarkup(name, { klass = 'icon' } = {}) {
+        return `<svg class="${klass}" viewBox="0 0 24 24" aria-hidden="true">${byName.get(name).body}</svg>`
+      }
+
+      function wrap(name, container) {
+        const icon = iconMarkup(name)
+        if (container === 'none') return icon
+        return `<span class="icon-frame icon-frame--${container}">${icon}</span>`
+      }
+
+      function exportSvg(name, { indent = '  ' } = {}) {
+        const { size, stroke, terminals } = state
+        const { cap, join } = TERMINALS[terminals]
+        const body = byName
+          .get(name)
+          .body.replace(/></g, `>\n${indent}<`)
+        return (
+          `<svg xmlns="${svgns}" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none"\n` +
+          `${indent}stroke="currentColor" stroke-width="${round(strokeUnits(size, stroke, state.optical))}"\n` +
+          `${indent}stroke-linecap="${cap}" stroke-linejoin="${join}">\n` +
+          `${indent}${body}\n</svg>`
+        )
+      }
+
+      function spriteSvg() {
+        const { size, stroke, terminals } = state
+        const { cap, join } = TERMINALS[terminals]
+        const symbols = ICONS.map(
+          (icon) =>
+            `  <symbol id="icon-${icon.name}" viewBox="0 0 24 24">${icon.body}</symbol>`,
+        ).join('\n')
+        return (
+          `<svg xmlns="${svgns}" hidden fill="none" stroke="currentColor"\n` +
+          `  stroke-width="${round(strokeUnits(size, stroke, state.optical))}" ` +
+          `stroke-linecap="${cap}" stroke-linejoin="${join}">\n${symbols}\n</svg>`
+        )
+      }
+
+      function cssBlock() {
+        const { size, stroke, terminals } = state
+        const { cap, join } = TERMINALS[terminals]
+        return [
+          '.icon {',
+          `  width: ${size}px;`,
+          `  height: ${size}px;`,
+          '  fill: none;',
+          '  stroke: currentColor;',
+          `  stroke-width: ${round(strokeUnits(size, stroke, state.optical))};`,
+          `  stroke-linecap: ${cap};`,
+          `  stroke-linejoin: ${join};`,
+          '}',
+        ].join('\n')
+      }
+
+      /* ─── Rendering ─────────────────────────────────────────── */
+
+      const gallery = $('gallery')
+      const status = $('status')
+      let renderedContainer = null
+
+      function renderGallery() {
+        gallery.innerHTML = ICONS.map(
+          (icon) =>
+            `<button class="cell" type="button" data-icon="${icon.name}" aria-label="Copy ${icon.name} as SVG">` +
+            `<span class="cell__stage">${wrap(icon.name, state.container)}</span>` +
+            `<span class="cell__label">${icon.name}</span>` +
+            '</button>',
+        ).join('')
+      }
+
+      function renderDirections() {
+        $('directions').innerHTML = DIRECTIONS.map((direction) => {
+          const { size, stroke, terminals, container } = direction.state
+          const units = round(strokeUnits(size, stroke, true))
+          const style =
+            `--icon-size:${size}px;--icon-stroke:${units};` +
+            `--icon-cap:${TERMINALS[terminals].cap};--icon-join:${TERMINALS[terminals].join};` +
+            `--frame-size:${frameSize(size)}px`
+          const marks = direction.sample.map((name) => wrap(name, container)).join('')
+          return (
+            `<button class="direction" type="button" data-direction="${direction.id}" aria-pressed="false">` +
+            `<span class="direction__stage" style="${style}">${marks}</span>` +
+            `<span class="direction__name">${direction.name}` +
+            `<span class="direction__spec">${size}px · ${stroke}px · ${TERMINALS[terminals].label.toLowerCase()}</span></span>` +
+            `<span class="direction__note">${direction.note}</span>` +
+            '</button>'
+          )
+        }).join('')
+      }
+
+      function renderTags(host, options, group) {
+        host.innerHTML = Object.entries(options)
+          .map(
+            ([value, option]) =>
+              `<label class="tag"><input type="radio" name="${group}" value="${value}"` +
+              `${state[group] === value ? ' checked' : ''} />${option.label}</label>`,
+          )
+          .join('')
+      }
+
+      function renderPlacements() {
+        for (const slot of document.querySelectorAll('[data-slot]')) {
+          slot.innerHTML = iconMarkup(slot.dataset.slot)
+        }
+      }
+
+      function renderAnatomy() {
+        $('anatomy-icon').innerHTML = byName.get('arrow-up-right').body
+      }
+
+      function sync() {
+        const { size, stroke, terminals, surface, container, optical, grid } = state
+        const { cap, join } = TERMINALS[terminals]
+        const root = document.body.style
+        root.setProperty('--icon-size', `${size}px`)
+        root.setProperty('--icon-stroke', String(round(strokeUnits(size, stroke, optical))))
+        root.setProperty('--icon-cap', cap)
+        root.setProperty('--icon-join', join)
+        root.setProperty('--frame-size', `${frameSize(size)}px`)
+
+        gallery.className = `gallery gallery--${surface}${grid ? ' gallery--grid' : ''}`
+        $('size-value').textContent = `${size}px`
+        $('stroke-value').textContent = optical
+          ? `${stroke}px held`
+          : `${stroke}px at 24 · ${round((stroke * size) / 24)}px rendered`
+        $('spec-stroke').textContent = `${stroke}px, uniform, no tapering`
+        $('spec-terminals').textContent = `${cap} cap, ${join} join`
+
+        for (const button of document.querySelectorAll('[data-direction]')) {
+          const preset = DIRECTIONS.find((d) => d.id === button.dataset.direction).state
+          const active = Object.entries(preset).every(([key, value]) => state[key] === value)
+          button.setAttribute('aria-pressed', String(active))
+        }
+
+        // The plate magnifies 24 units to 240px, so the stroke is drawn at scale.
+        $('anatomy-icon').style.strokeWidth = String(stroke)
+
+        if (container !== renderedContainer) {
+          renderedContainer = container
+          renderGallery()
+        }
+      }
+
+      async function copy(text, message) {
+        try {
+          await navigator.clipboard.writeText(text)
+          status.textContent = message
+        } catch {
+          const field = $('fallback-text')
+          field.value = text
+          $('fallback').showModal()
+          field.focus()
+          field.select()
+          status.textContent = 'Clipboard blocked — the markup is in the panel, ready to select.'
+        }
+      }
+
+      /* ─── Wiring ────────────────────────────────────────────── */
+
+      renderDirections()
+      renderTags($('container-tags'), CONTAINERS, 'container')
+      renderTags($('terminal-tags'), TERMINALS, 'terminals')
+      renderTags($('surface-tags'), SURFACES, 'surface')
+      renderAnatomy()
+      renderPlacements()
+      sync()
+
+      document.addEventListener('change', (event) => {
+        const target = event.target
+        if (target.name in state && target.type === 'radio') {
+          state[target.name] = target.value
+          sync()
+        }
+      })
+
+      $('size').addEventListener('input', (event) => {
+        state.size = Number(event.target.value)
+        sync()
+      })
+
+      $('stroke').addEventListener('input', (event) => {
+        state.stroke = Number(event.target.value)
+        sync()
+      })
+
+      $('optical').addEventListener('change', (event) => {
+        state.optical = event.target.checked
+        sync()
+      })
+
+      $('grid').addEventListener('change', (event) => {
+        state.grid = event.target.checked
+        sync()
+      })
+
+      gallery.addEventListener('click', (event) => {
+        const cell = event.target.closest('[data-icon]')
+        if (!cell) return
+        const name = cell.dataset.icon
+        copy(exportSvg(name), `${name} copied as SVG — ${state.size}px, ${state.stroke}px stroke.`)
+      })
+
+      $('directions').addEventListener('click', (event) => {
+        const button = event.target.closest('[data-direction]')
+        if (!button) return
+        const direction = DIRECTIONS.find((d) => d.id === button.dataset.direction)
+        Object.assign(state, direction.state)
+        applyStateToControls()
+        sync()
+        status.textContent = `${direction.name} loaded — ${direction.state.size}px, ${direction.state.stroke}px stroke.`
+      })
+
+      $('copy-sprite').addEventListener('click', () => {
+        copy(spriteSvg(), `Sprite copied — ${ICONS.length} symbols, use <use href="#icon-menu">.`)
+      })
+
+      $('copy-css').addEventListener('click', () => {
+        copy(cssBlock(), 'CSS copied — drop it beside the sprite.')
+      })
+
+      $('reset').addEventListener('click', () => {
+        Object.assign(state, DEFAULTS)
+        applyStateToControls()
+        sync()
+        status.textContent = 'Reset to Editorial defaults.'
+      })
+
+      function applyStateToControls() {
+        $('size').value = String(state.size)
+        $('stroke').value = String(state.stroke)
+        $('optical').checked = state.optical
+        $('grid').checked = state.grid
+        for (const input of document.querySelectorAll('input[type="radio"]')) {
+          input.checked = state[input.name] === input.value
+        }
+      }
+    </script>
+  </body>
+</html>

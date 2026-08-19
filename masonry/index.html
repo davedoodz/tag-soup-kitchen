@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Five masonry treatments applied to the nine real portfolio records pulled from the production deployment."
+    />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 44'%3E%3Cpath d='M0 44V0h27.5C38.82 0 48 9.18 48 20.5V44H33.5V22c0-4.14-3.36-7.5-7.5-7.5H14.5V44H0Z'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="../shared/acolorbright.css" />
+    <title>Masonry study</title>
+  </head>
+  <body>
+    <div class="page">
+      <header class="nav">
+        <span class="nav__wordmark">David Lafond Designs</span>
+        <div class="nav__actions">
+          <a class="nav__link" href="../hub.html">Hub</a>
+          <a class="nav__link" href="../designs/index.html">Directions</a>
+          <a class="nav__link" href="../design-system.html">Design system</a>
+          <span aria-hidden="true" class="nav__menu">
+            <span></span>
+            <span></span>
+            <span></span>
+          </span>
+        </div>
+      </header>
+
+      <section class="hero hero--compact">
+        <h1 class="hero__statement">
+          Five masonry treatments, all carrying the same nine real records and their production
+          media, so the layout is the only thing under review.
+        </h1>
+        <p class="hero__meta">
+          Titles, subtitles, roles, years, topics, and hero images were pulled from the live
+          deployment at davidlafond.xyz — build e0764e4,
+          2026-08-16 — and optimized into public/images. No placeholder copy and no
+          placeholder tiles appear on these pages.
+        </p>
+      </section>
+
+      <section class="chapter">
+        <h2 class="chapter__heading"><span class="chapter__badge">1</span>Variants</h2>
+        <ul class="hub-list">
+          <li class="hub-row">
+            <span class="caption">01</span>
+            <span><a href="01-column-masonry.html">Column masonry</a></span>
+            <span class="hub-row__description">Three CSS columns, natural aspect ratios, captions on the page. The ragged column bottom is the layout — nothing is cropped and nothing is padded to match.</span>
+            <span class="hub-row__port"><a href="http://localhost:4211/">4211</a></span>
+          </li>
+          <li class="hub-row">
+            <span class="caption">02</span>
+            <span><a href="02-justified-rows.html">Justified rows</a></span>
+            <span class="hub-row__description">Every row is flush left and right: widths are proportional to each image ratio, so the row height falls out of the content instead of a fixed grid.</span>
+            <span class="hub-row__port"><a href="http://localhost:4212/">4212</a></span>
+          </li>
+          <li class="hub-row">
+            <span class="caption">03</span>
+            <span><a href="03-span-mosaic.html">Span mosaic</a></span>
+            <span class="hub-row__description">A six-column grid on a 96px row module. Entries claim two or four columns and three to five rows, and images crop to the claim.</span>
+            <span class="hub-row__port"><a href="http://localhost:4213/">4213</a></span>
+          </li>
+          <li class="hub-row">
+            <span class="caption">04</span>
+            <span><a href="04-lead-and-columns.html">Lead and columns</a></span>
+            <span class="hub-row__description">One full-measure lead at 24px, then the remaining eight records in a tighter three-column masonry with serial numbering.</span>
+            <span class="hub-row__port"><a href="http://localhost:4214/">4214</a></span>
+          </li>
+          <li class="hub-row">
+            <span class="caption">05</span>
+            <span><a href="05-spec-rails.html">Spec rails</a></span>
+            <span class="hub-row__description">Two wide columns. Each record carries a banded spec rail — role, years, topics — so the index reads as a datasheet under the image.</span>
+            <span class="hub-row__port"><a href="http://localhost:4215/">4215</a></span>
+          </li>
+        </ul>
+      </section>
+
+      <section class="chapter">
+        <h2 class="chapter__heading"><span class="chapter__badge">2</span>Records in play</h2>
+        <p class="chapter__body">
+          The nine case studies as they exist in production, in deployment order. Every variant
+          renders this exact set, in this exact order.
+        </p>
+        <ul class="index-list">
+          <li class="index-row">
+            <span class="caption">01</span>
+            <span>Harvard + MIT Acceptance Portfolio</span>
+            <span>Not recorded</span>
+            <span>2024</span>
+          </li>
+          <li class="index-row">
+            <span class="caption">02</span>
+            <span>Re:Self</span>
+            <span>UX research / design lead</span>
+            <span>2025 — ongoing</span>
+          </li>
+          <li class="index-row">
+            <span class="caption">03</span>
+            <span>Global Interiors</span>
+            <span>Design lead</span>
+            <span>2025 — ongoing</span>
+          </li>
+          <li class="index-row">
+            <span class="caption">04</span>
+            <span>David's Journal</span>
+            <span>Founder / writer</span>
+            <span>2025 — ongoing</span>
+          </li>
+          <li class="index-row">
+            <span class="caption">05</span>
+            <span>Design Sketches</span>
+            <span>Design process archive</span>
+            <span>2025</span>
+          </li>
+          <li class="index-row">
+            <span class="caption">06</span>
+            <span>EcoFabriq</span>
+            <span>Co-founder / design lead</span>
+            <span>2024 — 2025</span>
+          </li>
+          <li class="index-row">
+            <span class="caption">07</span>
+            <span>Pumba Desktop</span>
+            <span>Product designer</span>
+            <span>2024 — 2025</span>
+          </li>
+          <li class="index-row">
+            <span class="caption">08</span>
+            <span>HIDECS 2 Reenactment</span>
+            <span>Product designer</span>
+            <span>2023</span>
+          </li>
+          <li class="index-row">
+            <span class="caption">09</span>
+            <span>N°1 Decode (CAJ)</span>
+            <span>Co-founder / editor-in-chief</span>
+            <span>2021 — 2023</span>
+          </li>
+        </ul>
+      </section>
+
+      <footer class="footer">
+        David Lafond Designs — masonry study. <a href="../hub.html">Back to the hub</a>.
+      </footer>
+    </div>
+  </body>
+</html>

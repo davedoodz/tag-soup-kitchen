@@ -1,0 +1,1479 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Archived shader study for AColorBright — five achromatic generative plates, all five accepted and now shipping as the portfolio’s interactive Shaders lab."
+    />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 44'%3E%3Cpath d='M0 44V0h27.5C38.82 0 48 9.18 48 20.5V44H33.5V22c0-4.14-3.36-7.5-7.5-7.5H14.5V44H0Z'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="../../shared/acolorbright.css" />
+    <title>Shader study (archived) — AColorBright</title>
+    <style>
+      /* ─── Plate primitives ────────────────────────────────────
+         One uniform contract, five coverage fields. A plate is an
+         image slot: 12px radius, no border, no shadow, no hue. */
+
+      .plate-canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+        border-radius: inherit;
+      }
+
+      .stage {
+        position: relative;
+        display: block;
+        border-radius: var(--radius-images);
+        background: var(--color-mist);
+        content-visibility: auto;
+        contain-intrinsic-size: auto none auto 240px;
+        overflow: clip;
+      }
+
+      .stage--unsupported::after {
+        position: absolute;
+        inset: auto var(--spacing-16) var(--spacing-16) var(--spacing-16);
+        color: var(--color-graphite);
+        content: 'WebGL2 unavailable — mist plate stands in.';
+        font-size: var(--text-caption);
+        line-height: var(--leading-caption);
+      }
+
+      /* ─── Chapter 1 — the five plates ─────────────────────────── */
+
+      .plates {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: var(--spacing-32);
+      }
+
+      .plate {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-16);
+        padding: 0;
+        border: 0;
+        background: none;
+        color: inherit;
+        font: inherit;
+        letter-spacing: inherit;
+        text-align: left;
+        cursor: pointer;
+      }
+
+      .plate__stage {
+        aspect-ratio: 4 / 3;
+        contain-intrinsic-size: auto none auto 220px;
+      }
+
+      .plate[aria-pressed='true'] .plate__name::after {
+        content: ' — in the lab';
+        color: var(--color-ash);
+      }
+
+      .plate__name {
+        display: flex;
+        align-items: baseline;
+        gap: var(--spacing-8);
+        font-size: var(--text-body);
+        line-height: var(--leading-body);
+      }
+
+      .plate__note {
+        margin: 0;
+        color: var(--color-graphite);
+        font-size: var(--text-body-sm);
+        line-height: var(--leading-body-sm);
+      }
+
+      .plate__spec {
+        color: var(--color-ash);
+        font-size: var(--text-caption);
+        line-height: var(--leading-caption);
+      }
+
+      /* ─── Chapter 2 — the lab ─────────────────────────────────── */
+
+      .controls {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: var(--spacing-24) var(--spacing-32);
+        margin-bottom: var(--spacing-32);
+        padding: var(--spacing-24) 0;
+        border-top: 1px solid var(--color-fog);
+        border-bottom: 1px solid var(--color-fog);
+      }
+
+      .control {
+        display: flex;
+        min-width: 0;
+        flex-direction: column;
+        gap: var(--spacing-8);
+        margin: 0;
+        padding: 0;
+        border: 0;
+      }
+
+      .control__legend {
+        padding: 0;
+        color: var(--color-ash);
+        font-size: var(--text-caption);
+        line-height: var(--leading-caption);
+      }
+
+      .control__value {
+        color: var(--color-graphite);
+        font-size: var(--text-caption);
+        line-height: var(--leading-caption);
+      }
+
+      .control__row {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: var(--spacing-8);
+      }
+
+      .control input[type='range'] {
+        width: 100%;
+        margin: 0;
+        accent-color: var(--color-ink-black);
+      }
+
+      .tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--spacing-8);
+      }
+
+      .tag {
+        position: relative;
+        padding: 8px var(--spacing-16);
+        border: 1px solid var(--color-fog);
+        border-radius: var(--radius-buttons);
+        color: var(--color-ink-black);
+        cursor: pointer;
+        font-size: var(--text-body-sm);
+        line-height: var(--leading-body-sm);
+      }
+
+      .tag input {
+        position: absolute;
+        inset: 0;
+        margin: 0;
+        opacity: 0;
+        cursor: pointer;
+      }
+
+      .tag:has(:checked) {
+        border-color: var(--color-charcoal);
+        background: var(--color-charcoal);
+        color: var(--color-paper);
+      }
+
+      .tag:has(:focus-visible) {
+        outline: 2px solid var(--color-ink-black);
+        outline-offset: 3px;
+      }
+
+      .switch {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-8);
+        font-size: var(--text-body-sm);
+        line-height: var(--leading-body-sm);
+      }
+
+      .switch input {
+        width: 16px;
+        height: 16px;
+        margin: 0;
+        accent-color: var(--color-ink-black);
+      }
+
+      .lab__stage {
+        aspect-ratio: 16 / 9;
+        contain-intrinsic-size: auto none auto 420px;
+      }
+
+      .readout {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--spacing-8) var(--spacing-24);
+        margin-top: var(--spacing-16);
+        color: var(--color-graphite);
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: var(--text-caption);
+        line-height: var(--leading-caption);
+      }
+
+      .status {
+        min-height: var(--spacing-24);
+        margin-top: var(--spacing-16);
+        color: var(--color-graphite);
+        font-size: var(--text-caption);
+        line-height: var(--leading-caption);
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--spacing-8);
+        margin-top: var(--spacing-16);
+      }
+
+      button.button {
+        cursor: pointer;
+        padding-inline: var(--spacing-16);
+      }
+
+      /* ─── Chapter 3 — the contract ────────────────────────────── */
+
+      .specs {
+        display: grid;
+        margin: 0;
+        grid-template-columns: 200px minmax(0, 1fr);
+      }
+
+      .specs dt,
+      .specs dd {
+        margin: 0;
+        padding: var(--spacing-8) var(--spacing-16);
+        font-size: var(--text-body-sm);
+        line-height: var(--leading-body-sm);
+      }
+
+      .specs dt {
+        color: var(--color-ink-black);
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      }
+
+      .specs dd {
+        color: var(--color-graphite);
+      }
+
+      .specs > :nth-child(4n + 1),
+      .specs > :nth-child(4n + 2) {
+        background: var(--color-mist);
+      }
+
+      code {
+        color: var(--color-ink-black);
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.9em;
+      }
+
+      /* ─── Chapter 4 — in place ────────────────────────────────── */
+
+      .placements {
+        display: grid;
+        gap: var(--spacing-64);
+      }
+
+      .placement__caption {
+        margin-bottom: var(--spacing-16);
+      }
+
+      .demo-card {
+        display: grid;
+        max-width: 560px;
+        gap: var(--spacing-16);
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .demo-card__stage {
+        aspect-ratio: 3 / 2;
+        contain-intrinsic-size: auto none auto 240px;
+      }
+
+      .demo-card__body {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-8);
+        padding-top: 0;
+      }
+
+      .demo-panels {
+        display: grid;
+        gap: var(--spacing-16);
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .demo-panels .stage {
+        aspect-ratio: 3 / 4;
+        contain-intrinsic-size: auto none auto 320px;
+      }
+
+      /* ─── Chapter 5 — verdict ─────────────────────────────────── */
+
+      .rules {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: var(--spacing-32);
+      }
+
+      .rules h3 {
+        margin: 0 0 var(--spacing-16);
+        font-size: var(--text-subheading);
+        font-weight: 400;
+        line-height: var(--leading-subheading);
+      }
+
+      .rules ul {
+        margin: 0;
+        padding-left: var(--spacing-16);
+        color: var(--color-graphite);
+        font-size: var(--text-body-sm);
+        line-height: var(--leading-body-sm);
+      }
+
+      .rules li + li {
+        margin-top: var(--spacing-8);
+      }
+
+      .callout {
+        max-width: 640px;
+        margin-top: var(--spacing-32);
+        padding: var(--spacing-24);
+        background: var(--color-mist);
+        font-size: var(--text-body-sm);
+        line-height: var(--leading-body-sm);
+      }
+
+      /* ─── Manual-copy fallback ────────────────────────────────── */
+
+      .fallback {
+        max-width: 720px;
+        padding: var(--spacing-24);
+        border: 1px solid var(--color-ink-black);
+        border-radius: var(--radius-images);
+        background: var(--color-paper);
+        color: var(--color-ink-black);
+      }
+
+      .fallback::backdrop {
+        background: rgb(26 26 26 / 0.4);
+      }
+
+      .fallback__text {
+        width: 100%;
+        margin: var(--spacing-16) 0;
+        padding: var(--spacing-16);
+        border: 1px solid var(--color-fog);
+        border-radius: var(--radius-buttons);
+        background: var(--color-mist);
+        color: var(--color-ink-black);
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: var(--text-caption);
+        line-height: var(--leading-body-sm);
+        resize: vertical;
+      }
+
+      @media (max-width: 900px) {
+        .specs {
+          grid-template-columns: 140px minmax(0, 1fr);
+        }
+      }
+
+      @media (max-width: 640px) {
+        .demo-panels {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header class="nav">
+        <span class="nav__wordmark">David Lafond Designs</span>
+        <div class="nav__actions">
+          <a class="nav__link" href="../../design-system.html">Design system</a>
+          <a class="nav__link" href="../../icons.html">Icon study</a>
+          <a class="nav__link" href="../../hub.html">Hub</a>
+          <span aria-hidden="true" class="nav__menu">
+            <span></span>
+            <span></span>
+            <span></span>
+          </span>
+        </div>
+      </header>
+
+      <section class="hero">
+        <h1 class="hero__statement">
+          AColorBright says photography is the only thing allowed to interrupt the white page — but
+          there is no approved photography yet, so every image slot in the portfolio is currently
+          empty. These five shaders are the stand-in: generative achromatic plates that fill an image
+          slot with material instead of a placeholder grey.
+        </h1>
+        <p class="hero__meta">
+          One uniform contract, five coverage fields, two palette values per plate. Nothing here
+          renders a hue, a shadow, or a smooth gradient — coverage is posterised into the system’s own
+          greys and dithered on an 8×8 ordered matrix, so a plate reads as printed ink, not as CSS.
+        </p>
+        <p class="hero__meta">
+          Archived 18.08.26 — this round is closed. All five plates were accepted, and the live
+          version is no longer here: it ships as the
+          <a href="https://david-lafond-designs.vercel.app/#shaders">Shaders section of the portfolio</a>
+          itself, where the uniforms are drivable and every frame exports as a PNG. Locally that
+          section runs on port 4178.
+        </p>
+      </section>
+
+      <section class="chapter">
+        <h2 class="chapter__heading"><span class="chapter__badge">1</span>Five plates</h2>
+        <p class="chapter__body">
+          Each plate is the same program with a different coverage field and a different default
+          preset. Click one to load it into the lab below.
+        </p>
+        <div class="plates" id="plates"></div>
+      </section>
+
+      <section class="chapter">
+        <h2 class="chapter__heading"><span class="chapter__badge">2</span>The lab</h2>
+        <p class="chapter__body">
+          Every plate answers to the same nine uniforms. Judge them at the size an image slot actually
+          gets — a 16:9 band on a 1200px page — then copy the shader with the current settings baked
+          in, or export the frame as a PNG to drop into Paper.
+        </p>
+
+        <div class="controls">
+          <fieldset class="control">
+            <legend class="control__legend">Field</legend>
+            <div class="tags" id="field-tags"></div>
+          </fieldset>
+
+          <fieldset class="control">
+            <legend class="control__legend">Palette</legend>
+            <div class="tags" id="palette-tags"></div>
+          </fieldset>
+
+          <div class="control">
+            <div class="control__row">
+              <label class="control__legend" for="scale">Scale</label>
+              <output class="control__value" id="scale-value">1.60</output>
+            </div>
+            <input id="scale" type="range" min="0.4" max="8" step="0.1" value="1.6" />
+          </div>
+
+          <div class="control">
+            <div class="control__row">
+              <label class="control__legend" for="contrast">Contrast</label>
+              <output class="control__value" id="contrast-value">0.50</output>
+            </div>
+            <input id="contrast" type="range" min="0" max="1" step="0.01" value="0.5" />
+          </div>
+
+          <div class="control">
+            <div class="control__row">
+              <label class="control__legend" for="grain">Grain</label>
+              <output class="control__value" id="grain-value">0.06</output>
+            </div>
+            <input id="grain" type="range" min="0" max="0.4" step="0.01" value="0.06" />
+          </div>
+
+          <div class="control">
+            <div class="control__row">
+              <label class="control__legend" for="steps">Posterise</label>
+              <output class="control__value" id="steps-value">off</output>
+            </div>
+            <input id="steps" type="range" min="0" max="12" step="1" value="0" />
+          </div>
+
+          <div class="control">
+            <div class="control__row">
+              <label class="control__legend" for="speed">Speed</label>
+              <output class="control__value" id="speed-value">0.60</output>
+            </div>
+            <input id="speed" type="range" min="0" max="2" step="0.05" value="0.6" />
+          </div>
+
+          <fieldset class="control">
+            <legend class="control__legend">Rendering</legend>
+            <label class="switch">
+              <input id="motion" type="checkbox" checked />
+              Animate — off respects reduced motion
+            </label>
+            <label class="switch">
+              <input id="dither" type="checkbox" checked />
+              Dither the posterise steps
+            </label>
+            <label class="switch">
+              <input id="pixel-ratio" type="checkbox" checked />
+              Render at device pixel ratio
+            </label>
+          </fieldset>
+        </div>
+
+        <div class="stage lab__stage" id="lab-stage"></div>
+        <div class="readout" id="readout"></div>
+        <p class="status" id="status" role="status">Pick a field, then copy the shader or the frame.</p>
+        <div class="actions">
+          <button class="button button--filled" id="copy-glsl" type="button">Copy GLSL</button>
+          <button class="button button--outlined" id="copy-loader" type="button">Copy loader</button>
+          <button class="button button--outlined" id="export-png" type="button">Export PNG — 1600×900</button>
+          <button class="button button--outlined" id="shuffle" type="button">New seed</button>
+          <button class="button button--outlined" id="reset" type="button">Reset preset</button>
+        </div>
+      </section>
+
+      <section class="chapter">
+        <h2 class="chapter__heading"><span class="chapter__badge">3</span>The contract</h2>
+        <p class="chapter__body">
+          A field is a single function — <code>float coverage(vec2 uv, vec2 px)</code> returning ink
+          coverage from 0 to 1. Everything after that is shared: contrast, grain, posterising,
+          dithering, and the two-colour mix. Adding a sixth plate means writing one function, not one
+          program.
+        </p>
+        <dl class="specs">
+          <dt>u_res</dt>
+          <dd>drawing-buffer size in device pixels; <code>uv</code> is aspect-corrected on y</dd>
+          <dt>u_dpr</dt>
+          <dd>device pixel ratio — <code>px</code> is CSS pixels so cell sizes stay design-space</dd>
+          <dt>u_time</dt>
+          <dd>seconds since load, already multiplied by speed; 0 freezes the plate</dd>
+          <dt>u_scale</dt>
+          <dd>field frequency, or halftone cell and column width in CSS pixels</dd>
+          <dt>u_contrast</dt>
+          <dd>gamma on coverage, 2.2 → 0.45; thins or thickens lines without crushing them</dd>
+          <dt>u_grain</dt>
+          <dd>device-pixel noise added to coverage, resampled 20 times per second</dd>
+          <dt>u_steps</dt>
+          <dd>posterise levels, 2–12; below 2 the field stays continuous</dd>
+          <dt>u_dither</dt>
+          <dd>1 blends the steps on the 8×8 ordered matrix, 0 leaves hard separations</dd>
+          <dt>u_seed</dt>
+          <dd>hash offset — the only difference between two plates of the same field</dd>
+          <dt>u_ink / u_paper</dt>
+          <dd>the two palette values coverage mixes between; both come from the token set</dd>
+        </dl>
+      </section>
+
+      <section class="chapter">
+        <h2 class="chapter__heading"><span class="chapter__badge">4</span>In place</h2>
+        <p class="chapter__body">
+          The test is not the plate, it is the page. These are the components that actually have image
+          slots — the case-study card and the full-bleed panel trio — running the current lab
+          settings. If a plate pulls the eye before the project name does, the setting is wrong.
+        </p>
+        <div class="placements">
+          <div class="placement">
+            <p class="caption placement__caption">Case study card — plate in the image slot, 12px radius</p>
+            <div class="demo-card">
+              <div class="stage demo-card__stage" data-plate="card"></div>
+              <div class="demo-card__body">
+                <span class="entry__title">Northlight — identity and product site</span>
+                <span class="entry__description">
+                  Brand system, design tokens, and a static build shipped in six weeks.
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="placement">
+            <p class="caption placement__caption">Panel trio — one field, three seeds, no caption chrome</p>
+            <div class="demo-panels">
+              <div class="stage" data-plate="panel-1"></div>
+              <div class="stage" data-plate="panel-2"></div>
+              <div class="stage" data-plate="panel-3"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="chapter">
+        <h2 class="chapter__heading"><span class="chapter__badge">5</span>Verdict</h2>
+        <p class="chapter__body">
+          Generative plates are an amendment to the system, so the question is whether they earn the
+          image slot they occupy — or whether an empty white slot was the more honest answer.
+        </p>
+        <div class="rules">
+          <div>
+            <h3>Keeps the system</h3>
+            <ul>
+              <li>Two token values per plate — 0% colourfulness holds, no hue is ever mixed.</li>
+              <li>No shadow, no blur, no elevation: coverage and radius do all the work.</li>
+              <li>Posterising into 4–8 greys stops a plate reading as a 2019-era gradient.</li>
+              <li>Halftone and sweep are sized in CSS pixels off the 8px spacing unit.</li>
+              <li>12px radius, no border, no caption chrome — identical to an image slot.</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Costs the system</h3>
+            <ul>
+              <li>“Imagery is the only chromatic interruption” — a plate is imagery that proves nothing.</li>
+              <li>Motion is new vocabulary: the system has no animation rules to fall back on.</li>
+              <li>Nine live contexts is real GPU cost on a page whose budget was type and whitespace.</li>
+              <li>Continuous fields at posterise off read as gradients, which the system bans.</li>
+              <li>Every plate is one more thing to maintain once the real photography lands.</li>
+            </ul>
+          </div>
+        </div>
+        <p class="callout">
+          Outcome: all five plates were accepted — Grain, Halftone, Contour, Warp, and Sweep. None
+          was dropped and none was retired. They now ship as the Shaders section of the portfolio,
+          where the uniform contract is exposed as an interactive lab: a visitor picks a plate, moves
+          the uniforms, and exports the frame as a PNG. The costs listed above stand as the record of
+          what the amendment charges the system; the decision was that the material is worth it. This
+          round is closed and this page is kept only as its artefact.
+        </p>
+      </section>
+
+      <footer class="footer">
+        David Lafond Designs — shader study against
+        <a href="../../design-system.html">the AColorBright system</a>. Every plate is one
+        coverage function over a shared uniform contract, copied straight from this page.
+      </footer>
+    </div>
+
+    <dialog class="fallback" id="fallback">
+      <p class="caption">Clipboard blocked by the browser — select the source and copy it.</p>
+      <textarea class="fallback__text" id="fallback-text" rows="14" readonly></textarea>
+      <form method="dialog">
+        <button class="button button--outlined" type="submit">Close</button>
+      </form>
+    </dialog>
+
+    <script>
+      /* ─── Palette pairs — token values only ───────────────────── */
+
+      const PALETTES = [
+        { id: 'ink-paper', name: 'Ink on paper', ink: '#1a1a1a', paper: '#ffffff' },
+        { id: 'graphite-mist', name: 'Graphite on mist', ink: '#666666', paper: '#f2f2f2' },
+        { id: 'ash-paper', name: 'Ash on paper', ink: '#999999', paper: '#ffffff' },
+        { id: 'ink-fog', name: 'Ink on fog', ink: '#1a1a1a', paper: '#e6e6e6' },
+        { id: 'paper-ink', name: 'Paper on ink', ink: '#ffffff', paper: '#1a1a1a' },
+      ]
+
+      /* ─── Shared program — helpers, then main ─────────────────── */
+
+      const VERT = `#version 300 es
+void main() {
+  // fullscreen triangle, no buffers
+  float x = -1.0 + float((gl_VertexID & 1) << 2);
+  float y = -1.0 + float((gl_VertexID & 2) << 1);
+  gl_Position = vec4(x, y, 0.0, 1.0);
+}`
+
+      const FRAG_HEAD = `#version 300 es
+precision highp float;
+
+uniform vec2 u_res;
+uniform float u_dpr;
+uniform float u_time;
+uniform float u_scale;
+uniform float u_contrast;
+uniform float u_grain;
+uniform float u_steps;
+uniform float u_dither;
+uniform float u_seed;
+uniform vec3 u_ink;
+uniform vec3 u_paper;
+
+out vec4 fragColor;
+
+const float BAYER[64] = float[64](
+   0.0, 32.0,  8.0, 40.0,  2.0, 34.0, 10.0, 42.0,
+  48.0, 16.0, 56.0, 24.0, 50.0, 18.0, 58.0, 26.0,
+  12.0, 44.0,  4.0, 36.0, 14.0, 46.0,  6.0, 38.0,
+  60.0, 28.0, 52.0, 20.0, 62.0, 30.0, 54.0, 22.0,
+   3.0, 35.0, 11.0, 43.0,  1.0, 33.0,  9.0, 41.0,
+  51.0, 19.0, 59.0, 27.0, 49.0, 17.0, 57.0, 25.0,
+  15.0, 47.0,  7.0, 39.0, 13.0, 45.0,  5.0, 37.0,
+  63.0, 31.0, 55.0, 23.0, 61.0, 29.0, 53.0, 21.0
+);
+
+float dither(vec2 p) {
+  ivec2 i = ivec2(mod(floor(p), 8.0));
+  return (BAYER[i.y * 8 + i.x] + 0.5) / 64.0;
+}
+
+// Hoskins hash12 — no axis correlation, so value noise reads organic
+float hash(vec2 p) {
+  vec3 q = fract(vec3(p.xyx) * 0.1031);
+  q += dot(q, q.yzx + 33.33);
+  return fract((q.x + q.y) * q.z);
+}
+
+float vnoise(vec2 p) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+  f = f * f * (3.0 - 2.0 * f);
+  float a = hash(i);
+  float b = hash(i + vec2(1.0, 0.0));
+  float c = hash(i + vec2(0.0, 1.0));
+  float d = hash(i + vec2(1.0, 1.0));
+  return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+}
+
+float fbm(vec2 p) {
+  float sum = 0.0;
+  float amp = 0.5;
+  mat2 rot = mat2(0.8, -0.6, 0.6, 0.8);
+  for (int i = 0; i < 5; i++) {
+    sum += amp * vnoise(p + u_seed * 17.0);
+    p = rot * p * 2.03;
+    amp *= 0.5;
+  }
+  return sum;
+}
+`
+
+      const FRAG_MAIN = `
+void main() {
+  vec2 px = gl_FragCoord.xy / max(u_dpr, 0.0001);
+  vec2 uv = (gl_FragCoord.xy - 0.5 * u_res) / u_res.y;
+
+  float v = clamp(coverage(uv, px), 0.0, 1.0);
+  v = pow(v, mix(2.2, 0.45, clamp(u_contrast, 0.0, 1.0)));
+
+  if (u_grain > 0.0) {
+    // grain is sampled per device pixel, so it stays film-fine at any ratio
+    float g = hash(gl_FragCoord.xy + vec2(u_seed * 131.0) + floor(u_time * 20.0) * vec2(7.0, 3.0)) - 0.5;
+    v = clamp(v + g * u_grain, 0.0, 1.0);
+  }
+
+  if (u_steps >= 2.0) {
+    float n = u_steps - 1.0;
+    float bias = u_dither > 0.5 ? dither(px) : 0.5;
+    v = clamp(floor(v * n + bias) / n, 0.0, 1.0);
+  }
+
+  fragColor = vec4(mix(u_paper, u_ink, v), 1.0);
+}`
+
+      /* ─── The five fields ─────────────────────────────────────── */
+
+      const FIELDS = [
+        {
+          id: 'grain',
+          index: '01',
+          name: 'Grain',
+          note:
+            'A near-flat tone carried entirely by film grain. This is the plate for a card that needs material, not a picture.',
+          preset: {
+            scale: 1.2,
+            contrast: 0.5,
+            grain: 0.22,
+            steps: 0,
+            dither: true,
+            speed: 0.4,
+            palette: 'ink-paper',
+          },
+          body: `float coverage(vec2 uv, vec2 px) {
+  float field = fbm(uv * u_scale * 1.2 + vec2(0.0, u_time * 0.05));
+  return 0.06 + 0.34 * field;
+}`,
+        },
+        {
+          id: 'halftone',
+          index: '02',
+          name: 'Halftone',
+          note:
+            'A 45° dot screen where dot area follows a drifting tone field. Reads as print reproduction, which is the register the type already sets.',
+          preset: {
+            scale: 4.5,
+            contrast: 0.45,
+            grain: 0.03,
+            steps: 0,
+            dither: true,
+            speed: 0.5,
+            palette: 'ink-paper',
+          },
+          body: `float coverage(vec2 uv, vec2 px) {
+  float raw = fbm(uv * u_scale * 0.35 + vec2(u_time * 0.04, 0.0));
+  float tone = clamp((raw - 0.3) * 2.1, 0.0, 1.0);
+  float a = 0.7853981634;
+  mat2 rot = mat2(cos(a), -sin(a), sin(a), cos(a));
+  float cell = clamp(48.0 / max(u_scale, 0.25), 4.0, 96.0);
+  vec2 f = fract(rot * px / cell) - 0.5;
+  float d = length(f);
+  float r = sqrt(tone) * 0.58;
+  float aa = fwidth(d) + 1e-4;
+  return 1.0 - smoothstep(r - aa, r + aa, d);
+}`,
+        },
+        {
+          id: 'contour',
+          index: '03',
+          name: 'Contour',
+          note:
+            'Iso-lines through a noise elevation, held at one optical weight by fwidth. The hairline rule the system will not draw, drawn as terrain.',
+          preset: {
+            scale: 1.6,
+            contrast: 0.45,
+            grain: 0.02,
+            steps: 0,
+            dither: true,
+            speed: 0.35,
+            palette: 'ink-paper',
+          },
+          body: `float coverage(vec2 uv, vec2 px) {
+  float h = fbm(uv * u_scale * 0.6 + vec2(0.0, u_time * 0.03)) * 11.0;
+  float band = abs(fract(h) - 0.5);
+  float w = max(fwidth(h), 1e-4);
+  return 1.0 - smoothstep(w * 0.5, w * 1.5, band);
+}`,
+        },
+        {
+          id: 'warp',
+          index: '04',
+          name: 'Warp',
+          note:
+            'Domain-warped flow, posterised to six greys so it bands like a duotone separation instead of sliding into a gradient.',
+          preset: {
+            scale: 1.6,
+            contrast: 0.55,
+            grain: 0.04,
+            steps: 6,
+            dither: false,
+            speed: 0.6,
+            palette: 'graphite-mist',
+          },
+          body: `float coverage(vec2 uv, vec2 px) {
+  vec2 q = uv * u_scale * 0.5;
+  vec2 w = vec2(
+    fbm(q + vec2(0.0, u_time * 0.05)),
+    fbm(q + vec2(5.2, 1.3) - vec2(u_time * 0.04, 0.0))
+  );
+  return clamp((fbm(q + 2.2 * w) - 0.3) * 1.8, 0.0, 1.0);
+}`,
+        },
+        {
+          id: 'sweep',
+          index: '05',
+          name: 'Sweep',
+          note:
+            'Columns on the 8px spacing unit, each one breathing on its own phase. The spacing scale made visible, and the only plate with a beat.',
+          preset: {
+            scale: 3,
+            contrast: 0.5,
+            grain: 0.02,
+            steps: 0,
+            dither: true,
+            speed: 0.8,
+            palette: 'ink-fog',
+          },
+          body: `float coverage(vec2 uv, vec2 px) {
+  float unit = 8.0 * max(u_scale, 0.5);
+  float col = px.x / unit;
+  float idx = floor(col);
+  float phase = fract(col);
+  float t = 0.3 + 0.26 * sin(idx * 0.6 + u_time * 0.9 + hash(vec2(idx, u_seed)) * 6.2831853);
+  float edge = t;
+  float aa = 1.5 / unit;
+  return 1.0 - smoothstep(edge - aa, edge + aa, phase);
+}`,
+        },
+      ]
+
+      const UNIFORM_NAMES = [
+        'u_res',
+        'u_dpr',
+        'u_time',
+        'u_scale',
+        'u_contrast',
+        'u_grain',
+        'u_steps',
+        'u_dither',
+        'u_seed',
+        'u_ink',
+        'u_paper',
+      ]
+
+      const $ = (id) => document.getElementById(id)
+      const fieldById = (id) => FIELDS.find((f) => f.id === id) || FIELDS[0]
+      const paletteById = (id) => PALETTES.find((p) => p.id === id) || PALETTES[0]
+
+      function rgb(hex) {
+        const n = parseInt(hex.slice(1), 16)
+        return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255]
+      }
+
+      /* ─── One plate — one canvas, one WebGL2 context ──────────── */
+
+      class Plate {
+        constructor(host, params) {
+          this.host = host
+          this.params = { ...params }
+          this.canvas = document.createElement('canvas')
+          this.canvas.className = 'plate-canvas'
+          this.canvas.setAttribute('role', 'img')
+          this.canvas.setAttribute('aria-label', `${fieldById(params.field).name} plate`)
+          host.append(this.canvas)
+
+          this.gl = null
+          this.program = null
+          this.programField = null
+          this.uniforms = {}
+          this.width = 0
+          this.height = 0
+          this.dirty = true
+          this.rendering = true
+          this.lost = false
+          this.clock = 0
+          this.last = 0
+          this.now = 0
+          this.drawn = 0
+          this.dpr = 1
+
+          this.canvas.addEventListener('webglcontextlost', (event) => {
+            event.preventDefault()
+            this.lost = true
+          })
+          this.canvas.addEventListener('webglcontextrestored', () => {
+            this.gl = null
+            this.program = null
+            this.programField = null
+            this.lost = false
+            this.dirty = true
+          })
+
+          const observer = new ResizeObserver(([entry]) => this.measure(entry))
+          const boxSupported =
+            typeof ResizeObserverEntry !== 'undefined' &&
+            'devicePixelContentBoxSize' in ResizeObserverEntry.prototype
+          observer.observe(this.canvas, boxSupported ? { box: 'device-pixel-content-box' } : {})
+
+          this.watchVisibility()
+          plates.push(this)
+        }
+
+        watchVisibility() {
+          if ('contentVisibility' in document.documentElement.style) {
+            this.host.addEventListener('contentvisibilityautostatechange', (event) => {
+              this.rendering = !event.skipped
+              if (this.rendering) this.dirty = true
+            })
+            return
+          }
+          const io = new IntersectionObserver(
+            ([entry]) => {
+              this.rendering = entry.isIntersecting
+              if (this.rendering) this.dirty = true
+            },
+            { rootMargin: '200px' },
+          )
+          io.observe(this.host)
+        }
+
+        measure(entry) {
+          const dpr = this.params.pixelRatio ? Math.min(window.devicePixelRatio || 1, 2) : 1
+          const box = entry && entry.devicePixelContentBoxSize
+          const width = box
+            ? box[0].inlineSize
+            : Math.round((entry ? entry.contentRect.width : this.canvas.clientWidth) * dpr)
+          const height = box
+            ? box[0].blockSize
+            : Math.round((entry ? entry.contentRect.height : this.canvas.clientHeight) * dpr)
+          if (!width || !height) return
+          if (width === this.width && height === this.height) return
+          this.width = width
+          this.height = height
+          this.canvas.width = width
+          this.canvas.height = height
+          this.dpr = width / Math.max(this.canvas.clientWidth || width, 1)
+          this.dirty = true
+        }
+
+        context() {
+          if (this.gl || this.lost) return this.gl
+          this.gl = this.canvas.getContext('webgl2', {
+            alpha: false,
+            antialias: false,
+            depth: false,
+            stencil: false,
+            powerPreference: 'low-power',
+          })
+          if (!this.gl) this.host.classList.add('stage--unsupported')
+          return this.gl
+        }
+
+        compile() {
+          const gl = this.context()
+          if (!gl) return null
+          const field = fieldById(this.params.field)
+          if (this.program && this.programField === field.id) return this.program
+          if (this.program) gl.deleteProgram(this.program)
+          this.program = buildProgram(gl, FRAG_HEAD + field.body + FRAG_MAIN)
+          this.programField = field.id
+          this.uniforms = {}
+          for (const name of UNIFORM_NAMES) {
+            this.uniforms[name] = gl.getUniformLocation(this.program, name)
+          }
+          return this.program
+        }
+
+        set(params) {
+          Object.assign(this.params, params)
+          if (params.pixelRatio !== undefined) {
+            this.width = 0
+            this.measure(null)
+          }
+          this.dirty = true
+        }
+
+        advance(now) {
+          const delta = this.last ? Math.min((now - this.last) / 1000, 0.1) : 0
+          this.last = now
+          if (this.params.motion) this.clock += delta * this.params.speed
+          this.now = now
+        }
+
+        // 30fps is plenty for fields this slow, and it halves the GPU cost of nine plates
+        needsFrame() {
+          if (!this.rendering || this.lost) return false
+          if (this.dirty) return true
+          if (!this.params.motion || this.params.speed <= 0) return false
+          return !this.drawn || this.now - this.drawn >= 32
+        }
+
+        render(gl = this.context()) {
+          if (!gl) return
+          const program = this.compile()
+          if (!program) return
+          const palette = paletteById(this.params.palette)
+          gl.viewport(0, 0, this.width, this.height)
+          gl.useProgram(program)
+          gl.uniform2f(this.uniforms.u_res, this.width, this.height)
+          gl.uniform1f(this.uniforms.u_dpr, this.dpr || 1)
+          gl.uniform1f(this.uniforms.u_time, this.clock)
+          gl.uniform1f(this.uniforms.u_scale, this.params.scale)
+          gl.uniform1f(this.uniforms.u_contrast, this.params.contrast)
+          gl.uniform1f(this.uniforms.u_grain, this.params.grain)
+          gl.uniform1f(this.uniforms.u_steps, this.params.steps)
+          gl.uniform1f(this.uniforms.u_dither, this.params.dither ? 1 : 0)
+          gl.uniform1f(this.uniforms.u_seed, this.params.seed)
+          gl.uniform3fv(this.uniforms.u_ink, rgb(palette.ink))
+          gl.uniform3fv(this.uniforms.u_paper, rgb(palette.paper))
+          gl.drawArrays(gl.TRIANGLES, 0, 3)
+          this.dirty = false
+          this.drawn = this.now || 0
+        }
+      }
+
+      function buildProgram(gl, fragSource) {
+        const program = gl.createProgram()
+        for (const [type, source] of [
+          [gl.VERTEX_SHADER, VERT],
+          [gl.FRAGMENT_SHADER, fragSource],
+        ]) {
+          const shader = gl.createShader(type)
+          gl.shaderSource(shader, source)
+          gl.compileShader(shader)
+          if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+            console.error(gl.getShaderInfoLog(shader), source)
+          }
+          gl.attachShader(program, shader)
+          gl.deleteShader(shader)
+        }
+        gl.linkProgram(program)
+        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+          console.error(gl.getProgramInfoLog(program))
+        }
+        return program
+      }
+
+      /* ─── One loop for every plate on the page ────────────────── */
+
+      const plates = []
+      let frameHandle = 0
+
+      function frame(now) {
+        for (const plate of plates) {
+          plate.advance(now)
+          if (plate.needsFrame()) plate.render()
+        }
+        frameHandle = requestAnimationFrame(frame)
+      }
+
+      function startLoop() {
+        if (!frameHandle) frameHandle = requestAnimationFrame(frame)
+      }
+
+      function stopLoop() {
+        if (frameHandle) cancelAnimationFrame(frameHandle)
+        frameHandle = 0
+        for (const plate of plates) plate.last = 0
+      }
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) stopLoop()
+        else startLoop()
+      })
+
+      /* ─── State — the lab drives chapters 1, 2 and 4 ──────────── */
+
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      const state = {
+        field: 'grain',
+        palette: 'ink-paper',
+        scale: 1.2,
+        contrast: 0.5,
+        grain: 0.22,
+        steps: 0,
+        dither: true,
+        speed: 0.4,
+        motion: !reduceMotion,
+        pixelRatio: true,
+        seed: 0.37,
+      }
+
+      const status = $('status')
+      const plateButtons = new Map()
+
+      function buildPlates() {
+        const host = $('plates')
+        for (const field of FIELDS) {
+          const button = document.createElement('button')
+          button.type = 'button'
+          button.className = 'plate'
+          button.setAttribute('aria-pressed', String(field.id === state.field))
+          button.innerHTML = `
+            <span class="stage plate__stage"></span>
+            <span class="plate__name">
+              <span>${field.index}</span>
+              <span>${field.name}</span>
+            </span>
+            <p class="plate__note">${field.note}</p>
+            <span class="plate__spec"></span>`
+          host.append(button)
+
+          const preset = field.preset
+          const plate = new Plate(button.querySelector('.plate__stage'), {
+            ...preset,
+            field: field.id,
+            motion: !reduceMotion,
+            pixelRatio: true,
+            seed: 0.11 + FIELDS.indexOf(field) * 0.17,
+          })
+          button.querySelector('.plate__spec').textContent = specLine(plate.params)
+          button.addEventListener('click', () => loadPreset(field.id))
+          plateButtons.set(field.id, button)
+        }
+      }
+
+      function specLine(params) {
+        const palette = paletteById(params.palette)
+        return `scale ${params.scale.toFixed(1)} · contrast ${params.contrast.toFixed(
+          2,
+        )} · grain ${params.grain.toFixed(2)} · ${
+          params.steps >= 2 ? `${params.steps} greys${params.dither ? ' dithered' : ' hard'}` : 'continuous'
+        } · ${palette.name.toLowerCase()}`
+      }
+
+      /* ─── Lab plate and the in-place plates ───────────────────── */
+
+      const labPlate = new Plate($('lab-stage'), { ...state })
+      const placements = [...document.querySelectorAll('[data-plate]')].map(
+        (host, index) => new Plate(host, { ...state, seed: 0.53 + index * 0.29 }),
+      )
+
+      function syncPlates() {
+        labPlate.set(state)
+        for (const [index, plate] of placements.entries()) {
+          plate.set({ ...state, seed: 0.53 + index * 0.29 })
+        }
+        for (const [id, button] of plateButtons) {
+          button.setAttribute('aria-pressed', String(id === state.field))
+        }
+        renderReadout()
+      }
+
+      function renderReadout() {
+        const palette = paletteById(state.palette)
+        $('readout').innerHTML = [
+          `field ${fieldById(state.field).id}`,
+          `u_scale ${state.scale.toFixed(2)}`,
+          `u_contrast ${state.contrast.toFixed(2)}`,
+          `u_grain ${state.grain.toFixed(2)}`,
+          `u_steps ${state.steps >= 2 ? state.steps : 'off'}`,
+          `u_dither ${state.dither ? 1 : 0}`,
+          `u_seed ${state.seed.toFixed(2)}`,
+          `u_ink ${palette.ink}`,
+          `u_paper ${palette.paper}`,
+        ]
+          .map((text) => `<span>${text}</span>`)
+          .join('')
+      }
+
+      /* ─── Controls ────────────────────────────────────────────── */
+
+      function buildTags(host, items, group, selected, onPick) {
+        host.innerHTML = ''
+        for (const item of items) {
+          const label = document.createElement('label')
+          label.className = 'tag'
+          label.innerHTML = `<input type="radio" name="${group}" value="${item.id}" ${
+            item.id === selected ? 'checked' : ''
+          } /><span>${item.name}</span>`
+          label.querySelector('input').addEventListener('change', () => onPick(item.id))
+          host.append(label)
+        }
+      }
+
+      function syncTags() {
+        for (const input of document.querySelectorAll('input[name="field"]')) {
+          input.checked = input.value === state.field
+        }
+        for (const input of document.querySelectorAll('input[name="palette"]')) {
+          input.checked = input.value === state.palette
+        }
+      }
+
+      function syncSliders() {
+        $('scale').value = state.scale
+        $('scale-value').textContent = state.scale.toFixed(2)
+        $('contrast').value = state.contrast
+        $('contrast-value').textContent = state.contrast.toFixed(2)
+        $('grain').value = state.grain
+        $('grain-value').textContent = state.grain.toFixed(2)
+        $('steps').value = state.steps
+        $('steps-value').textContent = state.steps >= 2 ? `${state.steps} greys` : 'off'
+        $('speed').value = state.speed
+        $('speed-value').textContent = state.speed.toFixed(2)
+        $('motion').checked = state.motion
+        $('dither').checked = state.dither
+        $('pixel-ratio').checked = state.pixelRatio
+      }
+
+      function loadPreset(id) {
+        const field = fieldById(id)
+        Object.assign(state, field.preset, { field: id })
+        syncTags()
+        syncSliders()
+        syncPlates()
+        status.textContent = `${field.name} loaded — ${specLine(state)}.`
+      }
+
+      function bindRange(id, key, format) {
+        $(id).addEventListener('input', (event) => {
+          state[key] = Number(event.target.value)
+          $(`${id}-value`).textContent = format(state[key])
+          syncPlates()
+        })
+      }
+
+      /* ─── Source export ───────────────────────────────────────── */
+
+      function glslSource() {
+        const field = fieldById(state.field)
+        const palette = paletteById(state.palette)
+        return `// AColorBright plate — ${field.name} (${field.index})
+// u_scale ${state.scale.toFixed(2)}  u_contrast ${state.contrast.toFixed(
+          2,
+        )}  u_grain ${state.grain.toFixed(2)}  u_steps ${
+          state.steps >= 2 ? state.steps : 0
+        }  u_dither ${state.dither ? 1 : 0}  u_seed ${state.seed.toFixed(2)}
+// u_ink ${palette.ink}  u_paper ${palette.paper}
+${FRAG_HEAD}${field.body}${FRAG_MAIN}
+`
+      }
+
+      function loaderSource() {
+        const palette = paletteById(state.palette)
+        return `// AColorBright plate loader — WebGL2, no buffers, no dependencies.
+// Pair with the fragment source from "Copy GLSL".
+export function mountPlate(canvas, frag, options = {}) {
+  const gl = canvas.getContext('webgl2', { alpha: false, antialias: false, depth: false })
+  if (!gl) return () => {}
+
+  const settings = {
+    scale: ${state.scale},
+    contrast: ${state.contrast},
+    grain: ${state.grain},
+    steps: ${state.steps},
+    dither: ${state.dither ? 1 : 0},
+    seed: ${state.seed},
+    speed: ${state.speed},
+    ink: '${palette.ink}',
+    paper: '${palette.paper}',
+    ...options,
+  }
+
+  const vert = \`${VERT}\`
+  const program = gl.createProgram()
+  for (const [type, src] of [[gl.VERTEX_SHADER, vert], [gl.FRAGMENT_SHADER, frag]]) {
+    const shader = gl.createShader(type)
+    gl.shaderSource(shader, src)
+    gl.compileShader(shader)
+    gl.attachShader(program, shader)
+  }
+  gl.linkProgram(program)
+  gl.useProgram(program)
+
+  const u = (name) => gl.getUniformLocation(program, name)
+  const rgb = (hex) => {
+    const n = parseInt(hex.slice(1), 16)
+    return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255]
+  }
+
+  let raf = 0
+  const start = performance.now()
+  const draw = (now) => {
+    const dpr = Math.min(devicePixelRatio || 1, 2)
+    const w = Math.round(canvas.clientWidth * dpr)
+    const h = Math.round(canvas.clientHeight * dpr)
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width = w
+      canvas.height = h
+    }
+    gl.viewport(0, 0, w, h)
+    gl.uniform2f(u('u_res'), w, h)
+    gl.uniform1f(u('u_dpr'), dpr)
+    gl.uniform1f(u('u_time'), ((now - start) / 1000) * settings.speed)
+    gl.uniform1f(u('u_scale'), settings.scale)
+    gl.uniform1f(u('u_contrast'), settings.contrast)
+    gl.uniform1f(u('u_grain'), settings.grain)
+    gl.uniform1f(u('u_steps'), settings.steps)
+    gl.uniform1f(u('u_dither'), settings.dither)
+    gl.uniform1f(u('u_seed'), settings.seed)
+    gl.uniform3fv(u('u_ink'), rgb(settings.ink))
+    gl.uniform3fv(u('u_paper'), rgb(settings.paper))
+    gl.drawArrays(gl.TRIANGLES, 0, 3)
+    if (settings.speed > 0) raf = requestAnimationFrame(draw)
+  }
+  raf = requestAnimationFrame(draw)
+  return () => cancelAnimationFrame(raf)
+}
+`
+      }
+
+      async function copy(text, message) {
+        try {
+          await navigator.clipboard.writeText(text)
+          status.textContent = message
+        } catch {
+          const field = $('fallback-text')
+          field.value = text
+          $('fallback').showModal()
+          field.focus()
+          field.select()
+          status.textContent = 'Clipboard blocked — the source is in the panel, ready to select.'
+        }
+      }
+
+      function exportPng() {
+        const width = 1600
+        const height = 900
+        const canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = height
+        canvas.style.width = `${width}px`
+        canvas.style.height = `${height}px`
+        const gl = canvas.getContext('webgl2', {
+          alpha: false,
+          antialias: false,
+          depth: false,
+          preserveDrawingBuffer: true,
+        })
+        if (!gl) {
+          status.textContent = 'WebGL2 unavailable — nothing to export.'
+          return
+        }
+        const field = fieldById(state.field)
+        const palette = paletteById(state.palette)
+        const program = buildProgram(gl, FRAG_HEAD + field.body + FRAG_MAIN)
+        gl.viewport(0, 0, width, height)
+        gl.useProgram(program)
+        gl.uniform2f(gl.getUniformLocation(program, 'u_res'), width, height)
+        gl.uniform1f(gl.getUniformLocation(program, 'u_dpr'), 1)
+        gl.uniform1f(gl.getUniformLocation(program, 'u_time'), labPlate.clock)
+        gl.uniform1f(gl.getUniformLocation(program, 'u_scale'), state.scale)
+        gl.uniform1f(gl.getUniformLocation(program, 'u_contrast'), state.contrast)
+        gl.uniform1f(gl.getUniformLocation(program, 'u_grain'), state.grain)
+        gl.uniform1f(gl.getUniformLocation(program, 'u_steps'), state.steps)
+        gl.uniform1f(gl.getUniformLocation(program, 'u_dither'), state.dither ? 1 : 0)
+        gl.uniform1f(gl.getUniformLocation(program, 'u_seed'), state.seed)
+        gl.uniform3fv(gl.getUniformLocation(program, 'u_ink'), rgb(palette.ink))
+        gl.uniform3fv(gl.getUniformLocation(program, 'u_paper'), rgb(palette.paper))
+        gl.drawArrays(gl.TRIANGLES, 0, 3)
+
+        canvas.toBlob((blob) => {
+          if (!blob) {
+            status.textContent = 'Export failed — the frame could not be encoded.'
+            return
+          }
+          const url = URL.createObjectURL(blob)
+          const link = document.createElement('a')
+          link.href = url
+          link.download = `acolorbright-plate-${field.id}-${state.palette}.png`
+          link.click()
+          URL.revokeObjectURL(url)
+          gl.getExtension('WEBGL_lose_context')?.loseContext()
+          status.textContent = `${field.name} exported at 1600×900 — drop it into Paper as an image fill.`
+        }, 'image/png')
+      }
+
+      /* ─── Wiring ──────────────────────────────────────────────── */
+
+      buildPlates()
+      buildTags($('field-tags'), FIELDS, 'field', state.field, loadPreset)
+      buildTags($('palette-tags'), PALETTES, 'palette', state.palette, (id) => {
+        state.palette = id
+        syncPlates()
+        status.textContent = `Palette ${paletteById(id).name.toLowerCase()} — ${
+          paletteById(id).ink
+        } coverage on ${paletteById(id).paper}.`
+      })
+
+      bindRange('scale', 'scale', (v) => v.toFixed(2))
+      bindRange('contrast', 'contrast', (v) => v.toFixed(2))
+      bindRange('grain', 'grain', (v) => v.toFixed(2))
+      bindRange('speed', 'speed', (v) => v.toFixed(2))
+      $('steps').addEventListener('input', (event) => {
+        state.steps = Number(event.target.value)
+        $('steps-value').textContent = state.steps >= 2 ? `${state.steps} greys` : 'off'
+        syncPlates()
+      })
+
+      $('motion').addEventListener('change', (event) => {
+        state.motion = event.target.checked
+        syncPlates()
+        status.textContent = state.motion
+          ? 'Motion on — every visible plate advances.'
+          : 'Motion off — plates hold their current frame.'
+      })
+
+      $('dither').addEventListener('change', (event) => {
+        state.dither = event.target.checked
+        syncPlates()
+        status.textContent = state.dither
+          ? 'Ordered 8×8 dither on — posterise steps blend without banding.'
+          : 'Dither off — posterise steps land as hard separations.'
+      })
+
+      $('pixel-ratio').addEventListener('change', (event) => {
+        state.pixelRatio = event.target.checked
+        syncPlates()
+        status.textContent = state.pixelRatio
+          ? 'Rendering at device pixel ratio, capped at 2.'
+          : 'Rendering at 1× — dot screens and columns coarsen.'
+      })
+
+      $('copy-glsl').addEventListener('click', () =>
+        copy(glslSource(), `${fieldById(state.field).name} fragment source copied.`),
+      )
+      $('copy-loader').addEventListener('click', () =>
+        copy(loaderSource(), 'Loader copied — pair it with the fragment source.'),
+      )
+      $('export-png').addEventListener('click', exportPng)
+      $('shuffle').addEventListener('click', () => {
+        state.seed = Math.round(Math.random() * 1000) / 1000
+        syncPlates()
+        status.textContent = `Seed ${state.seed.toFixed(3)} — same field, different plate.`
+      })
+      $('reset').addEventListener('click', () => loadPreset(state.field))
+
+      syncSliders()
+      syncPlates()
+      startLoop()
+
+      if (reduceMotion) {
+        status.textContent = 'Reduced motion is on — plates render one frame and hold.'
+      }
+    </script>
+  </body>
+</html>

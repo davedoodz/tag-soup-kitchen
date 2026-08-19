@@ -1,0 +1,1512 @@
+<!doctype html>
+<html lang="en" data-design-id="c1-sheet-with-rail" data-design-title="Sheet with archive rail">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A contact sheet led portfolio browser with a synchronized archive rail."
+    />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="stylesheet" href="../shared/acolorbright.css" />
+    <link rel="stylesheet" href="../shared/hifi.css" />
+    <link rel="stylesheet" href="../shared/review.css" />
+    <script src="../shared/projects.js"></script>
+    <script src="../shared/review.js" defer></script>
+    <title>Sheet with archive rail — David Lafond Designs</title>
+    <style>
+      :root {
+        --rail-width: 300px;
+        --rail-edge-width: 44px;
+        --rail-row-index: 28px;
+        --rail-row-category: 64px;
+        --rail-row-year: 36px;
+        --control-height: 44px;
+        --motion-duration: 280ms;
+        --backdrop: rgb(26 26 26 / 62%);
+      }
+
+      .shell {
+        display: grid;
+        height: var(--shell-height);
+        min-height: 560px;
+        grid-template-rows: auto minmax(0, 1fr);
+      }
+
+      .workspace {
+        display: grid;
+        min-width: 0;
+        min-height: 0;
+        grid-template-columns: var(--rail-width) minmax(0, 1fr);
+        transition: grid-template-columns var(--motion-duration) var(--ease);
+      }
+
+      .rail {
+        position: relative;
+        min-width: 0;
+        min-height: 0;
+        border-right: 1px solid var(--line);
+        background: var(--color-paper);
+      }
+
+      .rail__content {
+        display: grid;
+        overflow: hidden;
+        height: 100%;
+        min-height: 0;
+        grid-template-rows: auto auto minmax(0, 1fr) auto;
+        opacity: 1;
+        transition:
+          opacity 160ms var(--ease),
+          visibility 160ms var(--ease);
+      }
+
+      .rail__controls {
+        display: grid;
+        gap: var(--spacing-16);
+        padding: var(--spacing-16);
+      }
+
+      .rail__heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--spacing-16);
+      }
+
+      .rail__label {
+        margin: 0;
+        font-size: var(--text-body);
+        font-weight: 400;
+        line-height: var(--leading-body);
+      }
+
+      .rail__collapse {
+        width: var(--control-height);
+        height: var(--control-height);
+        flex-basis: var(--control-height);
+      }
+
+      .rail__head,
+      .row {
+        display: grid;
+        grid-template-columns:
+          var(--rail-row-index) minmax(0, 1fr) var(--rail-row-category)
+          var(--rail-row-year);
+        align-items: center;
+        gap: var(--spacing-8);
+      }
+
+      .rail__head {
+        padding: var(--spacing-8) 12px;
+        border-block: 1px solid var(--line);
+        color: var(--color-graphite);
+        font-size: var(--text-caption);
+        line-height: var(--leading-caption);
+      }
+
+      .rail__head span:last-child {
+        text-align: right;
+      }
+
+      .rail__scroll {
+        min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scrollbar-color: var(--color-fog) transparent;
+        scrollbar-width: thin;
+      }
+
+      .rail__list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .row {
+        width: 100%;
+        min-height: 52px;
+        padding: 12px;
+        border: 0;
+        background: transparent;
+        color: var(--color-ink-black);
+        cursor: pointer;
+        font: inherit;
+        letter-spacing: inherit;
+        text-align: left;
+      }
+
+      .rail__list li:nth-child(odd) .row {
+        background: var(--color-mist);
+      }
+
+      .row:hover,
+      .row.is-linked,
+      .rail__list li:nth-child(odd) .row.is-linked {
+        background: var(--color-fog);
+      }
+
+      .row[aria-current='true'],
+      .row[aria-current='true']:hover,
+      .row[aria-current='true'].is-linked,
+      .rail__list li:nth-child(odd) .row[aria-current='true'] {
+        background: var(--color-ink-black);
+        color: var(--color-paper);
+      }
+
+      .row__index,
+      .row__category,
+      .row__year {
+        color: var(--color-graphite);
+        font-size: var(--text-caption);
+        font-variant-numeric: tabular-nums;
+        line-height: var(--leading-caption);
+      }
+
+      .row__title {
+        overflow: hidden;
+        font-size: var(--text-body-sm);
+        line-height: var(--leading-body-sm);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .row__category {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .row__year {
+        text-align: right;
+      }
+
+      .row[aria-current='true'] .row__index,
+      .row[aria-current='true'] .row__category,
+      .row[aria-current='true'] .row__year {
+        color: var(--color-fog);
+      }
+
+      .rail__foot {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: var(--spacing-8);
+        padding: 12px var(--spacing-16);
+        border-top: 1px solid var(--line);
+        color: var(--color-graphite);
+        font-size: var(--text-caption);
+        line-height: var(--leading-caption);
+      }
+
+      .rail__foot b {
+        color: var(--color-ink-black);
+        font-variant-numeric: tabular-nums;
+        font-weight: 400;
+      }
+
+      .rail__empty {
+        padding: var(--spacing-32) var(--spacing-16);
+      }
+
+      .rail__empty strong {
+        display: block;
+        font-size: var(--text-subheading);
+        font-weight: 400;
+        line-height: var(--leading-subheading);
+      }
+
+      .rail__empty p {
+        margin: 12px 0 0;
+        color: var(--color-graphite);
+        font-size: var(--text-body-sm);
+        line-height: var(--leading-body-sm);
+      }
+
+      .rail-edge {
+        display: none;
+        width: 100%;
+        height: 100%;
+        padding: var(--spacing-16) 0;
+        border: 0;
+        background: var(--color-paper);
+        color: var(--color-ink-black);
+        cursor: pointer;
+        place-items: start center;
+      }
+
+      .rail-edge:hover {
+        background: var(--color-mist);
+      }
+
+      .canvas {
+        min-width: 0;
+        min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scrollbar-color: var(--color-fog) transparent;
+        scrollbar-width: thin;
+      }
+
+      .canvas__intro {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(280px, 420px);
+        align-items: end;
+        gap: var(--spacing-64);
+        padding: var(--spacing-64) var(--spacing-32) var(--spacing-32);
+      }
+
+      .canvas__title {
+        max-width: 18ch;
+        margin: 0;
+        font-size: var(--text-heading);
+        font-weight: 400;
+        line-height: var(--leading-heading);
+      }
+
+      .canvas__thesis {
+        margin: 0;
+        color: var(--color-graphite);
+        font-size: var(--text-body);
+        line-height: var(--leading-body);
+      }
+
+      .mobile-drawer-bar {
+        display: none;
+      }
+
+      .sheet-controls {
+        position: sticky;
+        z-index: 5;
+        top: 0;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: var(--spacing-24);
+        padding: var(--spacing-16) var(--spacing-32);
+        border-block: 1px solid var(--line);
+        background: var(--color-paper);
+      }
+
+      .sheet-controls__count {
+        margin: 0;
+        color: var(--color-graphite);
+        font-size: var(--text-caption);
+        font-variant-numeric: tabular-nums;
+        line-height: var(--leading-caption);
+        text-align: right;
+        white-space: nowrap;
+      }
+
+      .sheet {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: var(--spacing-64) var(--spacing-32);
+        margin: 0;
+        padding: var(--spacing-32);
+        list-style: none;
+      }
+
+      .cell {
+        display: block;
+        width: 100%;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        cursor: pointer;
+        font: inherit;
+        letter-spacing: inherit;
+        text-align: left;
+      }
+
+      .cell .cover {
+        transition:
+          filter 220ms var(--ease),
+          outline-color 220ms var(--ease);
+      }
+
+      .cell:hover .cover,
+      .cell:focus-visible .cover,
+      .cell.is-linked .cover {
+        filter: contrast(0.88) brightness(1.04);
+        outline: 1px solid var(--color-ink-black);
+        outline-offset: 4px;
+      }
+
+      .cell[aria-current='true'] .cover {
+        outline: 3px solid var(--color-ink-black);
+        outline-offset: 4px;
+      }
+
+      .cell__caption {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: baseline;
+        gap: var(--spacing-16);
+        margin-top: var(--spacing-16);
+      }
+
+      .cell__title {
+        margin: 0;
+        font-size: var(--text-body);
+        font-weight: 400;
+        line-height: var(--leading-body);
+      }
+
+      .cell__year,
+      .cell__state {
+        color: var(--color-ash);
+        font-size: var(--text-caption);
+        font-variant-numeric: tabular-nums;
+        line-height: var(--leading-caption);
+      }
+
+      .cell__state {
+        color: var(--color-ink-black);
+      }
+
+      .cell__meta {
+        display: block;
+        overflow: hidden;
+        max-height: 0;
+        margin-top: 0;
+        color: var(--color-graphite);
+        font-size: var(--text-body-sm);
+        line-height: var(--leading-body-sm);
+        opacity: 0;
+        transition:
+          max-height 220ms var(--ease),
+          margin-top 220ms var(--ease),
+          opacity 220ms var(--ease);
+      }
+
+      .cell:hover .cell__meta,
+      .cell:focus-visible .cell__meta,
+      .cell.is-linked .cell__meta,
+      .cell[aria-current='true'] .cell__meta {
+        max-height: 48px;
+        margin-top: 12px;
+        opacity: 1;
+      }
+
+      .sheet-empty {
+        padding: 96px var(--spacing-32);
+        border-top: 1px solid var(--line);
+      }
+
+      .sheet-empty__title {
+        margin: 0;
+        font-size: var(--text-heading);
+        font-weight: 400;
+        line-height: var(--leading-heading);
+      }
+
+      .sheet-empty__body {
+        max-width: 44ch;
+        margin: var(--spacing-16) 0 0;
+        color: var(--color-graphite);
+        font-size: var(--text-body);
+        line-height: var(--leading-body);
+      }
+
+      .canvas__foot {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: var(--spacing-16);
+        margin-top: var(--spacing-64);
+        padding: var(--spacing-32);
+        border-top: 1px solid var(--line);
+        color: var(--color-graphite);
+        font-size: var(--text-body-sm);
+      }
+
+      .viewer {
+        width: min(1200px, calc(100vw - var(--spacing-64)));
+        max-width: none;
+        max-height: none;
+        height: min(880px, calc(100dvh - var(--spacing-64)));
+        padding: 0;
+        border: 0;
+        border-radius: var(--radius-images);
+        background: var(--color-paper);
+        color: var(--color-ink-black);
+      }
+
+      .viewer::backdrop {
+        background: var(--backdrop);
+      }
+
+      .viewer__shell {
+        display: grid;
+        height: 100%;
+        grid-template-rows: auto minmax(0, 1fr) auto;
+      }
+
+      .viewer__bar,
+      .viewer__foot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--spacing-16);
+        padding: var(--spacing-16) var(--spacing-24);
+      }
+
+      .viewer__bar {
+        border-bottom: 1px solid var(--line);
+      }
+
+      .viewer__foot {
+        border-top: 1px solid var(--line);
+      }
+
+      .viewer__position {
+        margin: 0;
+        color: var(--color-graphite);
+        font-size: var(--text-caption);
+        font-variant-numeric: tabular-nums;
+        line-height: var(--leading-caption);
+      }
+
+      .viewer__body {
+        overflow-y: auto;
+        padding: var(--spacing-32);
+        overscroll-behavior: contain;
+      }
+
+      .viewer__spread {
+        display: grid;
+        grid-template-areas:
+          'media intro'
+          'chapters aside';
+        grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
+        gap: var(--spacing-32) var(--spacing-64);
+      }
+
+      .viewer__media {
+        grid-area: media;
+      }
+
+      .viewer__intro {
+        grid-area: intro;
+      }
+
+      .viewer__chapters {
+        grid-area: chapters;
+      }
+
+      .viewer__aside {
+        display: grid;
+        align-content: start;
+        gap: var(--spacing-32);
+        grid-area: aside;
+      }
+
+      .viewer__kicker {
+        margin: 0 0 var(--spacing-16);
+        color: var(--color-graphite);
+        font-size: var(--text-caption);
+        line-height: var(--leading-caption);
+      }
+
+      .viewer__title {
+        margin: 0;
+        font-size: var(--text-heading);
+        font-weight: 400;
+        line-height: var(--leading-heading);
+      }
+
+      .viewer__lead {
+        max-width: 46ch;
+        margin: var(--spacing-24) 0 0;
+        font-size: var(--text-body);
+        line-height: var(--leading-body);
+      }
+
+      .viewer__section + .viewer__section {
+        margin-top: var(--spacing-32);
+      }
+
+      .viewer__section h3 {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0 0 12px;
+        font-size: var(--text-body);
+        font-weight: 400;
+        line-height: var(--leading-body);
+      }
+
+      .viewer__section p {
+        max-width: 60ch;
+        margin: 0;
+        color: var(--color-graphite);
+        font-size: var(--text-body-sm);
+        line-height: var(--leading-body-sm);
+      }
+
+      .viewer__badge {
+        display: grid;
+        width: 24px;
+        height: 24px;
+        flex: 0 0 24px;
+        place-items: center;
+        border-radius: 50%;
+        background: var(--color-pure-black);
+        color: var(--color-paper);
+        font-size: var(--text-caption);
+        line-height: 1;
+      }
+
+      .viewer__steps {
+        display: flex;
+        gap: var(--spacing-8);
+      }
+
+      @media (min-width: 900px) {
+        .workspace.is-rail-collapsed {
+          grid-template-columns: var(--rail-edge-width) minmax(0, 1fr);
+        }
+
+        .workspace.is-rail-collapsed .rail__content {
+          visibility: hidden;
+          opacity: 0;
+          pointer-events: none;
+        }
+
+        .workspace.is-rail-collapsed .rail-edge {
+          display: grid;
+        }
+      }
+
+      @media (max-width: 1279px) and (min-width: 900px) {
+        .sheet {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .canvas__intro {
+          grid-template-columns: 1fr;
+          gap: var(--spacing-24);
+        }
+      }
+
+      @media (max-width: 1023px) {
+        .viewer__spread {
+          grid-template-areas:
+            'media'
+            'intro'
+            'chapters'
+            'aside';
+          grid-template-columns: 1fr;
+          gap: var(--spacing-32);
+        }
+      }
+
+      @media (max-width: 899px) {
+        .shell {
+          height: auto;
+          min-height: var(--shell-height);
+        }
+
+        .workspace {
+          display: block;
+          grid-template-columns: none;
+          transition: none;
+        }
+
+        .rail {
+          display: none;
+          height: min(560px, 62dvh);
+          border-right: 0;
+          border-bottom: 1px solid var(--line);
+        }
+
+        .workspace.is-drawer-open .rail {
+          display: block;
+        }
+
+        .rail__content {
+          visibility: visible;
+          opacity: 1;
+        }
+
+        .rail-edge {
+          display: none;
+        }
+
+        .canvas {
+          overflow: visible;
+        }
+
+        .mobile-drawer-bar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: var(--spacing-16);
+          padding: 12px var(--spacing-16);
+          border-bottom: 1px solid var(--line);
+          background: var(--color-paper);
+        }
+
+        .mobile-drawer-bar__copy {
+          display: grid;
+          gap: 2px;
+        }
+
+        .mobile-drawer-bar__copy span:first-child {
+          font-size: var(--text-body-sm);
+          line-height: var(--leading-body-sm);
+        }
+
+        .mobile-drawer-bar__copy span:last-child {
+          color: var(--color-graphite);
+          font-size: var(--text-caption);
+          line-height: var(--leading-caption);
+        }
+
+        .canvas__intro {
+          grid-template-columns: 1fr;
+          gap: var(--spacing-24);
+          padding: var(--spacing-32);
+        }
+
+        .sheet-controls {
+          grid-template-columns: 1fr;
+          gap: 12px;
+        }
+
+        .sheet-controls__count {
+          text-align: left;
+        }
+
+        .sheet {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 599px) {
+        .canvas__intro,
+        .sheet,
+        .sheet-empty,
+        .canvas__foot {
+          padding-inline: var(--spacing-16);
+        }
+
+        .canvas__title,
+        .sheet-empty__title {
+          font-size: var(--text-subheading);
+          line-height: var(--leading-subheading);
+        }
+
+        .sheet-controls {
+          padding: 12px var(--spacing-16);
+        }
+
+        .sheet-controls .chips {
+          flex-wrap: nowrap;
+          overflow-x: auto;
+          padding-block: var(--spacing-8);
+          scrollbar-width: thin;
+        }
+
+        .sheet {
+          grid-template-columns: 1fr;
+          gap: var(--spacing-32);
+        }
+
+        .viewer {
+          width: 100vw;
+          height: calc(100dvh - var(--review-bar-height, 0px));
+          border-radius: 0;
+        }
+
+        .viewer__body {
+          padding: var(--spacing-16);
+        }
+
+        .viewer__title {
+          font-size: var(--text-subheading);
+          line-height: var(--leading-subheading);
+        }
+
+        .viewer__hint {
+          display: none;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .workspace,
+        .rail__content,
+        .cell .cover,
+        .cell__meta {
+          transition: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <svg hidden aria-hidden="true">
+      <symbol id="icon-search" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="6.5" />
+        <path d="M15.8 15.8l4.7 4.7" />
+      </symbol>
+      <symbol id="icon-close" viewBox="0 0 24 24">
+        <path d="M5.5 5.5l13 13" />
+        <path d="M18.5 5.5l-13 13" />
+      </symbol>
+      <symbol id="icon-arrow-left" viewBox="0 0 24 24">
+        <path d="M20.5 12h-17" />
+        <path d="M10.5 5l-7 7 7 7" />
+      </symbol>
+      <symbol id="icon-arrow-right" viewBox="0 0 24 24">
+        <path d="M3.5 12h17" />
+        <path d="M13.5 5l7 7-7 7" />
+      </symbol>
+      <symbol id="icon-panel-left" viewBox="0 0 24 24">
+        <rect x="3.5" y="4" width="17" height="16" rx="1.5" />
+        <path d="M9 4v16" />
+        <path d="M6 8h0" />
+      </symbol>
+      <symbol id="icon-panel-open" viewBox="0 0 24 24">
+        <rect x="3.5" y="4" width="17" height="16" rx="1.5" />
+        <path d="M9 4v16" />
+        <path d="M13 12h4" />
+        <path d="M15 10l2 2-2 2" />
+      </symbol>
+    </svg>
+
+    <div class="shell">
+      <header class="topbar">
+        <div class="topbar__identity">
+          <span class="topbar__wordmark">David Lafond Designs</span>
+          <span class="topbar__context">Sheet with archive rail — combination 1</span>
+        </div>
+        <div class="topbar__actions">
+          <a class="topbar__link" href="index.html">All combinations</a>
+          <a class="topbar__link" href="../designs/01-contact-sheet.html">Contact sheet</a>
+          <a class="topbar__link" href="../designs/03-split-browser.html">Split browser</a>
+        </div>
+      </header>
+
+      <main class="workspace" id="workspace">
+        <aside class="rail" id="rail" aria-label="Project archive rail">
+          <div class="rail__content" id="railContent">
+            <div class="rail__controls">
+              <div class="rail__heading">
+                <h2 class="rail__label">Archive index</h2>
+                <button
+                  class="icon-frame rail__collapse"
+                  id="collapseRail"
+                  type="button"
+                  aria-label="Collapse archive rail"
+                  aria-expanded="true"
+                >
+                  <svg class="icon" aria-hidden="true"><use href="#icon-panel-left" /></svg>
+                </button>
+              </div>
+              <div class="field">
+                <svg class="icon icon--16" aria-hidden="true"><use href="#icon-search" /></svg>
+                <input
+                  class="field__input"
+                  id="search"
+                  type="search"
+                  placeholder="Project or discipline"
+                  autocomplete="off"
+                  spellcheck="false"
+                  aria-label="Filter projects"
+                />
+              </div>
+            </div>
+
+            <div class="rail__head" aria-hidden="true">
+              <span>No.</span>
+              <span>Project</span>
+              <span>Type</span>
+              <span>Year</span>
+            </div>
+
+            <div class="rail__scroll" id="railScroll">
+              <ul class="rail__list" id="railList" aria-label="Filtered projects"></ul>
+              <div class="rail__empty" id="railEmpty" hidden>
+                <strong>No matches</strong>
+                <p>Clear the field or choose another category to bring projects back into the sheet.</p>
+              </div>
+            </div>
+
+            <div class="rail__foot">
+              <span>Showing <b id="railCount">12</b> of <b>12</b></span>
+              <span>↑ ↓ to move</span>
+            </div>
+          </div>
+
+          <button
+            class="rail-edge"
+            id="reopenRail"
+            type="button"
+            aria-label="Reopen archive rail"
+            aria-expanded="false"
+          >
+            <svg class="icon" aria-hidden="true"><use href="#icon-panel-open" /></svg>
+          </button>
+        </aside>
+
+        <section class="canvas" id="canvas" aria-label="Contact sheet">
+          <div class="mobile-drawer-bar">
+            <div class="mobile-drawer-bar__copy">
+              <span>Archive index</span>
+              <span id="mobileCount">12 projects · precise list view</span>
+            </div>
+            <button
+              class="icon-frame"
+              id="drawerToggle"
+              type="button"
+              aria-controls="rail"
+              aria-expanded="false"
+              aria-label="Open archive drawer"
+            >
+              <svg class="icon" aria-hidden="true"><use href="#icon-panel-open" /></svg>
+            </button>
+          </div>
+
+          <div class="canvas__intro">
+            <h1 class="canvas__title">The sheet leads. The archive stays within reach.</h1>
+            <p class="canvas__thesis">
+              The contact sheet is the canvas; the split browser's list becomes a rail docked beside it.
+              Visual browsing leads, precise navigation is always one glance away.
+            </p>
+          </div>
+
+          <div class="sheet-controls">
+            <div class="chips" id="chips" role="group" aria-label="Filter by category"></div>
+            <p class="sheet-controls__count" id="sheetCount" aria-live="polite">12 of 12 projects</p>
+          </div>
+
+          <ul class="sheet" id="sheet" aria-label="Project contact sheet"></ul>
+
+          <section class="sheet-empty" id="sheetEmpty" hidden>
+            <h2 class="sheet-empty__title">Nothing under that filter</h2>
+            <p class="sheet-empty__body">
+              Try another category, shorten the archive search, or clear it to see all twelve projects.
+            </p>
+          </section>
+
+          <footer class="canvas__foot">
+            <span>David Lafond Designs — selected work, 2023–2026.</span>
+            <span>Hover either surface to find the same project in the other.</span>
+          </footer>
+        </section>
+      </main>
+    </div>
+
+    <dialog class="viewer" id="viewer" aria-labelledby="viewerTitle">
+      <div class="viewer__shell">
+        <header class="viewer__bar">
+          <p class="viewer__position" id="viewerPosition"></p>
+          <button class="icon-frame" id="viewerClose" type="button" aria-label="Close project">
+            <svg class="icon" aria-hidden="true"><use href="#icon-close" /></svg>
+          </button>
+        </header>
+        <div class="viewer__body" id="viewerBody"></div>
+        <footer class="viewer__foot">
+          <p class="viewer__position viewer__hint">← → to move through the filtered set</p>
+          <div class="viewer__steps">
+            <button
+              class="button button--outlined button--icon"
+              type="button"
+              data-viewer-step="previous"
+              aria-label="Previous project"
+            >
+              <svg class="icon" aria-hidden="true"><use href="#icon-arrow-left" /></svg>
+            </button>
+            <button
+              class="button button--outlined button--icon"
+              type="button"
+              data-viewer-step="next"
+              aria-label="Next project"
+            >
+              <svg class="icon" aria-hidden="true"><use href="#icon-arrow-right" /></svg>
+            </button>
+          </div>
+        </footer>
+      </div>
+    </dialog>
+
+    <script>
+      ;(() => {
+        const projects = window.PORTFOLIO_PROJECTS
+        const categories = ['All', 'Product', 'Web', 'Branding', 'Motion', '3D', 'Illustration', 'Print']
+        const storageKey = 'portfolio:c1-sheet-with-rail:collapsed'
+        const narrow = matchMedia('(max-width: 899px)')
+        const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)')
+
+        const workspace = document.querySelector('#workspace')
+        const rail = document.querySelector('#rail')
+        const railContent = document.querySelector('#railContent')
+        const railList = document.querySelector('#railList')
+        const railScroll = document.querySelector('#railScroll')
+        const railEmpty = document.querySelector('#railEmpty')
+        const railCount = document.querySelector('#railCount')
+        const search = document.querySelector('#search')
+        const collapseRail = document.querySelector('#collapseRail')
+        const reopenRail = document.querySelector('#reopenRail')
+        const drawerToggle = document.querySelector('#drawerToggle')
+        const mobileCount = document.querySelector('#mobileCount')
+        const canvas = document.querySelector('#canvas')
+        const chips = document.querySelector('#chips')
+        const sheet = document.querySelector('#sheet')
+        const sheetCount = document.querySelector('#sheetCount')
+        const sheetEmpty = document.querySelector('#sheetEmpty')
+        const viewer = document.querySelector('#viewer')
+        const viewerBody = document.querySelector('#viewerBody')
+        const viewerPosition = document.querySelector('#viewerPosition')
+
+        let category = 'All'
+        let query = ''
+        let visible = projects.map((_, index) => index)
+        let selected = 0
+        let openIndex = -1
+        let opener = null
+        let hoveredIndex = null
+        let focusedIndex = null
+        let linkedPriority = 'focus'
+        let drawerOpen = false
+        let railCollapsed = readCollapsedState()
+
+        const escapeText = (value) =>
+          String(value).replace(
+            /[&<>'"]/g,
+            (character) =>
+              ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[character],
+          )
+
+        function readCollapsedState() {
+          try {
+            return localStorage.getItem(storageKey) === 'true'
+          } catch {
+            return false
+          }
+        }
+
+        function storeCollapsedState() {
+          try {
+            localStorage.setItem(storageKey, String(railCollapsed))
+          } catch {
+            // Storage can be unavailable on a locked-down file:// origin; the interface still works.
+          }
+        }
+
+        function coverMarkup(project, index, ratio = project.ratio) {
+          return `
+            <div
+              class="cover cover--${project.tone}"
+              style="--cover-ratio: ${ratio}; --cover-rule: 56px"
+              role="img"
+              aria-label="${escapeText(project.title)} — ${escapeText(project.subtitle)}"
+            >
+              <span class="cover__index">${String(index + 1).padStart(2, '0')}</span>
+              <span class="cover__mark" aria-hidden="true">${escapeText(
+                project.title.slice(0, 2).toUpperCase(),
+              )}</span>
+              <span class="cover__note">${escapeText(project.category)}</span>
+            </div>
+          `
+        }
+
+        function renderChips() {
+          chips.innerHTML = categories
+            .map(
+              (name) => `
+                <button
+                  class="chip"
+                  type="button"
+                  data-category="${escapeText(name)}"
+                  aria-pressed="${name === category}"
+                >${escapeText(name)}</button>
+              `,
+            )
+            .join('')
+        }
+
+        function renderRail() {
+          const rovingIndex = visible.includes(selected) ? selected : visible[0]
+          railList.innerHTML = visible
+            .map((index) => {
+              const project = projects[index]
+              return `
+                <li>
+                  <button
+                    class="row"
+                    type="button"
+                    data-index="${index}"
+                    data-surface="rail"
+                    tabindex="${index === rovingIndex ? '0' : '-1'}"
+                    aria-current="${index === selected}"
+                    aria-label="${escapeText(project.title)}, ${escapeText(project.category)}, ${project.year}"
+                  >
+                    <span class="row__index">${String(index + 1).padStart(2, '0')}</span>
+                    <span class="row__title">${escapeText(project.title)}</span>
+                    <span class="row__category">${escapeText(project.category)}</span>
+                    <span class="row__year">${project.year}</span>
+                  </button>
+                </li>
+              `
+            })
+            .join('')
+
+          railList.hidden = visible.length === 0
+          railEmpty.hidden = visible.length !== 0
+        }
+
+        function renderSheet() {
+          const rovingIndex = visible.includes(selected) ? selected : visible[0]
+          sheet.innerHTML = visible
+            .map((index) => {
+              const project = projects[index]
+              return `
+                <li>
+                  <button
+                    class="cell"
+                    type="button"
+                    data-index="${index}"
+                    data-surface="sheet"
+                    tabindex="${index === rovingIndex ? '0' : '-1'}"
+                    aria-current="${index === selected}"
+                    aria-label="Open ${escapeText(project.title)} project details"
+                  >
+                    ${coverMarkup(project, index)}
+                    <span class="cell__caption">
+                      <span class="cell__title">${escapeText(project.title)}</span>
+                      <span>
+                        <span class="cell__state" ${index === selected ? '' : 'hidden'}>Selected · </span>
+                        <span class="cell__year">${project.year}</span>
+                      </span>
+                    </span>
+                    <span class="cell__meta">${escapeText(project.subtitle)} — ${escapeText(
+                      project.client,
+                    )}</span>
+                  </button>
+                </li>
+              `
+            })
+            .join('')
+
+          sheet.hidden = visible.length === 0
+          sheetEmpty.hidden = visible.length !== 0
+        }
+
+        function updateCounts() {
+          railCount.textContent = String(visible.length)
+          sheetCount.textContent = `${visible.length} of ${projects.length} projects`
+          mobileCount.textContent = `${visible.length} ${visible.length === 1 ? 'project' : 'projects'} · precise list view`
+        }
+
+        function applyFilter() {
+          query = search.value.trim().toLocaleLowerCase()
+          visible = projects
+            .map((project, index) => ({ project, index }))
+            .filter(({ project }) => {
+              const haystack =
+                `${project.title} ${project.subtitle} ${project.category} ${project.client}`.toLocaleLowerCase()
+              const matchesCategory = category === 'All' || project.category === category
+              return matchesCategory && haystack.includes(query)
+            })
+            .map(({ index }) => index)
+
+          hoveredIndex = null
+          focusedIndex = null
+          renderRail()
+          renderSheet()
+          updateCounts()
+          paintLinkedState()
+        }
+
+        function paintSelection() {
+          for (const item of document.querySelectorAll('[data-index][data-surface]')) {
+            const isSelected = Number(item.dataset.index) === selected
+            item.setAttribute('aria-current', String(isSelected))
+            const state = item.querySelector('.cell__state')
+            if (state) state.hidden = !isSelected
+          }
+        }
+
+        function selectProject(index) {
+          if (!visible.includes(index)) return
+          selected = index
+          paintSelection()
+        }
+
+        function linkedIndex() {
+          if (linkedPriority === 'hover' && hoveredIndex !== null) return hoveredIndex
+          if (linkedPriority === 'focus' && focusedIndex !== null) return focusedIndex
+          return focusedIndex ?? hoveredIndex
+        }
+
+        function paintLinkedState() {
+          const activeIndex = linkedIndex()
+          for (const item of document.querySelectorAll('[data-index][data-surface]')) {
+            item.classList.toggle('is-linked', Number(item.dataset.index) === activeIndex)
+          }
+        }
+
+        function scrollPeerIntoView(index, source) {
+          const targetSurface = source === 'sheet' ? 'rail' : 'sheet'
+          const target = document.querySelector(
+            `[data-surface="${targetSurface}"][data-index="${index}"]`,
+          )
+          if (!target) return
+
+          if (targetSurface === 'rail') {
+            const itemTop = target.offsetTop
+            const itemBottom = itemTop + target.offsetHeight
+            if (itemTop < railScroll.scrollTop) {
+              railScroll.scrollTo({
+                top: itemTop,
+                behavior: reducedMotion.matches ? 'auto' : 'smooth',
+              })
+            } else if (itemBottom > railScroll.scrollTop + railScroll.clientHeight) {
+              railScroll.scrollTo({
+                top: itemBottom - railScroll.clientHeight,
+                behavior: reducedMotion.matches ? 'auto' : 'smooth',
+              })
+            }
+            return
+          }
+
+          target.scrollIntoView({
+            block: 'center',
+            inline: 'nearest',
+            behavior: reducedMotion.matches ? 'auto' : 'smooth',
+          })
+        }
+
+        function setLinked(index, source, kind) {
+          if (kind === 'hover') hoveredIndex = index
+          else focusedIndex = index
+          linkedPriority = kind
+          paintLinkedState()
+          scrollPeerIntoView(index, source)
+        }
+
+        function clearLinked(kind, index) {
+          if (kind === 'hover' && hoveredIndex === index) hoveredIndex = null
+          if (kind === 'focus' && focusedIndex === index) focusedIndex = null
+          if (linkedPriority === kind) linkedPriority = kind === 'hover' ? 'focus' : 'hover'
+          paintLinkedState()
+        }
+
+        function updateRoving(surface, index) {
+          const root = surface === 'rail' ? railList : sheet
+          for (const item of root.querySelectorAll('[data-index]')) {
+            item.tabIndex = Number(item.dataset.index) === index ? 0 : -1
+          }
+        }
+
+        function moveRail(current, key) {
+          const position = visible.indexOf(current)
+          const nextPosition = {
+            ArrowDown: Math.min(position + 1, visible.length - 1),
+            ArrowUp: Math.max(position - 1, 0),
+            Home: 0,
+            End: visible.length - 1,
+          }[key]
+          if (nextPosition === undefined || nextPosition < 0) return
+          const index = visible[nextPosition]
+          updateRoving('rail', index)
+          railList.querySelector(`[data-index="${index}"]`)?.focus()
+        }
+
+        function moveSheet(current, key) {
+          const cells = [...sheet.querySelectorAll('[data-index]')]
+          if (!cells.length) return
+          const currentCell = sheet.querySelector(`[data-index="${current}"]`)
+          const firstCell = cells[0]
+          const columnWidth = firstCell.getBoundingClientRect().width
+          const columns = Math.max(1, Math.round(sheet.clientWidth / columnWidth))
+          const position = cells.indexOf(currentCell)
+          const offset = {
+            ArrowRight: 1,
+            ArrowLeft: -1,
+            ArrowDown: columns,
+            ArrowUp: -columns,
+            Home: -position,
+            End: cells.length - 1 - position,
+          }[key]
+          if (offset === undefined) return
+          const nextPosition = Math.min(Math.max(position + offset, 0), cells.length - 1)
+          const index = Number(cells[nextPosition].dataset.index)
+          updateRoving('sheet', index)
+          cells[nextPosition].focus()
+        }
+
+        function viewerMarkup(project, index) {
+          const chapters = [
+            ['Problem', project.problem],
+            ['Approach', project.approach],
+            ['Outcome', project.outcome],
+          ]
+
+          return `
+            <div class="viewer__spread">
+              <div class="viewer__media">
+                ${coverMarkup(project, index, '16 / 10')}
+              </div>
+              <div class="viewer__intro">
+                <p class="viewer__kicker">${escapeText(project.category)} — ${project.year}</p>
+                <h2 class="viewer__title" id="viewerTitle">${escapeText(project.title)}</h2>
+                <p class="viewer__lead">${escapeText(project.lead)}</p>
+              </div>
+              <div class="viewer__chapters">
+                ${chapters
+                  .map(
+                    ([heading, body], position) => `
+                      <section class="viewer__section">
+                        <h3><span class="viewer__badge">${position + 1}</span>${heading}</h3>
+                        <p>${escapeText(body)}</p>
+                      </section>
+                    `,
+                  )
+                  .join('')}
+              </div>
+              <div class="viewer__aside">
+                <dl class="facts">
+                  <div class="fact"><dt>Client</dt><dd>${escapeText(project.client)}</dd></div>
+                  <div class="fact"><dt>Discipline</dt><dd>${escapeText(project.subtitle)}</dd></div>
+                  <div class="fact"><dt>Role</dt><dd>${escapeText(project.role)}</dd></div>
+                  <div class="fact"><dt>Team</dt><dd>${escapeText(project.team)}</dd></div>
+                  <div class="fact"><dt>Duration</dt><dd>${escapeText(project.duration)}</dd></div>
+                </dl>
+                <ul class="metrics">
+                  ${project.metrics
+                    .map(
+                      (metric) => `
+                        <li class="metric">
+                          <p class="metric__value">${escapeText(metric.value)}</p>
+                          <p class="metric__label">${escapeText(metric.label)}</p>
+                        </li>
+                      `,
+                    )
+                    .join('')}
+                </ul>
+              </div>
+            </div>
+          `
+        }
+
+        function paintViewer(index) {
+          const project = projects[index]
+          const position = visible.indexOf(index)
+          openIndex = index
+          selected = index
+          paintSelection()
+          viewerBody.innerHTML = viewerMarkup(project, index)
+          viewerPosition.textContent = `${String(position + 1).padStart(2, '0')} / ${String(
+            visible.length,
+          ).padStart(2, '0')} — ${project.title}`
+          viewerBody.scrollTop = 0
+
+          const disabled = visible.length < 2
+          for (const button of viewer.querySelectorAll('[data-viewer-step]')) button.disabled = disabled
+        }
+
+        function openViewer(index, trigger) {
+          if (!visible.includes(index)) return
+          opener = {
+            element: trigger,
+            index,
+            surface: trigger.dataset.surface,
+          }
+          paintViewer(index)
+          viewer.showModal()
+        }
+
+        function stepViewer(direction) {
+          if (visible.length < 2) return
+          const position = visible.indexOf(openIndex)
+          const delta = direction === 'next' ? 1 : -1
+          paintViewer(visible[(position + delta + visible.length) % visible.length])
+        }
+
+        function setRailCollapsed(next) {
+          railCollapsed = next
+          workspace.classList.toggle('is-rail-collapsed', railCollapsed)
+          storeCollapsedState()
+          syncRailAccessibility()
+        }
+
+        function setDrawerOpen(next) {
+          drawerOpen = next
+          workspace.classList.toggle('is-drawer-open', drawerOpen)
+          syncRailAccessibility()
+          if (drawerOpen) requestAnimationFrame(() => search.focus())
+        }
+
+        function syncRailAccessibility() {
+          if (narrow.matches) {
+            railContent.inert = !drawerOpen
+            rail.setAttribute('aria-hidden', String(!drawerOpen))
+            drawerToggle.setAttribute('aria-expanded', String(drawerOpen))
+            drawerToggle.setAttribute('aria-label', drawerOpen ? 'Close archive drawer' : 'Open archive drawer')
+            collapseRail.setAttribute('aria-expanded', String(drawerOpen))
+            collapseRail.setAttribute('aria-label', 'Close archive drawer')
+            return
+          }
+
+          railContent.inert = railCollapsed
+          rail.setAttribute('aria-hidden', 'false')
+          collapseRail.setAttribute('aria-expanded', String(!railCollapsed))
+          collapseRail.setAttribute('aria-label', 'Collapse archive rail')
+          reopenRail.setAttribute('aria-expanded', String(!railCollapsed))
+        }
+
+        function itemForEvent(event) {
+          return event.target.closest('[data-index][data-surface]')
+        }
+
+        function bindSurface(root) {
+          root.addEventListener('pointerover', (event) => {
+            const item = itemForEvent(event)
+            if (!item || item.contains(event.relatedTarget)) return
+            setLinked(Number(item.dataset.index), item.dataset.surface, 'hover')
+          })
+
+          root.addEventListener('pointerout', (event) => {
+            const item = itemForEvent(event)
+            if (!item || item.contains(event.relatedTarget)) return
+            clearLinked('hover', Number(item.dataset.index))
+          })
+
+          root.addEventListener('focusin', (event) => {
+            const item = itemForEvent(event)
+            if (!item) return
+            setLinked(Number(item.dataset.index), item.dataset.surface, 'focus')
+          })
+
+          root.addEventListener('focusout', (event) => {
+            const item = itemForEvent(event)
+            if (!item || item.contains(event.relatedTarget)) return
+            clearLinked('focus', Number(item.dataset.index))
+          })
+
+          root.addEventListener('click', (event) => {
+            const item = itemForEvent(event)
+            if (!item) return
+            const index = Number(item.dataset.index)
+            selectProject(index)
+            openViewer(index, item)
+          })
+        }
+
+        bindSurface(railList)
+        bindSurface(sheet)
+
+        railList.addEventListener('keydown', (event) => {
+          const item = itemForEvent(event)
+          if (!item) return
+          if (['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) {
+            event.preventDefault()
+            moveRail(Number(item.dataset.index), event.key)
+          }
+        })
+
+        sheet.addEventListener('keydown', (event) => {
+          const item = itemForEvent(event)
+          if (!item) return
+          if (['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) {
+            event.preventDefault()
+            moveSheet(Number(item.dataset.index), event.key)
+          }
+        })
+
+        chips.addEventListener('click', (event) => {
+          const chip = event.target.closest('[data-category]')
+          if (!chip) return
+          category = chip.dataset.category
+          for (const button of chips.querySelectorAll('[data-category]')) {
+            button.setAttribute('aria-pressed', String(button === chip))
+          }
+          applyFilter()
+        })
+
+        search.addEventListener('input', applyFilter)
+        search.addEventListener('keydown', (event) => {
+          if (event.key === 'ArrowDown' && visible.length) {
+            event.preventDefault()
+            const index = visible.includes(selected) ? selected : visible[0]
+            updateRoving('rail', index)
+            railList.querySelector(`[data-index="${index}"]`)?.focus()
+          }
+          if (event.key === 'Escape' && search.value) {
+            event.preventDefault()
+            search.value = ''
+            applyFilter()
+          }
+        })
+
+        collapseRail.addEventListener('click', () => {
+          if (narrow.matches) setDrawerOpen(false)
+          else setRailCollapsed(true)
+        })
+        reopenRail.addEventListener('click', () => setRailCollapsed(false))
+        drawerToggle.addEventListener('click', () => setDrawerOpen(!drawerOpen))
+
+        viewer.addEventListener('click', (event) => {
+          if (event.target === viewer || event.target.closest('#viewerClose')) {
+            viewer.close()
+            return
+          }
+          const step = event.target.closest('[data-viewer-step]')
+          if (step && !step.disabled) stepViewer(step.dataset.viewerStep)
+        })
+
+        viewer.addEventListener('keydown', (event) => {
+          if (event.key === 'ArrowRight') {
+            event.preventDefault()
+            stepViewer('next')
+          }
+          if (event.key === 'ArrowLeft') {
+            event.preventDefault()
+            stepViewer('previous')
+          }
+        })
+
+        viewer.addEventListener('close', () => {
+          requestAnimationFrame(() => {
+            if (opener?.element?.isConnected) {
+              opener.element.focus()
+              return
+            }
+            const fallback = document.querySelector(
+              `[data-surface="${opener?.surface}"][data-index="${opener?.index}"]`,
+            )
+            fallback?.focus()
+          })
+        })
+
+        addEventListener('keydown', (event) => {
+          if (event.key !== '/' || viewer.open) return
+          const tag = document.activeElement?.tagName
+          if (tag === 'INPUT' || tag === 'TEXTAREA') return
+          event.preventDefault()
+          if (narrow.matches && !drawerOpen) setDrawerOpen(true)
+          else if (!narrow.matches && railCollapsed) setRailCollapsed(false)
+          requestAnimationFrame(() => {
+            search.focus()
+            search.select()
+          })
+        })
+
+        narrow.addEventListener('change', () => {
+          drawerOpen = false
+          workspace.classList.remove('is-drawer-open')
+          syncRailAccessibility()
+        })
+
+        renderChips()
+        applyFilter()
+        workspace.classList.toggle('is-rail-collapsed', railCollapsed)
+        syncRailAccessibility()
+      })()
+    </script>
+  </body>
+</html>

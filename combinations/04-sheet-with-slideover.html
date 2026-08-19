@@ -1,0 +1,1428 @@
+<!doctype html>
+<html lang="en" data-design-id="c4-sheet-with-slideover" data-design-title="Sheet with slide-over list">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A full-screen contact sheet with an on-demand, pinnable project index."
+    />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="stylesheet" href="../shared/acolorbright.css" />
+    <link rel="stylesheet" href="../shared/hifi.css" />
+    <link rel="stylesheet" href="../shared/review.css" />
+    <script src="../shared/projects.js"></script>
+    <script src="../shared/review.js" defer></script>
+    <title>Sheet with slide-over list — David Lafond Designs</title>
+    <style>
+      :root {
+        --panel-width: 380px;
+        --toolbar-min-height: 72px;
+        --sheet-cell-min: 252px;
+        --pulse-size: 6px;
+        --panel-speed: 280ms;
+      }
+      [hidden] {
+        display: none !important;
+      }
+
+
+      body {
+        overflow-x: hidden;
+      }
+
+      body.has-modal-panel {
+        overflow: hidden;
+      }
+
+      .app {
+        display: grid;
+        min-height: calc(100dvh - var(--review-bar-height, 0px));
+        grid-template-columns: minmax(0, 1fr);
+        background: var(--color-paper);
+      }
+
+      .app.is-pinned {
+        grid-template-columns: minmax(0, 1fr) var(--panel-width);
+      }
+
+      .surface {
+        min-width: 0;
+      }
+
+      .toolbar {
+        position: sticky;
+        z-index: 10;
+        top: 0;
+        display: grid;
+        min-height: var(--toolbar-min-height);
+        grid-template-columns: auto minmax(180px, 1fr) auto;
+        align-items: center;
+        gap: var(--spacing-24);
+        padding: 12px var(--spacing-16);
+        border-bottom: 1px solid var(--line);
+        background: var(--color-paper);
+      }
+
+      .toolbar__identity {
+        display: flex;
+        min-width: 0;
+        align-items: baseline;
+        gap: var(--spacing-16);
+      }
+
+      .wordmark {
+        font-size: var(--text-body-sm);
+        line-height: var(--leading-body-sm);
+        white-space: nowrap;
+      }
+
+      .all-link {
+        color: var(--color-graphite);
+        font-size: var(--text-caption);
+        line-height: var(--leading-caption);
+        text-decoration: underline;
+        text-decoration-color: transparent;
+        text-underline-offset: var(--spacing-8);
+        white-space: nowrap;
+      }
+
+      .all-link:hover,
+      .all-link:focus-visible {
+        color: var(--color-ink-black);
+        text-decoration-color: currentColor;
+      }
+
+      .toolbar__filters {
+        min-width: 0;
+      }
+
+      .toolbar__filters .chips {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-block: var(--spacing-8);
+        scrollbar-width: none;
+      }
+
+      .toolbar__filters .chips::-webkit-scrollbar {
+        display: none;
+      }
+
+      .toolbar__actions {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-16);
+      }
+
+      .result-count {
+        margin: 0;
+        color: var(--color-graphite);
+        font-size: var(--text-caption);
+        font-variant-numeric: tabular-nums;
+        line-height: var(--leading-caption);
+        white-space: nowrap;
+      }
+
+      .list-trigger {
+        display: inline-flex;
+        min-height: 40px;
+        align-items: center;
+        gap: var(--spacing-8);
+        padding: 0 12px;
+        border: 1px solid var(--color-ink-black);
+        border-radius: var(--radius-buttons);
+        background: var(--color-paper);
+        color: var(--color-ink-black);
+        cursor: pointer;
+        font: inherit;
+        font-size: var(--text-caption);
+        letter-spacing: inherit;
+        white-space: nowrap;
+      }
+
+      .list-trigger:hover {
+        background: var(--color-mist);
+      }
+
+      .shortcut {
+        color: var(--color-graphite);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .thesis {
+        margin: 0;
+        padding: var(--spacing-8) var(--spacing-16);
+        border-bottom: 1px solid var(--line);
+        color: var(--color-graphite);
+        font-size: var(--text-caption);
+        line-height: var(--leading-caption);
+      }
+
+      .sheet {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--sheet-cell-min)), 1fr));
+        align-items: start;
+        gap: 1px;
+        margin: 0;
+        padding: 0;
+        background: var(--line);
+        list-style: none;
+      }
+
+      .sheet > li {
+        min-width: 0;
+        background: var(--color-paper);
+      }
+
+      .cell {
+        position: relative;
+        display: block;
+        width: 100%;
+        padding: 0;
+        border: 0;
+        background: var(--color-paper);
+        color: inherit;
+        cursor: pointer;
+        font: inherit;
+        letter-spacing: inherit;
+        text-align: left;
+      }
+
+      .cell .cover {
+        border-radius: 0;
+        transition: filter var(--panel-speed) var(--ease);
+      }
+
+      .cell:hover .cover,
+      .cell:focus-visible .cover {
+        filter: contrast(0.88) brightness(1.04);
+      }
+
+      .cell__meta {
+        position: absolute;
+        right: var(--spacing-8);
+        bottom: var(--spacing-8);
+        left: var(--spacing-8);
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: baseline;
+        gap: var(--spacing-16);
+        padding: 12px var(--spacing-16);
+        border-radius: var(--radius-buttons);
+        background: var(--color-paper);
+        color: var(--color-ink-black);
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(var(--spacing-8));
+        transition:
+          opacity 180ms var(--ease),
+          transform 180ms var(--ease);
+      }
+
+      .cell:hover .cell__meta,
+      .cell:focus-visible .cell__meta,
+      .cell[aria-current='true'] .cell__meta {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .cell__title {
+        overflow: hidden;
+        font-size: var(--text-body-sm);
+        line-height: var(--leading-body-sm);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .cell__detail {
+        color: var(--color-graphite);
+        font-size: var(--text-caption);
+        line-height: var(--leading-caption);
+        white-space: nowrap;
+      }
+
+      .cell.is-targeted {
+        z-index: 2;
+        animation: target-pulse 900ms var(--ease);
+      }
+
+      @keyframes target-pulse {
+        0% {
+          box-shadow: inset 0 0 0 var(--pulse-size) var(--color-paper);
+        }
+        35% {
+          box-shadow: inset 0 0 0 var(--pulse-size) var(--color-ink-black);
+        }
+        100% {
+          box-shadow: inset 0 0 0 0 var(--color-ink-black);
+        }
+      }
+
+      .sheet-empty {
+        min-height: 50dvh;
+        padding: var(--spacing-64) var(--spacing-16);
+        background: var(--color-paper);
+      }
+
+      .sheet-empty h2 {
+        margin: 0;
+        font-size: var(--text-heading);
+        font-weight: 400;
+        line-height: var(--leading-heading);
+      }
+
+      .sheet-empty p {
+        max-width: 38ch;
+        margin: var(--spacing-16) 0 0;
+        color: var(--color-graphite);
+        font-size: var(--text-body-sm);
+        line-height: var(--leading-body-sm);
+      }
+
+      /* Summoned project index */
+
+      .scrim {
+        position: fixed;
+        z-index: 30;
+        inset: 0 0 var(--review-bar-height, 0px);
+        border: 0;
+        background: rgb(26 26 26 / 62%);
+        cursor: pointer;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity var(--panel-speed) var(--ease);
+      }
+
+      .app.is-panel-open:not(.is-pinned) + .scrim {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .panel {
+        position: fixed;
+        z-index: 40;
+        top: 0;
+        right: 0;
+        bottom: var(--review-bar-height, 0px);
+        display: grid;
+        width: min(var(--panel-width), 100vw);
+        min-height: 0;
+        grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+        border-left: 1px solid var(--line);
+        background: var(--color-paper);
+        color: var(--color-ink-black);
+        transform: translateX(100%);
+        transition:
+          transform var(--panel-speed) var(--ease),
+          visibility var(--panel-speed) step-end;
+        visibility: hidden;
+      }
+
+      .app.is-panel-open .panel {
+        transform: translateX(0);
+        transition:
+          transform var(--panel-speed) var(--ease),
+          visibility 0s;
+        visibility: visible;
+      }
+
+      .app.is-pinned .panel {
+        position: sticky;
+        z-index: 8;
+        top: 0;
+        right: auto;
+        bottom: auto;
+        width: var(--panel-width);
+        height: calc(100dvh - var(--review-bar-height, 0px));
+        grid-column: 2;
+        grid-row: 1;
+        transform: none;
+        visibility: visible;
+      }
+
+      .app.is-pinned .surface {
+        grid-column: 1;
+        grid-row: 1;
+      }
+
+      .panel__bar {
+        display: flex;
+        min-height: var(--toolbar-min-height);
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--spacing-16);
+        padding: 12px var(--spacing-16);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .panel__title {
+        margin: 0;
+        font-size: var(--text-body);
+        font-weight: 400;
+        line-height: var(--leading-body);
+      }
+
+      .panel__tools {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-8);
+      }
+
+      .pin-button[aria-pressed='true'] {
+        background: var(--color-ink-black);
+        color: var(--color-paper);
+      }
+
+      .panel__search {
+        padding: var(--spacing-16);
+      }
+
+      .panel__head,
+      .project-row {
+        display: grid;
+        grid-template-columns: 32px minmax(0, 1fr) 72px 40px;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .panel__head {
+        padding: var(--spacing-8) var(--spacing-16);
+        border-block: 1px solid var(--line);
+        color: var(--color-graphite);
+        font-size: var(--text-caption);
+        line-height: var(--leading-caption);
+      }
+
+      .panel__head span:last-child {
+        text-align: right;
+      }
+
+      .panel__scroll {
+        min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scrollbar-color: var(--color-fog) transparent;
+        scrollbar-width: thin;
+      }
+
+      .project-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .project-row {
+        width: 100%;
+        padding: var(--spacing-16);
+        border: 0;
+        background: transparent;
+        color: var(--color-ink-black);
+        cursor: pointer;
+        font: inherit;
+        letter-spacing: inherit;
+        text-align: left;
+      }
+
+      .project-list li:nth-child(odd) .project-row {
+        background: var(--color-mist);
+      }
+
+      .project-row:hover,
+      .project-list li:nth-child(odd) .project-row:hover {
+        background: var(--color-fog);
+      }
+
+      .project-row[aria-current='true'],
+      .project-list li:nth-child(odd) .project-row[aria-current='true'] {
+        background: var(--color-ink-black);
+        color: var(--color-paper);
+      }
+
+      .project-row__index,
+      .project-row__category,
+      .project-row__year {
+        color: var(--color-graphite);
+        font-size: var(--text-caption);
+        font-variant-numeric: tabular-nums;
+        line-height: var(--leading-caption);
+      }
+
+      .project-row[aria-current='true'] .project-row__index,
+      .project-row[aria-current='true'] .project-row__category,
+      .project-row[aria-current='true'] .project-row__year {
+        color: var(--color-fog);
+      }
+
+      .project-row__title {
+        overflow: hidden;
+        font-size: var(--text-body-sm);
+        line-height: var(--leading-body-sm);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .project-row__year {
+        text-align: right;
+      }
+
+      .panel-empty {
+        padding: var(--spacing-32) var(--spacing-16);
+      }
+
+      .panel-empty strong {
+        display: block;
+        font-size: var(--text-subheading);
+        font-weight: 400;
+        line-height: var(--leading-subheading);
+      }
+
+      .panel-empty p {
+        margin: 12px 0 0;
+        color: var(--color-graphite);
+        font-size: var(--text-body-sm);
+        line-height: var(--leading-body-sm);
+      }
+
+      .panel__foot {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: var(--spacing-16);
+        padding: 12px var(--spacing-16);
+        border-top: 1px solid var(--line);
+        color: var(--color-graphite);
+        font-size: var(--text-caption);
+        line-height: var(--leading-caption);
+      }
+
+      .panel__foot b {
+        color: var(--color-ink-black);
+        font-variant-numeric: tabular-nums;
+        font-weight: 400;
+      }
+
+      /* Full project detail */
+
+      .viewer {
+        width: min(1200px, calc(100vw - var(--spacing-64)));
+        max-width: none;
+        height: min(880px, calc(100dvh - var(--spacing-64) - var(--review-bar-height, 0px)));
+        max-height: none;
+        padding: 0;
+        border: 0;
+        border-radius: var(--radius-images);
+        background: var(--color-paper);
+        color: var(--color-ink-black);
+      }
+
+      .viewer::backdrop {
+        background: rgb(26 26 26 / 62%);
+      }
+
+      .viewer__shell {
+        display: grid;
+        height: 100%;
+        grid-template-rows: auto minmax(0, 1fr) auto;
+      }
+
+      .viewer__bar,
+      .viewer__foot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--spacing-16);
+        padding: var(--spacing-16) var(--spacing-24);
+      }
+
+      .viewer__bar {
+        border-bottom: 1px solid var(--line);
+      }
+
+      .viewer__foot {
+        border-top: 1px solid var(--line);
+      }
+
+      .viewer__position {
+        margin: 0;
+        color: var(--color-graphite);
+        font-size: var(--text-caption);
+        font-variant-numeric: tabular-nums;
+        line-height: var(--leading-caption);
+      }
+
+      .viewer__body {
+        overflow-y: auto;
+        padding: var(--spacing-32);
+        overscroll-behavior: contain;
+      }
+
+      .viewer__spread {
+        display: grid;
+        grid-template-areas:
+          'media intro'
+          'chapters aside'
+          'metrics metrics';
+        grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
+        gap: var(--spacing-32) var(--spacing-64);
+      }
+
+      .viewer__media {
+        grid-area: media;
+      }
+
+      .viewer__intro {
+        grid-area: intro;
+      }
+
+      .viewer__chapters {
+        grid-area: chapters;
+      }
+
+      .viewer__aside {
+        grid-area: aside;
+      }
+
+      .viewer__metrics {
+        grid-area: metrics;
+      }
+
+      .viewer__kicker {
+        margin: 0 0 var(--spacing-16);
+        color: var(--color-graphite);
+        font-size: var(--text-caption);
+        line-height: var(--leading-caption);
+      }
+
+      .viewer__title {
+        margin: 0;
+        font-size: var(--text-heading);
+        font-weight: 400;
+        line-height: var(--leading-heading);
+      }
+
+      .viewer__lead {
+        max-width: 46ch;
+        margin: var(--spacing-24) 0 0;
+        font-size: var(--text-body);
+        line-height: var(--leading-body);
+      }
+
+      .viewer__section + .viewer__section {
+        margin-top: var(--spacing-32);
+      }
+
+      .viewer__section h3 {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0 0 12px;
+        font-size: var(--text-body);
+        font-weight: 400;
+        line-height: var(--leading-body);
+      }
+
+      .viewer__section p {
+        margin: 0;
+        color: var(--color-graphite);
+        font-size: var(--text-body-sm);
+        line-height: var(--leading-body-sm);
+      }
+
+      .viewer__steps {
+        display: flex;
+        gap: var(--spacing-8);
+      }
+
+      @media (max-width: 1100px) {
+        .toolbar {
+          grid-template-columns: auto minmax(0, 1fr);
+        }
+
+        .toolbar__filters {
+          grid-column: 1 / -1;
+          grid-row: 2;
+        }
+
+        .toolbar__actions {
+          grid-column: 2;
+          grid-row: 1;
+          justify-self: end;
+        }
+
+        .viewer__spread {
+          grid-template-areas:
+            'media'
+            'intro'
+            'chapters'
+            'aside'
+            'metrics';
+          grid-template-columns: 1fr;
+          gap: var(--spacing-32);
+        }
+      }
+
+      @media (max-width: 900px) {
+        .app,
+        .app.is-pinned {
+          grid-template-columns: minmax(0, 1fr);
+        }
+
+        .app.is-pinned .surface {
+          grid-column: 1;
+        }
+
+        .app.is-pinned .panel,
+        .panel {
+          position: fixed;
+          z-index: 40;
+          top: 0;
+          right: 0;
+          bottom: var(--review-bar-height, 0px);
+          width: min(100vw, 480px);
+          height: auto;
+          transform: translateX(100%);
+          visibility: hidden;
+        }
+
+        .app.is-panel-open .panel,
+        .app.is-panel-open.is-pinned .panel {
+          transform: translateX(0);
+          visibility: visible;
+        }
+
+        .app.is-panel-open + .scrim {
+          opacity: 1;
+          pointer-events: auto;
+        }
+
+        .pin-button {
+          display: none;
+        }
+      }
+
+      @media (max-width: 640px) {
+        :root {
+          --sheet-cell-min: 100%;
+        }
+
+        .toolbar {
+          grid-template-columns: minmax(0, 1fr) auto;
+          gap: 12px;
+          padding-inline: var(--spacing-16);
+        }
+
+        .toolbar__identity {
+          display: grid;
+          gap: var(--spacing-8);
+        }
+
+        .toolbar__actions {
+          grid-column: 2;
+        }
+
+        .result-count,
+        .shortcut {
+          display: none;
+        }
+
+        .list-trigger {
+          width: 40px;
+          padding: 0;
+          justify-content: center;
+        }
+
+        .list-trigger__label {
+          position: absolute;
+          overflow: hidden;
+          width: 1px;
+          height: 1px;
+          clip-path: inset(50%);
+          white-space: nowrap;
+        }
+
+        .thesis {
+          line-height: var(--leading-body-sm);
+        }
+
+        .panel {
+          width: 100vw;
+          border-left: 0;
+        }
+
+        .viewer {
+          width: 100vw;
+          height: calc(100dvh - var(--review-bar-height, 0px));
+          border-radius: 0;
+        }
+
+        .viewer__body {
+          padding: var(--spacing-16);
+        }
+
+        .viewer__title {
+          font-size: var(--text-subheading);
+          line-height: var(--leading-subheading);
+        }
+
+        .viewer__hint {
+          display: none;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .panel,
+        .scrim {
+          transition: none !important;
+        }
+
+        .cell.is-targeted {
+          animation: none;
+          box-shadow: inset 0 0 0 var(--pulse-size) var(--color-ink-black);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <svg hidden aria-hidden="true">
+      <symbol id="icon-search" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="6.5" />
+        <path d="M15.8 15.8l4.7 4.7" />
+      </symbol>
+      <symbol id="icon-list" viewBox="0 0 24 24">
+        <path d="M4 6h16" />
+        <path d="M4 12h16" />
+        <path d="M4 18h16" />
+      </symbol>
+      <symbol id="icon-close" viewBox="0 0 24 24">
+        <path d="M5.5 5.5l13 13" />
+        <path d="M18.5 5.5l-13 13" />
+      </symbol>
+      <symbol id="icon-pin" viewBox="0 0 24 24">
+        <path d="M8 4h8l-1 6 3 3H6l3-3-1-6Z" />
+        <path d="M12 13v7" />
+      </symbol>
+      <symbol id="icon-arrow-left" viewBox="0 0 24 24">
+        <path d="M20.5 12h-17" />
+        <path d="M10.5 5l-7 7 7 7" />
+      </symbol>
+      <symbol id="icon-arrow-right" viewBox="0 0 24 24">
+        <path d="M3.5 12h17" />
+        <path d="M13.5 5l7 7-7 7" />
+      </symbol>
+    </svg>
+
+    <div class="app" id="app">
+      <div class="surface" id="surface">
+        <header class="toolbar">
+          <div class="toolbar__identity">
+            <span class="wordmark">David Lafond Designs</span>
+            <a class="all-link" href="index.html">All combinations</a>
+          </div>
+          <nav class="toolbar__filters" aria-label="Filter projects by category">
+            <div class="chips" id="chips"></div>
+          </nav>
+          <div class="toolbar__actions">
+            <p class="result-count" id="sheetCount" aria-live="polite">12 of 12</p>
+            <button class="list-trigger" id="listTrigger" type="button" aria-haspopup="dialog" aria-controls="projectPanel" aria-expanded="false">
+              <svg class="icon icon--16" aria-hidden="true"><use href="#icon-list" /></svg>
+              <span class="list-trigger__label">Project list</span>
+              <span class="shortcut" aria-hidden="true">⌘K /</span>
+            </button>
+          </div>
+        </header>
+        <p class="thesis">
+          The contact sheet owns the whole screen; the project list is summoned for full precision on demand.
+        </p>
+
+        <main id="mainContent">
+          <h1 class="sr-only">Selected design work</h1>
+          <ul class="sheet" id="sheet" aria-label="Projects"></ul>
+          <section class="sheet-empty" id="sheetEmpty" hidden>
+            <h2>No projects in this category</h2>
+            <p>Choose All to return to the complete contact sheet.</p>
+          </section>
+        </main>
+      </div>
+
+      <aside class="panel" id="projectPanel" aria-labelledby="panelTitle" aria-hidden="true">
+        <header class="panel__bar">
+          <h2 class="panel__title" id="panelTitle">Project index</h2>
+          <div class="panel__tools">
+            <button class="icon-frame pin-button" id="pinButton" type="button" aria-label="Pin project index" aria-pressed="false">
+              <svg class="icon icon--16" aria-hidden="true"><use href="#icon-pin" /></svg>
+            </button>
+            <button class="icon-frame" id="panelClose" type="button" aria-label="Close project index">
+              <svg class="icon icon--16" aria-hidden="true"><use href="#icon-close" /></svg>
+            </button>
+          </div>
+        </header>
+
+        <div class="panel__search">
+          <label class="field">
+            <svg class="icon icon--16" aria-hidden="true"><use href="#icon-search" /></svg>
+            <span class="sr-only">Filter the project index</span>
+            <input
+              class="field__input"
+              id="panelSearch"
+              type="search"
+              placeholder="Project or discipline"
+              autocomplete="off"
+              spellcheck="false"
+            />
+          </label>
+        </div>
+
+        <div class="panel__head" aria-hidden="true">
+          <span>No.</span>
+          <span>Project</span>
+          <span>Type</span>
+          <span>Year</span>
+        </div>
+
+        <div class="panel__scroll" id="panelScroll">
+          <ul class="project-list" id="projectList" aria-label="Filtered projects"></ul>
+          <div class="panel-empty" id="panelEmpty" hidden>
+            <strong>No matches</strong>
+            <p>Clear the field or change the sheet category to widen the list.</p>
+          </div>
+        </div>
+
+        <footer class="panel__foot">
+          <span>Showing <b id="panelCount">12</b> of <b>12</b></span>
+          <span>↑ ↓ to move</span>
+        </footer>
+      </aside>
+    </div>
+
+    <button class="scrim" id="scrim" type="button" tabindex="-1" aria-label="Close project index"></button>
+
+    <dialog class="viewer" id="viewer" aria-labelledby="viewerTitle">
+      <div class="viewer__shell">
+        <header class="viewer__bar">
+          <p class="viewer__position" id="viewerPosition"></p>
+          <button class="icon-frame" id="viewerClose" type="button" aria-label="Close project">
+            <svg class="icon icon--16" aria-hidden="true"><use href="#icon-close" /></svg>
+          </button>
+        </header>
+        <div class="viewer__body" id="viewerBody"></div>
+        <footer class="viewer__foot">
+          <p class="viewer__position viewer__hint">← → to move through the filtered sheet</p>
+          <div class="viewer__steps">
+            <button class="button button--outlined button--icon" type="button" data-step="previous" aria-label="Previous project">
+              <svg class="icon" aria-hidden="true"><use href="#icon-arrow-left" /></svg>
+            </button>
+            <button class="button button--outlined button--icon" type="button" data-step="next" aria-label="Next project">
+              <svg class="icon" aria-hidden="true"><use href="#icon-arrow-right" /></svg>
+            </button>
+          </div>
+        </footer>
+      </div>
+    </dialog>
+
+    <script>
+      ;(() => {
+        const projects = window.PORTFOLIO_PROJECTS
+        const categories = ['All', 'Product', 'Web', 'Branding', 'Motion', '3D', 'Illustration', 'Print']
+        const pinStorageKey = 'c4-sheet-with-slideover:pinned'
+        const mobileQuery = matchMedia('(max-width: 900px)')
+        const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)')
+
+        const app = document.querySelector('#app')
+        const surface = document.querySelector('#surface')
+        const chips = document.querySelector('#chips')
+        const sheet = document.querySelector('#sheet')
+        const sheetCount = document.querySelector('#sheetCount')
+        const sheetEmpty = document.querySelector('#sheetEmpty')
+        const listTrigger = document.querySelector('#listTrigger')
+        const panel = document.querySelector('#projectPanel')
+        const panelClose = document.querySelector('#panelClose')
+        const pinButton = document.querySelector('#pinButton')
+        const panelSearch = document.querySelector('#panelSearch')
+        const projectList = document.querySelector('#projectList')
+        const panelCount = document.querySelector('#panelCount')
+        const panelEmpty = document.querySelector('#panelEmpty')
+        const scrim = document.querySelector('#scrim')
+        const viewer = document.querySelector('#viewer')
+        const viewerBody = document.querySelector('#viewerBody')
+        const viewerPosition = document.querySelector('#viewerPosition')
+
+        let category = 'All'
+        let sheetVisible = projects.map((_, index) => index)
+        let listVisible = [...sheetVisible]
+        let selected = 0
+        let viewerIndex = -1
+        let panelOpen = false
+        let panelOpener = listTrigger
+        let storedPinned = readPinState()
+        let pulseTimer = 0
+
+        function readPinState() {
+          try {
+            return localStorage.getItem(pinStorageKey) === 'true'
+          } catch {
+            return false
+          }
+        }
+
+        function writePinState() {
+          try {
+            localStorage.setItem(pinStorageKey, String(storedPinned))
+          } catch {
+            /* Persistence is optional when storage is blocked. */
+          }
+        }
+
+        const escapeText = (value) =>
+          String(value).replace(
+            /[&<>'"]/g,
+            (character) =>
+              ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[character],
+          )
+
+        const effectivePinned = () => storedPinned && !mobileQuery.matches
+        const initials = (project) => project.title.slice(0, 2).toUpperCase()
+
+        function coverMarkup(project, index, ratio = project.ratio) {
+          return `
+            <span
+              class="cover cover--${project.tone}"
+              style="--cover-ratio: ${ratio}; --cover-rule: 56px"
+              role="img"
+              aria-label="${escapeText(project.title)} — ${escapeText(project.subtitle)}"
+            >
+              <span class="cover__index">${String(index + 1).padStart(2, '0')}</span>
+              <span class="cover__mark" aria-hidden="true">${escapeText(initials(project))}</span>
+              <span class="cover__note">${escapeText(project.category)}</span>
+            </span>
+          `
+        }
+
+        function renderChips() {
+          chips.innerHTML = categories
+            .map(
+              (name) => `
+                <button class="chip" type="button" data-category="${escapeText(name)}" aria-pressed="${name === category}">
+                  ${escapeText(name)}
+                </button>
+              `,
+            )
+            .join('')
+        }
+
+        function renderSheet() {
+          const activeTabIndex = sheetVisible.includes(selected) ? selected : sheetVisible[0]
+          sheet.innerHTML = sheetVisible
+            .map((index) => {
+              const project = projects[index]
+              return `
+                <li>
+                  <button
+                    class="cell"
+                    type="button"
+                    data-index="${index}"
+                    aria-current="${index === selected}"
+                    aria-label="Open ${escapeText(project.title)}, ${escapeText(project.subtitle)}, ${project.year}"
+                    tabindex="${index === activeTabIndex ? '0' : '-1'}"
+                  >
+                    ${coverMarkup(project, index)}
+                    <span class="cell__meta">
+                      <span class="cell__title">${escapeText(project.title)}</span>
+                      <span class="cell__detail">${escapeText(project.subtitle)} · ${project.year}</span>
+                    </span>
+                  </button>
+                </li>
+              `
+            })
+            .join('')
+
+          sheetCount.textContent = `${sheetVisible.length} of ${projects.length}`
+          sheet.hidden = sheetVisible.length === 0
+          sheetEmpty.hidden = sheetVisible.length !== 0
+        }
+
+        function matchesListQuery(project) {
+          const query = panelSearch.value.trim().toLocaleLowerCase()
+          const haystack = `${project.title} ${project.subtitle} ${project.category} ${project.client}`.toLocaleLowerCase()
+          return haystack.includes(query)
+        }
+
+        function renderList() {
+          listVisible = sheetVisible.filter((index) => matchesListQuery(projects[index]))
+          const activeTabIndex = listVisible.includes(selected) ? selected : listVisible[0]
+
+          projectList.innerHTML = listVisible
+            .map((index) => {
+              const project = projects[index]
+              return `
+                <li>
+                  <button
+                    class="project-row"
+                    type="button"
+                    data-index="${index}"
+                    aria-current="${index === selected}"
+                    aria-label="Choose ${escapeText(project.title)}, ${escapeText(project.category)}, ${project.year}"
+                    tabindex="${index === activeTabIndex ? '0' : '-1'}"
+                  >
+                    <span class="project-row__index">${String(index + 1).padStart(2, '0')}</span>
+                    <span class="project-row__title">${escapeText(project.title)}</span>
+                    <span class="project-row__category">${escapeText(project.category)}</span>
+                    <span class="project-row__year">${project.year}</span>
+                  </button>
+                </li>
+              `
+            })
+            .join('')
+
+          panelCount.textContent = String(listVisible.length)
+          panelEmpty.hidden = listVisible.length !== 0
+          projectList.hidden = listVisible.length === 0
+        }
+
+        function filterSheet(nextCategory) {
+          category = nextCategory
+          sheetVisible = projects
+            .map((project, index) => ({ project, index }))
+            .filter(({ project }) => category === 'All' || project.category === category)
+            .map(({ index }) => index)
+          renderChips()
+          renderSheet()
+          renderList()
+        }
+
+        function setPanelMode() {
+          const pinned = effectivePinned()
+          if (pinned) panelOpen = true
+
+          app.classList.toggle('is-pinned', pinned)
+          app.classList.toggle('is-panel-open', panelOpen)
+          pinButton.setAttribute('aria-pressed', String(pinned))
+          pinButton.setAttribute('aria-label', pinned ? 'Unpin project index' : 'Pin project index')
+          panelClose.hidden = pinned
+          listTrigger.setAttribute('aria-expanded', String(panelOpen))
+
+          const overlaying = panelOpen && !pinned
+          surface.inert = overlaying
+          document.body.classList.toggle('has-modal-panel', overlaying)
+          panel.setAttribute('aria-hidden', String(!panelOpen))
+          panel.setAttribute('role', overlaying ? 'dialog' : 'complementary')
+          if (overlaying) panel.setAttribute('aria-modal', 'true')
+          else panel.removeAttribute('aria-modal')
+        }
+
+        function openPanel(trigger = listTrigger) {
+          if (viewer.open) return
+          panelOpener = trigger
+          panelOpen = true
+          setPanelMode()
+          renderList()
+          panel.getBoundingClientRect()
+          panelSearch.focus()
+          panelSearch.select()
+        }
+
+        function closePanel({ restoreFocus = true } = {}) {
+          if (effectivePinned()) return
+          panelOpen = false
+          setPanelMode()
+          if (restoreFocus) panelOpener?.focus()
+        }
+
+        function togglePin() {
+          storedPinned = !storedPinned
+          writePinState()
+          panelOpen = true
+          setPanelMode()
+          panel.getBoundingClientRect()
+          panelSearch.focus()
+        }
+
+        function clearTargetRing() {
+          for (const cell of sheet.querySelectorAll('.is-targeted')) cell.classList.remove('is-targeted')
+        }
+
+        function focusSheetCell(index) {
+          const cell = sheet.querySelector(`[data-index="${index}"]`)
+          if (!cell) return
+
+          clearTimeout(pulseTimer)
+          clearTargetRing()
+          cell.scrollIntoView({
+            behavior: reducedMotion.matches ? 'auto' : 'smooth',
+            block: 'center',
+            inline: 'nearest',
+          })
+          cell.focus({ preventScroll: true })
+          cell.classList.add('is-targeted')
+
+          if (!reducedMotion.matches) {
+            const clear = () => cell.classList.remove('is-targeted')
+            cell.addEventListener('animationend', clear, { once: true })
+            pulseTimer = setTimeout(clear, 1200)
+          }
+        }
+
+        function chooseFromList(index) {
+          selected = index
+          renderSheet()
+          renderList()
+          if (!effectivePinned()) closePanel({ restoreFocus: false })
+          focusSheetCell(index)
+        }
+
+        function viewerMarkup(project, index) {
+          const chapters = [
+            ['Problem', project.problem],
+            ['Approach', project.approach],
+            ['Outcome', project.outcome],
+          ]
+          return `
+            <div class="viewer__spread">
+              <div class="viewer__media">${coverMarkup(project, index, '16 / 10')}</div>
+              <div class="viewer__intro">
+                <p class="viewer__kicker">${escapeText(project.category)} — ${project.year} — ${escapeText(project.subtitle)}</p>
+                <h2 class="viewer__title" id="viewerTitle">${escapeText(project.title)}</h2>
+                <p class="viewer__lead">${escapeText(project.lead)}</p>
+              </div>
+              <div class="viewer__chapters">
+                ${chapters
+                  .map(
+                    ([heading, body], position) => `
+                      <section class="viewer__section">
+                        <h3><span class="chapter__badge">${position + 1}</span>${heading}</h3>
+                        <p>${escapeText(body)}</p>
+                      </section>
+                    `,
+                  )
+                  .join('')}
+              </div>
+              <aside class="viewer__aside" aria-label="Project facts">
+                <dl class="facts">
+                  <div class="fact"><dt>Client</dt><dd>${escapeText(project.client)}</dd></div>
+                  <div class="fact"><dt>Role</dt><dd>${escapeText(project.role)}</dd></div>
+                  <div class="fact"><dt>Team</dt><dd>${escapeText(project.team)}</dd></div>
+                  <div class="fact"><dt>Duration</dt><dd>${escapeText(project.duration)}</dd></div>
+                  <div class="fact"><dt>Year</dt><dd>${project.year}</dd></div>
+                </dl>
+              </aside>
+              <section class="viewer__metrics" aria-labelledby="metricsTitle">
+                <h3 class="sr-only" id="metricsTitle">What changed</h3>
+                <ul class="metrics">
+                  ${project.metrics
+                    .map(
+                      (metric) => `
+                        <li class="metric">
+                          <p class="metric__value">${escapeText(metric.value)}</p>
+                          <p class="metric__label">${escapeText(metric.label)}</p>
+                        </li>
+                      `,
+                    )
+                    .join('')}
+                </ul>
+              </section>
+            </div>
+          `
+        }
+
+        function paintViewer(index) {
+          const project = projects[index]
+          const position = sheetVisible.indexOf(index)
+          if (!project || position < 0) return
+          selected = index
+          viewerIndex = index
+          renderSheet()
+          renderList()
+          viewerBody.innerHTML = viewerMarkup(project, index)
+          viewerPosition.textContent = `${String(position + 1).padStart(2, '0')} / ${String(sheetVisible.length).padStart(2, '0')} — ${project.title}`
+          viewerBody.scrollTop = 0
+        }
+
+        function openViewer(index) {
+          if (!sheetVisible.includes(index)) return
+          if (panelOpen && !effectivePinned()) closePanel({ restoreFocus: false })
+          paintViewer(index)
+          viewer.showModal()
+        }
+
+        function stepViewer(direction) {
+          if (sheetVisible.length < 2) return
+          const position = sheetVisible.indexOf(viewerIndex)
+          const delta = direction === 'next' ? 1 : -1
+          paintViewer(sheetVisible[(position + delta + sheetVisible.length) % sheetVisible.length])
+        }
+
+        function moveFocus(items, current, key) {
+          const position = items.indexOf(current)
+          const nextPosition =
+            key === 'Home'
+              ? 0
+              : key === 'End'
+                ? items.length - 1
+                : Math.min(Math.max(position + (key === 'ArrowDown' || key === 'ArrowRight' ? 1 : -1), 0), items.length - 1)
+          const next = items[nextPosition]
+          if (!next) return
+          for (const item of items) item.tabIndex = item === next ? 0 : -1
+          next.focus()
+        }
+
+        function trapPanelFocus(event) {
+          if (event.key !== 'Tab' || effectivePinned() || !panelOpen) return
+          const focusable = [...panel.querySelectorAll('button:not([hidden]):not([disabled]), input:not([disabled])')].filter(
+            (element) => element.getClientRects().length > 0,
+          )
+          if (focusable.length === 0) return
+          const first = focusable[0]
+          const last = focusable[focusable.length - 1]
+          if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault()
+            last.focus()
+          } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault()
+            first.focus()
+          }
+        }
+
+        chips.addEventListener('click', (event) => {
+          const chip = event.target.closest('[data-category]')
+          if (!chip) return
+          filterSheet(chip.dataset.category)
+        })
+
+        listTrigger.addEventListener('click', () => openPanel(listTrigger))
+        panelClose.addEventListener('click', () => closePanel())
+        pinButton.addEventListener('click', togglePin)
+        scrim.addEventListener('click', () => closePanel())
+
+        panelSearch.addEventListener('input', renderList)
+        panelSearch.addEventListener('keydown', (event) => {
+          if (event.key === 'ArrowDown' && listVisible.length) {
+            event.preventDefault()
+            projectList.querySelector('.project-row')?.focus()
+          }
+        })
+
+        projectList.addEventListener('click', (event) => {
+          const row = event.target.closest('[data-index]')
+          if (row) chooseFromList(Number(row.dataset.index))
+        })
+
+        projectList.addEventListener('keydown', (event) => {
+          const row = event.target.closest('[data-index]')
+          if (!row || !['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return
+          event.preventDefault()
+          moveFocus([...projectList.querySelectorAll('.project-row')], row, event.key)
+        })
+
+        panel.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && !effectivePinned()) {
+            event.preventDefault()
+            closePanel()
+            return
+          }
+          trapPanelFocus(event)
+        })
+
+        sheet.addEventListener('click', (event) => {
+          const cell = event.target.closest('[data-index]')
+          if (!cell) return
+          openViewer(Number(cell.dataset.index))
+        })
+
+        sheet.addEventListener('focusin', (event) => {
+          const cell = event.target.closest('[data-index]')
+          if (!cell) return
+          selected = Number(cell.dataset.index)
+          for (const button of sheet.querySelectorAll('.cell')) {
+            button.tabIndex = button === cell ? 0 : -1
+            button.setAttribute('aria-current', String(button === cell))
+          }
+          renderList()
+        })
+
+        sheet.addEventListener('keydown', (event) => {
+          const cell = event.target.closest('[data-index]')
+          if (!cell || !['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return
+          event.preventDefault()
+          const cells = [...sheet.querySelectorAll('.cell')]
+          if (event.key === 'Home' || event.key === 'End') {
+            moveFocus(cells, cell, event.key)
+            return
+          }
+          const firstRect = cells[0]?.getBoundingClientRect()
+          const columns = firstRect ? Math.max(1, Math.round(sheet.clientWidth / firstRect.width)) : 1
+          const position = cells.indexOf(cell)
+          const delta =
+            event.key === 'ArrowRight'
+              ? 1
+              : event.key === 'ArrowLeft'
+                ? -1
+                : event.key === 'ArrowDown'
+                  ? columns
+                  : -columns
+          const next = cells[Math.min(Math.max(position + delta, 0), cells.length - 1)]
+          for (const item of cells) item.tabIndex = item === next ? 0 : -1
+          next?.focus()
+        })
+
+        viewer.addEventListener('click', (event) => {
+          if (event.target.closest('#viewerClose')) {
+            viewer.close()
+            return
+          }
+          const step = event.target.closest('[data-step]')
+          if (step) {
+            stepViewer(step.dataset.step)
+            return
+          }
+          if (event.target === viewer) {
+            const rect = viewer.getBoundingClientRect()
+            const inside =
+              event.clientX >= rect.left &&
+              event.clientX <= rect.right &&
+              event.clientY >= rect.top &&
+              event.clientY <= rect.bottom
+            if (!inside) viewer.close()
+          }
+        })
+
+        viewer.addEventListener('keydown', (event) => {
+          if (event.key === 'ArrowRight') {
+            event.preventDefault()
+            stepViewer('next')
+          } else if (event.key === 'ArrowLeft') {
+            event.preventDefault()
+            stepViewer('previous')
+          }
+        })
+
+        viewer.addEventListener('close', () => {
+          sheet.querySelector(`[data-index="${viewerIndex}"]`)?.focus()
+        })
+
+        addEventListener('keydown', (event) => {
+          const commandK = (event.metaKey || event.ctrlKey) && event.key.toLocaleLowerCase() === 'k'
+          const slash = event.key === '/' && !event.metaKey && !event.ctrlKey && !event.altKey
+          if ((!commandK && !slash) || viewer.open) return
+
+          const tag = document.activeElement?.tagName
+          if (slash && (tag === 'INPUT' || tag === 'TEXTAREA')) return
+          event.preventDefault()
+          openPanel(document.activeElement instanceof HTMLElement ? document.activeElement : listTrigger)
+        })
+
+        mobileQuery.addEventListener('change', () => {
+          setPanelMode()
+        })
+
+        renderChips()
+        renderSheet()
+        renderList()
+        if (effectivePinned()) {
+          panelOpen = true
+          setPanelMode()
+        } else {
+          setPanelMode()
+        }
+      })()
+    </script>
+  </body>
+</html>

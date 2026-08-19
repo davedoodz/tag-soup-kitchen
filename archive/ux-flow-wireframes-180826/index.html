@@ -1,0 +1,1169 @@
+<!doctype html>
+<html lang="en" data-design-id="wireframes" data-design-title="UX flows">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Low-fidelity wireframes mapping four core portfolio journeys for David Lafond Designs."
+    />
+    <link rel="stylesheet" href="../../shared/review.css" />
+    <script src="../../shared/review.js" defer></script>
+    <title>UX flows — David Lafond Designs</title>
+    <style>
+      :root {
+        --ink: #222220;
+        --graphite: #66645f;
+        --muted: #8f8c85;
+        --line: #cfccc4;
+        --line-dark: #9b9891;
+        --fog: #e8e6e1;
+        --mist: #f0efeb;
+        --paper: #f8f7f4;
+        --signal: #3d4d45;
+        --space-1: 4px;
+        --space-2: 8px;
+        --space-3: 12px;
+        --space-4: 16px;
+        --space-5: 24px;
+        --space-6: 32px;
+        --space-7: 48px;
+        --space-8: 64px;
+        --radius-control: 6px;
+        --font-body: Arial, Helvetica, sans-serif;
+        --font-utility: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        --page-width: 1536px;
+        --frame-width: 224px;
+        --frame-height: 140px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        max-width: 100%;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: var(--font-body);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      body {
+        min-width: 0;
+        margin: 0;
+        padding-bottom: 112px;
+        overflow-x: hidden;
+        overflow-x: clip;
+        background:
+          linear-gradient(var(--line) 1px, transparent 1px),
+          linear-gradient(90deg, var(--line) 1px, transparent 1px),
+          var(--paper);
+        background-size: 32px 32px;
+        background-position: -1px -1px;
+      }
+
+      button,
+      summary,
+      a {
+        font: inherit;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      a:focus-visible,
+      button:focus-visible,
+      summary:focus-visible,
+      .flow-track:focus-visible {
+        outline: 2px solid var(--signal);
+        outline-offset: 3px;
+      }
+
+      .page {
+        width: min(100%, var(--page-width));
+        min-width: 0;
+        margin-inline: auto;
+        padding: var(--space-5) var(--space-6) var(--space-8);
+      }
+
+      .topline {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-4);
+        padding-bottom: var(--space-4);
+        border-bottom: 1px solid var(--ink);
+      }
+
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+        font-family: var(--font-utility);
+        font-size: 12px;
+        line-height: 1;
+        text-decoration: none;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      .back-link::before {
+        content: "←";
+        font-size: 14px;
+      }
+
+      .back-link:hover {
+        text-decoration: underline;
+        text-underline-offset: 4px;
+      }
+
+      .artifact-label {
+        color: var(--graphite);
+        font-family: var(--font-utility);
+        font-size: 11px;
+        line-height: 1;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .intro {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: end;
+        gap: var(--space-7);
+        padding-block: var(--space-8) var(--space-7);
+      }
+
+      .intro-copy {
+        min-width: 0;
+      }
+
+      .eyebrow {
+        margin: 0 0 var(--space-3);
+        color: var(--graphite);
+        font-family: var(--font-utility);
+        font-size: 12px;
+        line-height: 1.2;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        max-width: 900px;
+        margin: 0;
+        font-size: clamp(42px, 7vw, 104px);
+        font-weight: 400;
+        line-height: 0.9;
+        letter-spacing: -0.065em;
+      }
+
+      .direction-description {
+        max-width: 680px;
+        margin: var(--space-5) 0 0;
+        color: var(--graphite);
+        font-size: clamp(16px, 1.5vw, 20px);
+        line-height: 1.35;
+      }
+
+      .device-control {
+        align-self: end;
+        min-width: min-content;
+      }
+
+      .device-control-label {
+        display: block;
+        margin-bottom: var(--space-2);
+        color: var(--graphite);
+        font-family: var(--font-utility);
+        font-size: 11px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .device-buttons {
+        display: flex;
+        border: 1px solid var(--ink);
+        border-radius: var(--radius-control);
+        overflow: hidden;
+        background: var(--paper);
+      }
+
+      .device-button {
+        min-height: 40px;
+        padding: var(--space-2) var(--space-3);
+        border: 0;
+        border-right: 1px solid var(--ink);
+        background: transparent;
+        color: var(--ink);
+        cursor: pointer;
+        font-family: var(--font-utility);
+        font-size: 11px;
+        line-height: 1.15;
+        text-align: left;
+      }
+
+      .device-button:last-child {
+        border-right: 0;
+      }
+
+      .device-button:hover {
+        background: var(--mist);
+      }
+
+      .device-button[aria-pressed="true"] {
+        background: var(--ink);
+        color: var(--paper);
+      }
+
+      .device-button span {
+        display: block;
+        color: inherit;
+        opacity: 0.72;
+        font-size: 9px;
+      }
+
+      .flow-list {
+        min-width: 0;
+        border-top: 1px solid var(--ink);
+      }
+
+      .flow {
+        min-width: 0;
+        border-bottom: 1px solid var(--ink);
+        background: color-mix(in srgb, var(--paper) 94%, transparent);
+      }
+
+      .flow summary {
+        display: grid;
+        grid-template-columns: 52px minmax(0, 1fr) auto;
+        align-items: center;
+        gap: var(--space-4);
+        min-height: 88px;
+        padding: var(--space-4) 0;
+        cursor: pointer;
+        list-style: none;
+      }
+
+      .flow summary::-webkit-details-marker {
+        display: none;
+      }
+
+      .flow-number {
+        align-self: start;
+        padding-top: var(--space-1);
+        color: var(--graphite);
+        font-family: var(--font-utility);
+        font-size: 12px;
+        letter-spacing: 0.04em;
+      }
+
+      .flow-heading {
+        min-width: 0;
+      }
+
+      .flow-title {
+        display: block;
+        font-size: clamp(19px, 2.2vw, 30px);
+        font-weight: 400;
+        line-height: 1.1;
+        letter-spacing: -0.03em;
+      }
+
+      .flow-count {
+        display: block;
+        margin-top: var(--space-2);
+        color: var(--graphite);
+        font-family: var(--font-utility);
+        font-size: 10px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .disclosure {
+        display: grid;
+        width: 32px;
+        height: 32px;
+        place-items: center;
+        border: 1px solid var(--line-dark);
+        border-radius: 50%;
+        font-family: var(--font-utility);
+        font-size: 16px;
+      }
+
+      .disclosure::before {
+        content: "+";
+      }
+
+      .flow[open] .disclosure::before {
+        content: "−";
+      }
+
+      .flow-body {
+        min-width: 0;
+        padding: var(--space-2) 0 var(--space-6) 68px;
+      }
+
+      .flow-track {
+        width: 100%;
+        min-width: 0;
+        overflow-x: auto;
+        overflow-y: hidden;
+        overscroll-behavior-inline: contain;
+        scrollbar-color: var(--line-dark) transparent;
+        scrollbar-width: thin;
+        scroll-padding-inline: var(--space-4);
+        padding: var(--space-2) var(--space-1) var(--space-4);
+      }
+
+      .flow-sequence {
+        display: flex;
+        width: max-content;
+        align-items: flex-start;
+      }
+
+      .frame-step {
+        width: var(--frame-width);
+        flex: 0 0 var(--frame-width);
+        margin: 0;
+      }
+
+      .wireframe {
+        display: flex;
+        width: var(--frame-width);
+        height: var(--frame-height);
+        flex-direction: column;
+        gap: 6px;
+        overflow: hidden;
+        padding: 9px;
+        border: 1px solid var(--ink);
+        background: var(--paper);
+        box-shadow: 3px 3px 0 var(--fog);
+      }
+
+      .frame-caption {
+        margin: var(--space-3) 0 0;
+        color: var(--graphite);
+        font-family: var(--font-utility);
+        font-size: 10px;
+        line-height: 1.35;
+      }
+
+      .frame-caption strong {
+        display: block;
+        margin-bottom: 2px;
+        color: var(--ink);
+        font-weight: 600;
+      }
+
+      .connector {
+        position: relative;
+        width: 44px;
+        height: 20px;
+        flex: 0 0 44px;
+        align-self: flex-start;
+        margin-top: calc(var(--frame-height) / 2 - 10px);
+      }
+
+      .connector::before {
+        content: "";
+        position: absolute;
+        top: 9px;
+        right: 8px;
+        left: 8px;
+        border-top: 1px solid var(--line-dark);
+      }
+
+      .connector::after {
+        content: "";
+        position: absolute;
+        top: 6px;
+        right: 8px;
+        width: 6px;
+        height: 6px;
+        border-top: 1px solid var(--line-dark);
+        border-right: 1px solid var(--line-dark);
+        transform: rotate(45deg);
+      }
+
+      .decision {
+        display: grid;
+        grid-template-columns: 112px minmax(0, 720px);
+        gap: var(--space-4);
+        margin: var(--space-4) 0 0;
+        padding-top: var(--space-4);
+        border-top: 1px dashed var(--line);
+      }
+
+      .decision-label {
+        color: var(--graphite);
+        font-family: var(--font-utility);
+        font-size: 10px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .decision p {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.45;
+      }
+
+      /* Wireframe vocabulary */
+      .wf-header {
+        display: flex;
+        height: 15px;
+        flex: 0 0 15px;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .wf-wordmark,
+      .wf-nav,
+      .wf-bar,
+      .wf-chip,
+      .wf-field,
+      .wf-button,
+      .wf-line,
+      .wf-share {
+        border: 1px solid var(--line-dark);
+        background: var(--fog);
+      }
+
+      .wf-wordmark {
+        width: 44%;
+        height: 5px;
+      }
+
+      .wf-nav {
+        width: 24%;
+        height: 5px;
+      }
+
+      .wf-label {
+        color: var(--graphite);
+        font-family: var(--font-utility);
+        font-size: 7px;
+        line-height: 1;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+      }
+
+      .wf-title {
+        max-width: 94%;
+        font-family: var(--font-utility);
+        font-size: 9px;
+        font-weight: 600;
+        line-height: 1.1;
+      }
+
+      .wf-subtitle {
+        color: var(--graphite);
+        font-family: var(--font-utility);
+        font-size: 7px;
+        line-height: 1.2;
+      }
+
+      .wf-bar {
+        height: 5px;
+      }
+
+      .wf-bar--short {
+        width: 45%;
+      }
+
+      .wf-bar--medium {
+        width: 68%;
+      }
+
+      .wf-bar--long {
+        width: 88%;
+      }
+
+      .wf-bar--dark {
+        border-color: var(--graphite);
+        background: var(--graphite);
+      }
+
+      .wf-stack {
+        display: flex;
+        min-height: 0;
+        flex: 1;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .wf-row {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .wf-row--between {
+        justify-content: space-between;
+      }
+
+      .wf-chips {
+        display: flex;
+        gap: 3px;
+      }
+
+      .wf-chip {
+        min-width: 24px;
+        height: 10px;
+        border-radius: 5px;
+      }
+
+      .wf-chip--active {
+        border-color: var(--ink);
+        background: var(--ink);
+      }
+
+      .wf-grid {
+        display: grid;
+        min-height: 0;
+        flex: 1;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 4px;
+      }
+
+      .wf-grid--two {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .wf-tile {
+        position: relative;
+        min-height: 16px;
+        border: 1px solid var(--line-dark);
+        background: var(--fog);
+      }
+
+      .wf-tile::after {
+        content: "";
+        position: absolute;
+        right: 4px;
+        bottom: 4px;
+        left: 4px;
+        height: 3px;
+        background: var(--line-dark);
+      }
+
+      .wf-tile--selected {
+        border: 2px solid var(--ink);
+        background: var(--mist);
+      }
+
+      .wf-media {
+        min-height: 32px;
+        flex: 1;
+        border: 1px solid var(--line-dark);
+        background:
+          linear-gradient(135deg, transparent 49%, var(--line) 50%, transparent 51%),
+          var(--fog);
+      }
+
+      .wf-media--shallow {
+        min-height: 22px;
+        flex: 0.58;
+      }
+
+      .wf-copy {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .wf-footer {
+        display: flex;
+        min-height: 17px;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+        padding-top: 5px;
+        border-top: 1px solid var(--line-dark);
+      }
+
+      .wf-button {
+        display: grid;
+        min-width: 42px;
+        min-height: 14px;
+        place-items: center;
+        padding-inline: 4px;
+        background: var(--ink);
+        color: var(--paper);
+        font-family: var(--font-utility);
+        font-size: 6px;
+        line-height: 1;
+      }
+
+      .wf-button--light {
+        background: var(--paper);
+        color: var(--ink);
+      }
+
+      .wf-field {
+        height: 16px;
+        flex: 1;
+        background: var(--paper);
+      }
+
+      .wf-notice {
+        display: grid;
+        min-height: 42px;
+        flex: 1;
+        place-items: center;
+        border: 1px solid var(--line-dark);
+        background: var(--mist);
+        text-align: center;
+      }
+
+      .wf-check {
+        display: grid;
+        width: 20px;
+        height: 20px;
+        margin-inline: auto;
+        place-items: center;
+        border: 1px solid var(--ink);
+        border-radius: 50%;
+        font-family: var(--font-utility);
+        font-size: 10px;
+      }
+
+      .wf-process {
+        display: grid;
+        min-height: 0;
+        flex: 1;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 3px;
+      }
+
+      .wf-process-step {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding: 4px;
+        border: 1px solid var(--line-dark);
+      }
+
+      .wf-outcome {
+        display: grid;
+        min-height: 0;
+        flex: 1;
+        grid-template-columns: 1.3fr 0.7fr;
+        gap: 4px;
+      }
+
+      .wf-metric {
+        display: grid;
+        place-items: center;
+        border: 1px solid var(--line-dark);
+        background: var(--mist);
+        font-family: var(--font-utility);
+        font-size: 10px;
+      }
+
+      .wf-recent-tag {
+        display: inline-flex;
+        width: max-content;
+        height: 11px;
+        align-items: center;
+        padding-inline: 4px;
+        border: 1px solid var(--ink);
+        color: var(--ink);
+        font-family: var(--font-utility);
+        font-size: 6px;
+        text-transform: uppercase;
+      }
+
+      .wf-list {
+        display: flex;
+        min-height: 0;
+        flex: 1;
+        flex-direction: column;
+        border-top: 1px solid var(--line-dark);
+      }
+
+      .wf-list-row {
+        display: grid;
+        min-height: 14px;
+        flex: 1;
+        grid-template-columns: 12px 1fr 28px;
+        align-items: center;
+        gap: 4px;
+        border-bottom: 1px solid var(--line);
+        color: var(--graphite);
+        font-family: var(--font-utility);
+        font-size: 6px;
+      }
+
+      .wf-list-row--active {
+        background: var(--mist);
+        color: var(--ink);
+      }
+
+      .wf-share {
+        display: grid;
+        width: 24px;
+        height: 24px;
+        place-items: center;
+        border-radius: 50%;
+        background: var(--paper);
+        font-family: var(--font-utility);
+        font-size: 9px;
+      }
+
+      .wf-title--spaced {
+        margin-top: var(--space-2);
+      }
+
+      .wf-stack--center {
+        justify-content: center;
+        text-align: center;
+      }
+
+      .wf-row--center {
+        justify-content: center;
+      }
+
+      .viewer[data-device="tablet"] {
+        --frame-width: 184px;
+        --frame-height: 236px;
+      }
+
+      .viewer[data-device="mobile"] {
+        --frame-width: 148px;
+        --frame-height: 263px;
+      }
+
+      .viewer[data-device="tablet"] .wf-grid,
+      .viewer[data-device="mobile"] .wf-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .viewer[data-device="mobile"] .wf-process,
+      .viewer[data-device="mobile"] .wf-outcome {
+        grid-template-columns: 1fr;
+      }
+
+      .viewer[data-device="mobile"] .wf-process-step:nth-child(n + 4) {
+        display: none;
+      }
+
+      @media (max-width: 760px) {
+        .page {
+          padding: var(--space-4) var(--space-4) var(--space-7);
+        }
+
+        .topline {
+          align-items: flex-start;
+        }
+
+        .artifact-label {
+          max-width: 15ch;
+          text-align: right;
+        }
+
+        .intro {
+          grid-template-columns: 1fr;
+          gap: var(--space-6);
+          padding-block: var(--space-7) var(--space-6);
+        }
+
+        h1 {
+          font-size: clamp(44px, 16vw, 72px);
+        }
+
+        .device-control {
+          width: 100%;
+        }
+
+        .device-buttons {
+          width: 100%;
+        }
+
+        .device-button {
+          min-width: 0;
+          flex: 1;
+          padding-inline: var(--space-2);
+        }
+
+        .flow summary {
+          grid-template-columns: 34px minmax(0, 1fr) auto;
+          gap: var(--space-3);
+          min-height: 80px;
+        }
+
+        .flow-body {
+          padding-left: 0;
+        }
+
+        .decision {
+          grid-template-columns: 1fr;
+          gap: var(--space-2);
+        }
+      }
+
+    </style>
+  </head>
+  <body>
+    <main class="page viewer" id="viewer" data-device="desktop">
+      <header class="topline">
+        <a class="back-link" href="../ux-direction-explorations-180826/index.html">All directions</a>
+        <span class="artifact-label">Portfolio architecture / working wireframes</span>
+      </header>
+
+      <section class="intro" aria-labelledby="page-title">
+        <div class="intro-copy">
+          <p class="eyebrow">David Lafond Designs · UX study</p>
+          <h1 id="page-title">Four ways through the work.</h1>
+          <p class="direction-description">
+            A low-fidelity map of how visitors discover, understand, and act on the portfolio.
+          </p>
+        </div>
+
+        <div class="device-control">
+          <span class="device-control-label" id="device-label">Frame viewport</span>
+          <div class="device-buttons" role="group" aria-labelledby="device-label">
+            <button class="device-button" type="button" data-device="desktop" aria-pressed="true">
+              Desktop <span>1280</span>
+            </button>
+            <button class="device-button" type="button" data-device="tablet" aria-pressed="false">
+              Tablet <span>820</span>
+            </button>
+            <button class="device-button" type="button" data-device="mobile" aria-pressed="false">
+              Mobile <span>390</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="flow-list" aria-label="Portfolio user flows">
+        <details class="flow" open>
+          <summary>
+            <span class="flow-number">01</span>
+            <span class="flow-heading">
+              <span class="flow-title">Browse → filter → project → next project</span>
+              <span class="flow-count">4 frames · discovery loop</span>
+            </span>
+            <span class="disclosure" aria-hidden="true"></span>
+          </summary>
+          <div class="flow-body">
+            <div class="flow-track" tabindex="0" aria-label="Browse and filter flow; scroll horizontally">
+              <div class="flow-sequence">
+                <figure class="frame-step">
+                  <div class="wireframe" aria-label="Portfolio index wireframe">
+                    <div class="wf-header"><span class="wf-wordmark"></span><span class="wf-nav"></span></div>
+                    <span class="wf-label">Selected work</span>
+                    <div class="wf-chips" aria-hidden="true">
+                      <span class="wf-chip wf-chip--active"></span><span class="wf-chip"></span><span class="wf-chip"></span>
+                    </div>
+                    <div class="wf-grid" aria-hidden="true">
+                      <span class="wf-tile"></span><span class="wf-tile"></span><span class="wf-tile"></span>
+                      <span class="wf-tile"></span><span class="wf-tile"></span><span class="wf-tile"></span>
+                    </div>
+                  </div>
+                  <figcaption class="frame-caption"><strong>Index entry</strong>All work is visible before any choice is required.</figcaption>
+                </figure>
+                <span class="connector" aria-hidden="true"></span>
+                <figure class="frame-step">
+                  <div class="wireframe" aria-label="Product category filter wireframe">
+                    <div class="wf-header"><span class="wf-wordmark"></span><span class="wf-nav"></span></div>
+                    <div class="wf-row wf-row--between"><span class="wf-label">Product · 3</span><span class="wf-label">Clear</span></div>
+                    <div class="wf-chips" aria-hidden="true">
+                      <span class="wf-chip"></span><span class="wf-chip wf-chip--active"></span><span class="wf-chip"></span>
+                    </div>
+                    <div class="wf-grid" aria-hidden="true">
+                      <span class="wf-tile wf-tile--selected"></span><span class="wf-tile"></span><span class="wf-tile"></span>
+                    </div>
+                  </div>
+                  <figcaption class="frame-caption"><strong>Filtered index</strong>The layout contracts in place; no page transition.</figcaption>
+                </figure>
+                <span class="connector" aria-hidden="true"></span>
+                <figure class="frame-step">
+                  <div class="wireframe" aria-label="Ledger project page wireframe">
+                    <div class="wf-header"><span class="wf-wordmark"></span><span class="wf-nav"></span></div>
+                    <div class="wf-row wf-row--between"><span class="wf-title">Ledger</span><span class="wf-label">Product · 2026</span></div>
+                    <div class="wf-media" aria-hidden="true"></div>
+                    <div class="wf-copy" aria-hidden="true"><span class="wf-bar wf-bar--long"></span><span class="wf-bar wf-bar--medium"></span></div>
+                    <div class="wf-footer"><span class="wf-label">Next project</span><span class="wf-label">Cadence →</span></div>
+                  </div>
+                  <figcaption class="frame-caption"><strong>Project read</strong>Context and a lateral exit share the same page.</figcaption>
+                </figure>
+                <span class="connector" aria-hidden="true"></span>
+                <figure class="frame-step">
+                  <div class="wireframe" aria-label="Cadence next project wireframe">
+                    <div class="wf-header"><span class="wf-wordmark"></span><span class="wf-nav"></span></div>
+                    <div class="wf-row wf-row--between"><span class="wf-title">Cadence</span><span class="wf-label">Product · 2024</span></div>
+                    <div class="wf-media" aria-hidden="true"></div>
+                    <div class="wf-copy" aria-hidden="true"><span class="wf-bar wf-bar--long"></span><span class="wf-bar wf-bar--short"></span></div>
+                    <div class="wf-footer"><span class="wf-label">← Ledger</span><span class="wf-label">Harbour →</span></div>
+                  </div>
+                  <figcaption class="frame-caption"><strong>Next project</strong>Browsing continues without rebuilding index context.</figcaption>
+                </figure>
+              </div>
+            </div>
+            <div class="decision">
+              <span class="decision-label">Key decision</span>
+              <p>Optimise for uninterrupted comparison by making project pages a lateral loop. The risk is disorientation if the next-project cue obscures a clear route back to the filtered index.</p>
+            </div>
+          </div>
+        </details>
+
+        <details class="flow" open>
+          <summary>
+            <span class="flow-number">02</span>
+            <span class="flow-heading">
+              <span class="flow-title">First visit → scan → contact</span>
+              <span class="flow-count">5 frames · comprehension to action</span>
+            </span>
+            <span class="disclosure" aria-hidden="true"></span>
+          </summary>
+          <div class="flow-body">
+            <div class="flow-track" tabindex="0" aria-label="First visit and contact flow; scroll horizontally">
+              <div class="flow-sequence">
+                <figure class="frame-step">
+                  <div class="wireframe" aria-label="Landing page wireframe">
+                    <div class="wf-header"><span class="wf-wordmark"></span><span class="wf-nav"></span></div>
+                    <span class="wf-label">Independent product designer</span>
+                    <div class="wf-title">Digital systems made clear.</div>
+                    <div class="wf-media wf-media--shallow" aria-hidden="true"></div>
+                    <div class="wf-footer"><span class="wf-label">Selected work ↓</span><span class="wf-label">Available 2026</span></div>
+                  </div>
+                  <figcaption class="frame-caption"><strong>Landing</strong>Role, value, and proof appear in one viewport.</figcaption>
+                </figure>
+                <span class="connector" aria-hidden="true"></span>
+                <figure class="frame-step">
+                  <div class="wireframe" aria-label="Hero comprehension wireframe">
+                    <div class="wf-header"><span class="wf-wordmark"></span><span class="wf-nav"></span></div>
+                    <div class="wf-stack">
+                      <span class="wf-label">Product / Brand / Web</span>
+                      <div class="wf-title">Complex products, legible experiences.</div>
+                      <div class="wf-copy" aria-hidden="true"><span class="wf-bar wf-bar--long"></span><span class="wf-bar wf-bar--long"></span><span class="wf-bar wf-bar--medium"></span></div>
+                      <span class="wf-button">View work</span>
+                    </div>
+                  </div>
+                  <figcaption class="frame-caption"><strong>Hero comprehension</strong>A plain capability statement answers “what does David do?”</figcaption>
+                </figure>
+                <span class="connector" aria-hidden="true"></span>
+                <figure class="frame-step">
+                  <div class="wireframe" aria-label="Work scanning wireframe">
+                    <div class="wf-header"><span class="wf-wordmark"></span><span class="wf-nav"></span></div>
+                    <div class="wf-row wf-row--between"><span class="wf-label">Selected work</span><span class="wf-label">12 projects</span></div>
+                    <div class="wf-grid wf-grid--two" aria-hidden="true">
+                      <span class="wf-tile"></span><span class="wf-tile"></span><span class="wf-tile"></span><span class="wf-tile"></span>
+                    </div>
+                    <div class="wf-footer"><span class="wf-label">Ledger</span><span class="wf-label">Atlas</span></div>
+                  </div>
+                  <figcaption class="frame-caption"><strong>Work scan</strong>Varied media proportions communicate range quickly.</figcaption>
+                </figure>
+                <span class="connector" aria-hidden="true"></span>
+                <figure class="frame-step">
+                  <div class="wireframe" aria-label="Contact and subscribe wireframe">
+                    <div class="wf-header"><span class="wf-wordmark"></span><span class="wf-nav"></span></div>
+                    <span class="wf-label">Start a conversation</span>
+                    <div class="wf-title">Have a complex product to clarify?</div>
+                    <div class="wf-copy" aria-hidden="true"><span class="wf-bar wf-bar--long"></span><span class="wf-bar wf-bar--medium"></span></div>
+                    <div class="wf-row"><span class="wf-field"></span><span class="wf-button">Subscribe</span></div>
+                    <div class="wf-footer"><span class="wf-label">Email David</span><span class="wf-label">LinkedIn</span></div>
+                  </div>
+                  <figcaption class="frame-caption"><strong>Contact surface</strong>Direct contact and a lower-commitment follow option coexist.</figcaption>
+                </figure>
+                <span class="connector" aria-hidden="true"></span>
+                <figure class="frame-step">
+                  <div class="wireframe" aria-label="Contact confirmation wireframe">
+                    <div class="wf-header"><span class="wf-wordmark"></span><span class="wf-nav"></span></div>
+                    <div class="wf-notice">
+                      <div>
+                        <span class="wf-check" aria-hidden="true">✓</span>
+                        <div class="wf-title wf-title--spaced">You’re on the list.</div>
+                        <span class="wf-subtitle">Next update: new work, no noise.</span>
+                      </div>
+                    </div>
+                    <div class="wf-footer"><span class="wf-label">Return to work</span><span class="wf-label">Close</span></div>
+                  </div>
+                  <figcaption class="frame-caption"><strong>Confirmation</strong>The state changes in context and provides a clear next move.</figcaption>
+                </figure>
+              </div>
+            </div>
+            <div class="decision">
+              <span class="decision-label">Key decision</span>
+              <p>Optimise for confidence before conversion: visitors understand the practice, see proof, then choose contact or subscribe. The risk is that two calls to action split intent at the final step.</p>
+            </div>
+          </div>
+        </details>
+
+        <details class="flow" open>
+          <summary>
+            <span class="flow-number">03</span>
+            <span class="flow-heading">
+              <span class="flow-title">Case study read</span>
+              <span class="flow-count">5 frames · project anatomy</span>
+            </span>
+            <span class="disclosure" aria-hidden="true"></span>
+          </summary>
+          <div class="flow-body">
+            <div class="flow-track" tabindex="0" aria-label="Case study reading flow; scroll horizontally">
+              <div class="flow-sequence">
+                <figure class="frame-step">
+                  <div class="wireframe" aria-label="Case study hero wireframe">
+                    <div class="wf-header"><span class="wf-wordmark"></span><span class="wf-nav"></span></div>
+                    <div class="wf-row wf-row--between"><span class="wf-title">Ledger</span><span class="wf-label">01 / 12</span></div>
+                    <div class="wf-media" aria-hidden="true"></div>
+                    <div class="wf-footer"><span class="wf-label">Payments console</span><span class="wf-label">2026</span></div>
+                  </div>
+                  <figcaption class="frame-caption"><strong>Hero media</strong>Lead with the product and orient with minimal metadata.</figcaption>
+                </figure>
+                <span class="connector" aria-hidden="true"></span>
+                <figure class="frame-step">
+                  <div class="wireframe" aria-label="Problem statement wireframe">
+                    <div class="wf-header"><span class="wf-wordmark"></span><span class="wf-nav"></span></div>
+                    <span class="wf-label">The problem</span>
+                    <div class="wf-title">Make reconciliation fast enough to trust.</div>
+                    <div class="wf-copy" aria-hidden="true"><span class="wf-bar wf-bar--long"></span><span class="wf-bar wf-bar--long"></span><span class="wf-bar wf-bar--long"></span><span class="wf-bar wf-bar--medium"></span></div>
+                    <div class="wf-row"><span class="wf-label">Role</span><span class="wf-label">Research · Interaction · System</span></div>
+                  </div>
+                  <figcaption class="frame-caption"><strong>Problem statement</strong>Scope and design responsibility precede process detail.</figcaption>
+                </figure>
+                <span class="connector" aria-hidden="true"></span>
+                <figure class="frame-step">
+                  <div class="wireframe" aria-label="Design process strip wireframe">
+                    <div class="wf-header"><span class="wf-wordmark"></span><span class="wf-nav"></span></div>
+                    <span class="wf-label">Process</span>
+                    <div class="wf-process" aria-hidden="true">
+                      <span class="wf-process-step"><i class="wf-bar wf-bar--short"></i><i class="wf-bar wf-bar--long"></i></span>
+                      <span class="wf-process-step"><i class="wf-bar wf-bar--short"></i><i class="wf-bar wf-bar--long"></i></span>
+                      <span class="wf-process-step"><i class="wf-bar wf-bar--short"></i><i class="wf-bar wf-bar--long"></i></span>
+                      <span class="wf-process-step"><i class="wf-bar wf-bar--short"></i><i class="wf-bar wf-bar--long"></i></span>
+                    </div>
+                    <div class="wf-footer"><span class="wf-label">Map</span><span class="wf-label">Prototype</span><span class="wf-label">Validate</span></div>
+                  </div>
+                  <figcaption class="frame-caption"><strong>Process strip</strong>Show pivotal moves, not a diary of every workshop.</figcaption>
+                </figure>
+                <span class="connector" aria-hidden="true"></span>
+                <figure class="frame-step">
+                  <div class="wireframe" aria-label="Project outcome wireframe">
+                    <div class="wf-header"><span class="wf-wordmark"></span><span class="wf-nav"></span></div>
+                    <span class="wf-label">Outcome</span>
+                    <div class="wf-outcome">
+                      <div class="wf-media" aria-hidden="true"></div>
+                      <div class="wf-stack" aria-hidden="true"><span class="wf-metric">−38%</span><span class="wf-metric">2.4×</span></div>
+                    </div>
+                    <div class="wf-copy" aria-hidden="true"><span class="wf-bar wf-bar--long"></span><span class="wf-bar wf-bar--medium"></span></div>
+                  </div>
+                  <figcaption class="frame-caption"><strong>Outcome</strong>Pair shipped evidence with the change it produced.</figcaption>
+                </figure>
+                <span class="connector" aria-hidden="true"></span>
+                <figure class="frame-step">
+                  <div class="wireframe" aria-label="Next project footer wireframe">
+                    <div class="wf-header"><span class="wf-wordmark"></span><span class="wf-nav"></span></div>
+                    <span class="wf-label">Next project · 02 / 12</span>
+                    <div class="wf-media" aria-hidden="true"></div>
+                    <div class="wf-row wf-row--between"><span class="wf-title">Northbound</span><span class="wf-title">→</span></div>
+                    <div class="wf-footer"><span class="wf-label">Brand system</span><span class="wf-label">Back to index</span></div>
+                  </div>
+                  <figcaption class="frame-caption"><strong>Next-project footer</strong>End with momentum plus an explicit archive escape.</figcaption>
+                </figure>
+              </div>
+            </div>
+            <div class="decision">
+              <span class="decision-label">Key decision</span>
+              <p>Optimise for a narrative that moves from evidence to reasoning to impact, with each section earning the next. The risk is a formulaic rhythm across projects unless media scale and section depth adapt to the story.</p>
+            </div>
+          </div>
+        </details>
+
+        <details class="flow" open>
+          <summary>
+            <span class="flow-number">04</span>
+            <span class="flow-heading">
+              <span class="flow-title">Return visitor → what’s new</span>
+              <span class="flow-count">4 frames · rapid re-entry</span>
+            </span>
+            <span class="disclosure" aria-hidden="true"></span>
+          </summary>
+          <div class="flow-body">
+            <div class="flow-track" tabindex="0" aria-label="Return visitor and latest work flow; scroll horizontally">
+              <div class="flow-sequence">
+                <figure class="frame-step">
+                  <div class="wireframe" aria-label="Landing with recent work wireframe">
+                    <div class="wf-header"><span class="wf-wordmark"></span><span class="wf-nav"></span></div>
+                    <span class="wf-recent-tag">New since your last visit</span>
+                    <div class="wf-grid wf-grid--two" aria-hidden="true">
+                      <span class="wf-tile wf-tile--selected"></span><span class="wf-tile"></span>
+                    </div>
+                    <div class="wf-footer"><span class="wf-label">Ledger · 2026</span><span class="wf-label">Northbound · 2026</span></div>
+                  </div>
+                  <figcaption class="frame-caption"><strong>Recent work surfaced</strong>New entries precede the full archive without hiding it.</figcaption>
+                </figure>
+                <span class="connector" aria-hidden="true"></span>
+                <figure class="frame-step">
+                  <div class="wireframe" aria-label="Latest sort wireframe">
+                    <div class="wf-header"><span class="wf-wordmark"></span><span class="wf-nav"></span></div>
+                    <div class="wf-row wf-row--between"><span class="wf-label">All work</span><span class="wf-button wf-button--light">Latest ↓</span></div>
+                    <div class="wf-list">
+                      <span class="wf-list-row wf-list-row--active"><b>01</b><b>Ledger</b><b>2026</b></span>
+                      <span class="wf-list-row"><b>02</b><b>Northbound</b><b>2026</b></span>
+                      <span class="wf-list-row"><b>03</b><b>Atlas</b><b>2026</b></span>
+                      <span class="wf-list-row"><b>04</b><b>Signal</b><b>2025</b></span>
+                    </div>
+                  </div>
+                  <figcaption class="frame-caption"><strong>Sort by latest</strong>A visible sort confirms recency instead of implying it.</figcaption>
+                </figure>
+                <span class="connector" aria-hidden="true"></span>
+                <figure class="frame-step">
+                  <div class="wireframe" aria-label="Deep linked project wireframe">
+                    <div class="wf-header"><span class="wf-wordmark"></span><span class="wf-nav"></span></div>
+                    <div class="wf-row wf-row--between"><span class="wf-title">Ledger</span><span class="wf-recent-tag">New</span></div>
+                    <div class="wf-media" aria-hidden="true"></div>
+                    <div class="wf-copy" aria-hidden="true"><span class="wf-bar wf-bar--long"></span><span class="wf-bar wf-bar--medium"></span></div>
+                    <div class="wf-footer"><span class="wf-label">Copy link</span><span class="wf-label">Share ↗</span></div>
+                  </div>
+                  <figcaption class="frame-caption"><strong>Deep-link entry</strong>The project stands alone while preserving portfolio context.</figcaption>
+                </figure>
+                <span class="connector" aria-hidden="true"></span>
+                <figure class="frame-step">
+                  <div class="wireframe" aria-label="Project share confirmation wireframe">
+                    <div class="wf-header"><span class="wf-wordmark"></span><span class="wf-nav"></span></div>
+                    <div class="wf-stack wf-stack--center">
+                      <span class="wf-share" aria-hidden="true">↗</span>
+                      <div class="wf-title">Link copied</div>
+                      <span class="wf-subtitle">Ledger — payments console</span>
+                      <div class="wf-row wf-row--center"><span class="wf-button wf-button--light">Email</span><span class="wf-button wf-button--light">LinkedIn</span></div>
+                    </div>
+                    <div class="wf-footer"><span class="wf-label">Continue reading</span><span class="wf-label">Dismiss</span></div>
+                  </div>
+                  <figcaption class="frame-caption"><strong>Share</strong>Copy is immediate; channel shortcuts remain secondary.</figcaption>
+                </figure>
+              </div>
+            </div>
+            <div class="decision">
+              <span class="decision-label">Key decision</span>
+              <p>Optimise for fast recognition by front-loading recent work and keeping “Latest” explicit. The risk is over-personalising without reliable visit history, so the interface must still make sense as a generic recency view.</p>
+            </div>
+          </div>
+        </details>
+      </section>
+    </main>
+
+    <script>
+      ;(() => {
+        const viewer = document.querySelector('#viewer')
+        const buttons = [...document.querySelectorAll('[data-device]')].filter((element) =>
+          element.matches('button'),
+        )
+
+        for (const button of buttons) {
+          button.addEventListener('click', () => {
+            viewer.dataset.device = button.dataset.device
+            for (const option of buttons) {
+              option.setAttribute('aria-pressed', String(option === button))
+            }
+          })
+        }
+      })()
+    </script>
+  </body>
+</html>

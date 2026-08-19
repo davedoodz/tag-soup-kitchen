@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ASCII hover micro-interactions — 9 specimens + power latch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   SYSTEM: PHOSPHOR
+   Exploration round — hover micro-interactions rendered as
+   computational ASCII fields. Deliberately NOT the HAIRLINE
+   system: this round is dark, monospace-only, one accent.
+
+   Hard rules kept for the whole round:
+     - one type family (IBM Plex Mono), no sans anywhere
+     - every specimen is a real <button role="switch">
+     - the art layer is a single text node per specimen,
+       repainted from a field function (no per-cell DOM)
+     - intensity is carried by the GLYPH RAMP, colour only
+       carries state (idle / probe / latched)
+     - divisions are 1px hairlines, never shadows
+     - every animated specimen has a reduced-motion path
+   ============================================================ */
+@property --spot-in  { syntax:"<length-percentage>"; inherits:false; initial-value:0px; }
+@property --spot-out { syntax:"<length-percentage>"; inherits:false; initial-value:0px; }
+
+:root{
+  --void:#06080A;
+  --panel:#0A0E11;
+  --panel-2:#0D1317;
+  --line:#192126;
+  --line-hot:#31454B;
+  --dim:#4C6067;      /* idle glyph ink */
+  --mute:#6C8087;     /* meta */
+  --pale:#B9C7C5;     /* prose */
+  --phos:#5FE3BE;     /* probe / hover */
+  --amber:#F2A63C;    /* latched ON */
+  --mono:"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --t-micro:10px;
+  --t-meta:11px;
+  --t-ui:13px;
+  --t-lead:15px;
+  --field:11px;
+  --field-lg:12px;
+
+  --s4:4px; --s8:8px; --s12:12px; --s16:16px; --s20:20px;
+  --s24:24px; --s32:32px; --s48:48px; --s64:64px;
+  --canvas:1436px;
+}
+*{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  margin:0;
+  background:var(--void);
+  color:var(--pale);
+  font-family:var(--mono);
+  font-weight:400;
+  font-size:var(--t-ui);
+  font-variant-ligatures:none;
+  font-feature-settings:"liga" 0,"calt" 0;
+  -webkit-font-smoothing:antialiased;
+}
+/* CRT ground: scanlines + vignette, both static (no motion) */
+body::before{
+  content:"";
+  position:fixed; inset:0; z-index:0; pointer-events:none;
+  background:repeating-linear-gradient(to bottom,
+    rgba(255,255,255,.022) 0 1px, transparent 1px 3px);
+  mix-blend-mode:screen;
+}
+body::after{
+  content:"";
+  position:fixed; inset:0; z-index:0; pointer-events:none;
+  background:radial-gradient(120% 90% at 50% 0%, transparent 40%, rgba(0,0,0,.65) 100%);
+}
+.wrap{position:relative; z-index:1; max-width:var(--canvas); margin:0 auto; padding:var(--s48) var(--s24) var(--s64);}
+
+::selection{background:var(--phos); color:var(--void);}
+:where(a){color:var(--phos); text-decoration:none; border-bottom:1px solid color-mix(in oklab, var(--phos) 35%, transparent);}
+:where(a):hover{border-bottom-color:var(--phos);}
+:where(button){font:inherit; color:inherit; background:none; border:0;}
+:where(a,button):focus-visible{outline:1px solid var(--phos); outline-offset:3px;}
+
+/* ---------- primitives ---------- */
+.meta{font-size:var(--t-meta); letter-spacing:.14em; text-transform:uppercase; color:var(--mute);}
+.meta--micro{font-size:var(--t-micro); letter-spacing:.18em;}
+.meta--hot{color:var(--phos);}
+.rule{height:1px; background:var(--line); border:0; margin:0;}
+
+/* ---------- masthead ---------- */
+.mast{display:grid; gap:var(--s16); padding-bottom:var(--s24); border-bottom:1px solid var(--line);}
+.mast__top{display:flex; flex-wrap:wrap; gap:var(--s16) var(--s24); align-items:baseline; justify-content:space-between;}
+.mast h1{
+  margin:0; font-size:clamp(20px,2.4vw,30px); font-weight:600;
+  letter-spacing:.02em; color:var(--pale);
+}
+.mast h1 b{color:var(--phos); font-weight:600;}
+.mast__lede{margin:0; max-width:74ch; font-size:var(--t-lead); line-height:1.65; color:var(--mute);}
+.mast__lede em{color:var(--pale); font-style:normal;}
+
+/* ---------- hero: the power latch ---------- */
+.hero{margin-top:var(--s32);}
+.hero__head{display:flex; flex-wrap:wrap; gap:var(--s12) var(--s24); align-items:baseline; justify-content:space-between; margin-bottom:var(--s12);}
+.latch{
+  display:block; width:100%; cursor:pointer; text-align:left;
+  background:var(--panel); border:1px solid var(--line);
+  padding:var(--s24) var(--s24) var(--s16);
+  position:relative; overflow:clip;
+  transition:border-color .35s ease, background-color .35s ease;
+  translate:0px; scale:1;
+}
+.latch:hover,.latch:focus-visible{border-color:var(--line-hot); background:var(--panel-2);}
+.latch[aria-checked="true"]{border-color:color-mix(in oklab, var(--amber) 45%, var(--line));}
+.latch__corner{position:absolute; width:14px; height:14px; border:1px solid var(--line-hot); transition:translate .3s ease, border-color .3s ease;}
+.latch__corner:nth-child(1){top:8px; left:8px; border-right:0; border-bottom:0;}
+.latch__corner:nth-child(2){top:8px; right:8px; border-left:0; border-bottom:0;}
+.latch__corner:nth-child(3){bottom:8px; left:8px; border-right:0; border-top:0;}
+.latch__corner:nth-child(4){bottom:8px; right:8px; border-left:0; border-top:0;}
+.latch:hover .latch__corner:nth-child(1),.latch:focus-visible .latch__corner:nth-child(1){translate:-4px -4px;}
+.latch:hover .latch__corner:nth-child(2),.latch:focus-visible .latch__corner:nth-child(2){translate:4px -4px;}
+.latch:hover .latch__corner:nth-child(3),.latch:focus-visible .latch__corner:nth-child(3){translate:-4px 4px;}
+.latch:hover .latch__corner:nth-child(4),.latch:focus-visible .latch__corner:nth-child(4){translate:4px 4px;}
+.latch[aria-checked="true"] .latch__corner{border-color:var(--amber);}
+
+.latch__field{
+  display:block; white-space:pre; overflow:clip;
+  font-size:var(--field-lg); line-height:1.05; letter-spacing:.02em;
+  color:var(--dim);
+  transition:color .4s ease, text-shadow .4s ease;
+}
+.latch:hover .latch__field,.latch:focus-visible .latch__field{
+  color:var(--phos); text-shadow:0 0 10px color-mix(in oklab, var(--phos) 35%, transparent);
+}
+.latch[aria-checked="true"] .latch__field{
+  color:var(--amber); text-shadow:0 0 12px color-mix(in oklab, var(--amber) 32%, transparent);
+}
+.latch__bar{
+  display:flex; flex-wrap:wrap; gap:var(--s8) var(--s24); align-items:center;
+  margin-top:var(--s16); padding-top:var(--s12); border-top:1px solid var(--line);
+}
+.latch__bar .grow{flex:1 1 auto;}
+
+/* ---------- specimen grid ---------- */
+.grid{
+  display:grid; gap:var(--s24);
+  grid-template-columns:repeat(auto-fit, minmax(390px, 1fr));
+  margin-top:var(--s48);
+}
+.spec{display:flex; flex-direction:column; gap:var(--s12); min-width:0;}
+.spec__head{display:flex; flex-wrap:wrap; align-items:baseline; gap:var(--s8) var(--s12);}
+.spec__idx{font-size:var(--t-micro); letter-spacing:.18em; color:var(--phos);}
+.spec__name{margin:0; font-size:var(--t-ui); font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--pale);}
+.spec__tech{flex:1 1 100%; font-size:var(--t-micro); letter-spacing:.1em; text-transform:uppercase; color:var(--mute);}
+.spec__note{margin:0; font-size:var(--t-meta); line-height:1.7; color:var(--mute);}
+.spec__note b{color:var(--pale); font-weight:500;}
+
+.plate{
+  display:block; width:100%; cursor:pointer; text-align:left;
+  background:var(--panel); border:1px solid var(--line);
+  padding:var(--s16) var(--s16) var(--s8);
+  overflow:clip;
+  transition:border-color .3s ease, background-color .3s ease;
+}
+.plate:hover,.plate:focus-visible{border-color:var(--line-hot); background:var(--panel-2);}
+.plate[aria-checked="true"]{border-color:color-mix(in oklab, var(--amber) 40%, var(--line));}
+
+.field{
+  display:block; white-space:pre; overflow:clip;
+  font-size:var(--field); line-height:1.08; letter-spacing:.02em;
+  color:var(--dim);
+  transition:color .3s ease, text-shadow .3s ease;
+}
+.plate:hover .field,.plate:focus-visible .field{
+  color:var(--phos); text-shadow:0 0 8px color-mix(in oklab, var(--phos) 30%, transparent);
+}
+.plate[aria-checked="true"] .field{
+  color:var(--amber); text-shadow:0 0 9px color-mix(in oklab, var(--amber) 28%, transparent);
+}
+
+.readout{
+  display:flex; align-items:center; gap:var(--s8);
+  margin-top:var(--s12); padding-top:var(--s8); border-top:1px solid var(--line);
+  font-size:var(--t-micro); letter-spacing:.16em; text-transform:uppercase; color:var(--mute);
+}
+.readout .grow{flex:1 1 auto;}
+.dot{
+  inline-size:6px; block-size:6px; flex:0 0 auto;
+  background:var(--dim); transition:background-color .3s ease, box-shadow .3s ease;
+}
+.plate:hover .dot,.plate:focus-visible .dot,.latch:hover .dot,.latch:focus-visible .dot{background:var(--phos);}
+[aria-checked="true"] .dot{background:var(--amber); box-shadow:0 0 8px var(--amber);}
+
+/* ---------- 04 · scanner reveal (CSS masks, no JS paint) ---------- */
+.scan{position:relative; display:block; isolation:isolate;}
+.scan__layer{display:block; white-space:pre; overflow:clip; font-size:var(--field); line-height:1.08; letter-spacing:.02em;}
+.scan__base{color:#2C3A3F;}
+.scan__reveal{
+  position:absolute; inset:0; color:var(--phos); pointer-events:none;
+  text-shadow:0 0 8px color-mix(in oklab, var(--phos) 40%, transparent);
+  transition:--spot-in .22s ease-out, --spot-out .22s ease-out, color .3s ease;
+  -webkit-mask-image:radial-gradient(circle at var(--mx,50%) var(--my,50%),
+    #000 var(--spot-in, 0px), transparent var(--spot-out, 0px));
+  mask-image:radial-gradient(circle at var(--mx,50%) var(--my,50%),
+    #000 var(--spot-in, 0px), transparent var(--spot-out, 0px));
+  -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
+}
+.plate:hover .scan__reveal,.plate:focus-visible .scan__reveal{--spot-in:52px; --spot-out:82px;}
+.plate[aria-checked="true"] .scan__reveal{--spot-in:140%; --spot-out:150%; color:var(--amber); text-shadow:0 0 10px color-mix(in oklab, var(--amber) 34%, transparent);}
+
+/* ---------- 08 · HUD bracket + typed status (CSS only) ---------- */
+.hud{display:grid; gap:6px; font-size:var(--field); line-height:1.35; color:var(--dim); transition:color .3s ease;}
+.plate:hover .hud,.plate:focus-visible .hud{color:var(--phos);}
+.plate[aria-checked="true"] .hud{color:var(--amber);}
+.hud__frame{
+  position:relative; padding:var(--s16) var(--s12); display:grid; gap:4px;
+  border:1px solid currentColor; opacity:.9;
+}
+.hud__frame::before,.hud__frame::after{
+  content:""; position:absolute; inline-size:22px; block-size:22px;
+  border:1px solid currentColor; transition:translate .28s ease;
+}
+.hud__frame::before{top:-1px; left:-1px; border-right:0; border-bottom:0;}
+.hud__frame::after{bottom:-1px; right:-1px; border-left:0; border-top:0;}
+.plate:hover .hud__frame::before,.plate:focus-visible .hud__frame::before{translate:-6px -6px;}
+.plate:hover .hud__frame::after,.plate:focus-visible .hud__frame::after{translate:6px 6px;}
+.hud__row{display:flex; justify-content:space-between; gap:var(--s12); white-space:pre;}
+.hud__typed{
+  display:block; white-space:pre; overflow:clip;
+  inline-size:0ch; max-inline-size:100%;
+}
+.plate:hover .hud__typed,.plate:focus-visible .hud__typed{animation:type 900ms steps(34,end) forwards;}
+.plate[aria-checked="true"] .hud__typed{inline-size:34ch;}
+@keyframes type{from{inline-size:0ch;} to{inline-size:34ch;}}
+.hud__caret{display:inline-block; inline-size:1ch; background:currentColor; animation:blink 1s steps(1,end) infinite;}
+@keyframes blink{0%,49%{opacity:1;} 50%,100%{opacity:0;}}
+
+/* ---------- notes ---------- */
+.notes{margin-top:var(--s64); padding-top:var(--s24); border-top:1px solid var(--line);}
+.notes__grid{display:grid; gap:var(--s24) var(--s48); grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); margin-top:var(--s16);}
+.notes h2{margin:0 0 var(--s12); font-size:var(--t-ui); font-weight:600; letter-spacing:.12em; text-transform:uppercase;}
+.notes h3{margin:0 0 var(--s8); font-size:var(--t-meta); font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--phos);}
+.notes ul{margin:0; padding-left:1.3em; display:grid; gap:6px;}
+.notes li{font-size:var(--t-meta); line-height:1.7; color:var(--mute);}
+.notes li b{color:var(--pale); font-weight:500;}
+
+@media (prefers-reduced-motion: reduce){
+  .latch,.latch__field,.latch__corner,.plate,.field,.scan__reveal,.hud,.hud__frame::before,.hud__frame::after,.dot{transition:none !important;}
+  .plate:hover .hud__typed,.plate:focus-visible .hud__typed{animation:none; inline-size:34ch;}
+  .hud__caret{animation:none;}
+  .hud__typed{inline-size:34ch;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="mast">
+    <div class="mast__top">
+      <h1>Hover micro-interactions · <b>ASCII computational fields</b></h1>
+      <span class="meta meta--micro">SYSTEM: PHOSPHOR — ROUND 01 — 9 SPECIMENS + 1 LATCH</span>
+    </div>
+    <p class="mast__lede">
+      Every surface below is a real <em>switch</em>: hover (or focus) probes it, click latches it.
+      The art layer is one text node per specimen, repainted from a field function — the glyph ramp
+      <em>&nbsp;.:-=+*#%@&nbsp;</em> carries brightness, colour carries state only:
+      <em style="color:var(--dim)">idle</em> → <em style="color:var(--phos)">probe</em> → <em style="color:var(--amber)">latched</em>.
+    </p>
+  </header>
+
+  <!-- ============ HERO: POWER LATCH ============ -->
+  <section class="hero">
+    <div class="hero__head">
+      <span class="meta meta--micro meta--hot">00 · POWER LATCH</span>
+      <span class="meta meta--micro">SIN-FIELD PLASMA · DITHER WIPE · STROKE-GEOMETRY WORD · OFF ⇄ ON CROSSFADE</span>
+    </div>
+    <button class="latch" type="button" role="switch" aria-checked="false"
+            aria-label="Power latch — the flagship on/off specimen"
+            data-spec="latch" data-cols="86" data-rows="17">
+      <span class="latch__corner" aria-hidden="true"></span>
+      <span class="latch__corner" aria-hidden="true"></span>
+      <span class="latch__corner" aria-hidden="true"></span>
+      <span class="latch__corner" aria-hidden="true"></span>
+      <span class="latch__field" data-field aria-hidden="true"></span>
+      <span class="latch__bar">
+        <span class="dot" aria-hidden="true"></span>
+        <span class="meta meta--micro" data-read>OFF · IDLE</span>
+        <span class="grow"></span>
+        <span class="meta meta--micro" aria-hidden="true">CLICK / SPACE TO LATCH · THE WIPE CARRIES THE WORD ACROSS</span>
+      </span>
+    </button>
+  </section>
+
+  <!-- ============ SPECIMEN GRID ============ -->
+  <div class="grid">
+
+    <article class="spec">
+      <header class="spec__head">
+        <span class="spec__idx">01</span>
+        <h2 class="spec__name" id="lbl-charge">Charge field</h2>
+        <span class="spec__tech">pointer-distance falloff → 10-step ramp</span>
+      </header>
+      <button class="plate" type="button" role="switch" aria-checked="false" aria-labelledby="lbl-charge"
+              data-spec="charge" data-cols="52" data-rows="12">
+        <span class="field" data-field aria-hidden="true"></span>
+        <span class="readout">
+          <span class="dot" aria-hidden="true"></span>
+          <span data-read>OFF · IDLE</span>
+        </span>
+      </button>
+      <p class="spec__note">The cheapest honest hover: cell brightness is <b>1 − distance to the cursor</b>.
+        Latched, a standing pulse keeps breathing out of the last probe point.</p>
+    </article>
+
+    <article class="spec">
+      <header class="spec__head">
+        <span class="spec__idx">02</span>
+        <h2 class="spec__name" id="lbl-decode">Decode buffer</h2>
+        <span class="spec__tech">per-cell settle threshold · glyph scramble → target text</span>
+      </header>
+      <button class="plate" type="button" role="switch" aria-checked="false" aria-labelledby="lbl-decode"
+              data-spec="decode" data-cols="52" data-rows="12">
+        <span class="field" data-field aria-hidden="true"></span>
+        <span class="readout">
+          <span class="dot" aria-hidden="true"></span>
+          <span data-read>OFF · IDLE</span>
+        </span>
+      </button>
+      <p class="spec__note">Scramble-on-hover taken from one word to a whole plate. Every cell owns a random
+        <b>settle threshold</b>; hover raises the waterline, so the text resolves as noise instead of a wipe.
+        Leaving re-scrambles; latching holds the plaintext.</p>
+    </article>
+
+    <article class="spec">
+      <header class="spec__head">
+        <span class="spec__idx">03</span>
+        <h2 class="spec__name" id="lbl-dither">Dither sweep</h2>
+        <span class="spec__tech">4×4 Bayer matrix · threshold follows the knob</span>
+      </header>
+      <button class="plate" type="button" role="switch" aria-checked="false" aria-labelledby="lbl-dither"
+              data-spec="dither" data-cols="52" data-rows="12">
+        <span class="field" data-field aria-hidden="true"></span>
+        <span class="readout">
+          <span class="dot" aria-hidden="true"></span>
+          <span data-read>OFF · IDLE</span>
+        </span>
+      </button>
+      <p class="spec__note">A switch knob with no knob. An ordered <b>Bayer threshold</b> turns the eased 0→1
+        travel into a grain front that crosses the plate; hover pre-lights the front so the control
+        telegraphs its own direction.</p>
+    </article>
+
+    <article class="spec">
+      <header class="spec__head">
+        <span class="spec__idx">04</span>
+        <h2 class="spec__name" id="lbl-scan">Scanner reveal</h2>
+        <span class="spec__tech">CSS mask + registered @property · zero JS paint</span>
+      </header>
+      <button class="plate" type="button" role="switch" aria-checked="false" aria-labelledby="lbl-scan"
+              data-spec="scan" data-cols="52" data-rows="12">
+        <span class="scan">
+          <span class="scan__layer scan__base" data-base aria-hidden="true"></span>
+          <span class="scan__layer scan__reveal" data-reveal aria-hidden="true"></span>
+        </span>
+        <span class="readout">
+          <span class="dot" aria-hidden="true"></span>
+          <span data-read>OFF · IDLE</span>
+        </span>
+      </button>
+      <p class="spec__note">Two stacked ASCII layers; the top one is masked by a
+        <b>radial-gradient with interpolated stops</b> (<code>@property</code>), so the aperture eases open
+        without a rAF loop. Latching opens the mask to the full plate — the reveal becomes the state.</p>
+    </article>
+
+    <article class="spec">
+      <header class="spec__head">
+        <span class="spec__idx">05</span>
+        <h2 class="spec__name" id="lbl-life">Cell culture</h2>
+        <span class="spec__tech">Conway B3/S23 · hover injects soup · decay trails</span>
+      </header>
+      <button class="plate" type="button" role="switch" aria-checked="false" aria-labelledby="lbl-life"
+              data-spec="life" data-cols="52" data-rows="12">
+        <span class="field" data-field aria-hidden="true"></span>
+        <span class="readout">
+          <span class="dot" aria-hidden="true"></span>
+          <span data-read>OFF · IDLE</span>
+        </span>
+      </button>
+      <p class="spec__note">Hover seeds live cells under the cursor — you are drawing the initial condition.
+        <b>Off holds the culture frozen</b> and lets the trails fade; latched, the automaton runs at 8 Hz and
+        eats whatever you drew.</p>
+    </article>
+
+    <article class="spec">
+      <header class="spec__head">
+        <span class="spec__idx">06</span>
+        <h2 class="spec__name" id="lbl-ripple">Interference</h2>
+        <span class="spec__tech">two-source sine field · source B tracks the pointer</span>
+      </header>
+      <button class="plate" type="button" role="switch" aria-checked="false" aria-labelledby="lbl-ripple"
+              data-spec="ripple" data-cols="52" data-rows="12">
+        <span class="field" data-field aria-hidden="true"></span>
+        <span class="readout">
+          <span class="dot" aria-hidden="true"></span>
+          <span data-read>OFF · IDLE</span>
+        </span>
+      </button>
+      <p class="spec__note">The pointer <b>is</b> the second emitter, so moiré bands bend around it — the
+        motion reads as caused, not decorative. Latching doubles the frequency and inverts the ramp.</p>
+    </article>
+
+    <article class="spec">
+      <header class="spec__head">
+        <span class="spec__idx">07</span>
+        <h2 class="spec__name" id="lbl-rain">Column rain</h2>
+        <span class="spec__tech">per-column head + exponential tail · local pointer boost</span>
+      </header>
+      <button class="plate" type="button" role="switch" aria-checked="false" aria-labelledby="lbl-rain"
+              data-spec="rain" data-cols="52" data-rows="12">
+        <span class="field" data-field aria-hidden="true"></span>
+        <span class="readout">
+          <span class="dot" aria-hidden="true"></span>
+          <span data-read>OFF · IDLE</span>
+        </span>
+      </button>
+      <p class="spec__note">The cliché, made responsive: columns near the cursor <b>accelerate</b>, the rest
+        drift. Off, the fall stalls to a residue; latched, it runs. Direct manipulation of a background effect.</p>
+    </article>
+
+    <article class="spec">
+      <header class="spec__head">
+        <span class="spec__idx">08</span>
+        <h2 class="spec__name" id="lbl-hud">Bracket lock</h2>
+        <span class="spec__tech">box-drawing frame · steps() typewriter · pure CSS</span>
+      </header>
+      <button class="plate" type="button" role="switch" aria-checked="false" aria-labelledby="lbl-hud"
+              data-spec="hud">
+        <span class="hud" aria-hidden="true">
+          <span class="hud__frame">
+            <span class="hud__row"><span>SEC.9 / GHOST LINE</span><span>0x2E1F</span></span>
+            <span class="hud__row"><span>CARRIER</span><span>ATTACHED BODY</span></span>
+            <span class="hud__typed">&gt; handshake ok · dive permitted&nbsp;<span class="hud__caret"> </span></span>
+          </span>
+          <span class="hud__row"><span>LAT 35.6812</span><span>LON 139.7671</span><span>ALT 041</span></span>
+        </span>
+        <span class="readout">
+          <span class="dot" aria-hidden="true"></span>
+          <span data-read>OFF · IDLE</span>
+        </span>
+      </button>
+      <p class="spec__note">No canvas, no rAF, no JS: corner brackets push out on
+        <b>individual transform properties</b> (identity set on the base so the stacking context never
+        shifts), and the status line types with <code>steps()</code>. Latched, the line stays written.</p>
+    </article>
+
+    <article class="spec">
+      <header class="spec__head">
+        <span class="spec__idx">09</span>
+        <h2 class="spec__name" id="lbl-rule">Rule engine</h2>
+        <span class="spec__tech">elementary CA · rule 90 ⇄ 110 · seed follows the pointer</span>
+      </header>
+      <button class="plate" type="button" role="switch" aria-checked="false" aria-labelledby="lbl-rule"
+              data-spec="rule" data-cols="52" data-rows="12">
+        <span class="field" data-field aria-hidden="true"></span>
+        <span class="readout">
+          <span class="dot" aria-hidden="true"></span>
+          <span data-read>OFF · RULE 90</span>
+        </span>
+      </button>
+      <p class="spec__note">Each row is one generation. Hovering moves the <b>single live seed cell</b>, so the
+        Sierpiński cone tracks the cursor; latching swaps rule 90 for rule 110 and starts scrolling
+        generations upward. The toggle changes the mathematics, not the styling.</p>
+    </article>
+
+  </div>
+
+  <!-- ============ NOTES ============ -->
+  <section class="notes">
+    <h2>Round notes</h2>
+    <div class="notes__grid">
+      <div>
+        <h3>What carried</h3>
+        <ul>
+          <li><b>02 Decode buffer</b> and <b>00 Power latch</b> — the two where the hover state is legible as
+            information rather than as polish. Both survive being scaled down to a nav item.</li>
+          <li><b>06 Interference</b> — best cause-and-effect: the pointer is an emitter, not a spotlight.</li>
+          <li><b>04 Scanner reveal</b> — cheapest per frame (no JS paint at all) for the strongest impression.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>What to drop</h3>
+        <ul>
+          <li><b>07 Column rain</b> reads as reference, not as a control. Keep only if a page needs one
+            atmosphere block.</li>
+          <li><b>05 Cell culture</b> is beautiful and illegible — the state is impossible to read at a glance,
+            which disqualifies it as a switch.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Technique ledger</h3>
+        <ul>
+          <li>One <code>requestAnimationFrame</code> loop, ~30 fps, iterating only specimens that are on
+            screen <em>and</em> in motion; it stops itself when the page is quiet.</li>
+          <li>One text node per plate — no per-cell spans, so a repaint is a single string assignment.</li>
+          <li>Grids are measured, not assumed: a DOM probe reports the character advance, the column count
+            follows the plate width (here 60×12 per plate, 179×17 for the latch) and a
+            <code>ResizeObserver</code> rebuilds the field — letters re-derive their own scale from the cell
+            aspect. Integrity relies on ASCII-only ramps and <code>font-variant-ligatures:none</code>.</li>
+          <li>Reduced motion: the loop never starts, each specimen renders one static frame per state, and the
+            typewriter resolves instantly.</li>
+          <li>Every plate is a <code>&lt;button role="switch"&gt;</code> with <code>aria-checked</code>; art
+            layers are <code>aria-hidden</code>, and focus drives the same probe as hover.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Where the look comes from</h3>
+        <ul>
+          <li>Scramble/decode text on hover as a monospace idiom —
+            <a href="https://www.awwwards.com/inspiration/scramble-text-on-hover-monospace">Awwwards collection</a>.</li>
+          <li>Experimental typographic + shader-ish text effects —
+            <a href="https://tympanus.net/codrops/tag/typography/">Codrops typography archive</a>.</li>
+          <li>ASCII/dither rendering and monospace brutalism as a 2026 current —
+            <a href="https://tilda.education/en/web-design-trends-2026">trend survey</a>.</li>
+          <li>HUD grammar (corner brackets, coordinate ribbons, one amber warning against cold phosphor) from
+            <em>Ghost in the Shell</em> interface plates.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  const RM = matchMedia('(prefers-reduced-motion: reduce)');
+  const RAMP = ' .:-=+*#%@';               // 10 steps, ASCII only — guaranteed monospace
+  const SCRAM = '01<>[]{}/\\|-+=*%$#@!?:;~^&XKZMV';
+  const BAYER = [
+     0, 8, 2,10,
+    12, 4,14, 6,
+     3,11, 1, 9,
+    15, 7,13, 5,
+  ];
+
+  // Letters are stroke geometry evaluated in normalised letter space, not a
+  // bitmap: a 5x5 raster scaled 4x turns N's diagonal into three bars.
+  function stroke(ch, u, v) {
+    const th = 0.19;
+    if (ch === 'O') {
+      const d = Math.hypot((u - 0.5) / 0.5, (v - 0.5) / 0.5);
+      return d <= 1 && d >= 1 - th * 2.1;
+    }
+    if (ch === 'N') return u < th || u > 1 - th || Math.abs(u - v) < th * 0.85;
+    if (ch === 'F') return u < th || v < th || (v > 0.42 && v < 0.42 + th && u < 0.78);
+    return false;
+  }
+
+  function hash(x, y) {
+    let h = (x | 0) * 374761393 + (y | 0) * 668265263;
+    h = (h ^ (h >>> 13)) * 1274126177;
+    return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+  }
+
+  // Cell metrics of a text node, measured with its real font (canvas
+  // measurement would ignore letter-spacing, so probe in the DOM).
+  function measureCell(node) {
+    const cs = getComputedStyle(node);
+    const probe = document.createElement('span');
+    probe.style.cssText = 'position:absolute;left:-9999px;top:0;white-space:pre;';
+    probe.style.fontFamily = cs.fontFamily;
+    probe.style.fontSize = cs.fontSize;
+    probe.style.fontWeight = cs.fontWeight;
+    probe.style.letterSpacing = cs.letterSpacing;
+    probe.textContent = 'M'.repeat(100);
+    document.body.append(probe);
+    const adv = probe.getBoundingClientRect().width / 100;
+    probe.remove();
+    let line = parseFloat(cs.lineHeight);
+    if (!isFinite(line)) line = parseFloat(cs.fontSize) * 1.2;
+    const inner = node.clientWidth || node.parentElement.clientWidth;
+    const cols = adv > 0 && inner > 0 ? Math.max(24, Math.floor(inner / adv)) : 0;
+    return { adv, line, cols };
+  }
+
+  // A word laid out in grid cells; letter width follows the cell aspect so the
+  // glyphs stay roughly square on screen at any measured grid size.
+  function word(text, rows, cell) {
+    const h = Math.max(5, rows - 2);
+    const w = Math.max(6, Math.round(h * (cell.line / cell.adv) * 0.72));
+    const gap = Math.max(2, Math.round(w * 0.24));
+    return { text, w, h, gap, total: text.length * w + (text.length - 1) * gap };
+  }
+
+  function inWord(m, x, y, ox, oy) {
+    const lx = x - ox, ly = y - oy;
+    if (lx < 0 || ly < 0 || lx >= m.total || ly >= m.h) return false;
+    const step = m.w + m.gap;
+    const i = (lx / step) | 0;
+    const inx = lx - i * step;
+    if (inx >= m.w) return false;                 // inter-letter gap
+    return stroke(m.text[i], (inx + 0.5) / m.w, (ly + 0.5) / m.h);
+  }
+
+  const DECODE_TEXT = (
+    'SECTION 9 // GHOST LINE OPEN // CIPHER 0x2E1F // ' +
+    'DIVE VECTOR NOMINAL // ATTACHED BODY 04 // BARRIER MAZE CLEARED // ' +
+    'NO EXTERNAL MEMORY // WHOSE HAND MOVES THE HAND // '
+  );
+
+  /* ------------------------------------------------------------------
+     Specimen definitions.
+     field(x, y, f) -> 0..1 intensity     (ramp handles the glyph)
+     glyph(x, y, f) -> character          (bypasses the ramp)
+     step(f, dt)                          (stateful buffers)
+     live(f) -> boolean                   (needs frames while true)
+     ------------------------------------------------------------------ */
+  const DEFS = {
+
+    latch: {
+      live: f => true,
+      init(f) {
+        // letters are laid out against the measured cell aspect, so they stay
+        // square whatever grid the plate width resolves to
+        f.mem.on = word('ON', f.rows, f.cell);
+        f.mem.off = word('OFF', f.rows, f.cell);
+      },
+      field(x, y, f) {
+        const t = f.t;
+        // quiet sin-field plasma ground — must never compete with the word
+        let v = 0.5 + 0.5 * Math.sin(x * 0.14 + t * 0.6) * Math.cos(y * 0.36 - t * 0.42);
+        v = v * 0.12 + 0.02 + hash(x, y) * 0.03;
+        // probe: scan bar sweeping on hover
+        const bar = ((t * 0.5) % 1) * (f.cols + 12) - 6;
+        v += f.h * Math.max(0, 1 - Math.abs(x - bar) / (f.cols * 0.05)) * 0.34;
+        // dither wipe front tied to the eased latch travel
+        const front = f.k * (f.cols + 26) - 13;
+        v += Math.max(0, 1 - Math.abs(x - front) / (f.cols * 0.035)) * 0.5;
+        v += (x < front ? 0.07 : 0) * f.osc(1, y * 0.5);
+        // the word: ON to the left of the wipe front, OFF to the right
+        const past = x < front;
+        const m = past ? f.mem.on : f.mem.off;
+        const ox = ((f.cols - m.total) / 2) | 0;
+        const oy = ((f.rows - m.h) / 2) | 0;
+        if (inWord(m, x, y, ox, oy)) {
+          const beat = f.osc(1.7, -y * 0.18);
+          // the latched word sits at the top of the ramp, the idle word mid-ramp:
+          // the ground never reaches either level, so state reads at a glance
+          v = past ? 0.88 + 0.12 * beat : 0.50 + 0.08 * beat;
+        }
+        return v;
+      },
+    },
+
+    charge: {
+      live: f => f.k > 0.01,
+      field(x, y, f) {
+        const dx = (x - f.px) / (f.cols * 0.16), dy = (y - f.py) / (f.rows * 0.24);
+        const d = Math.sqrt(dx * dx + dy * dy);
+        let v = 0.06 + hash(x, y) * 0.07;
+        v += f.h * Math.max(0, 1 - d) * 0.95;
+        v += f.k * Math.max(0, 0.85 - d * 0.45) * (0.1 + 0.9 * f.osc(2.2, -d * 2.4));
+        return v;
+      },
+    },
+
+    decode: {
+      init(f) {
+        f.mem.settle = new Float32Array(f.cols * f.rows);
+        f.mem.target = new Array(f.cols * f.rows);
+        for (let y = 0; y < f.rows; y++) {
+          for (let x = 0; x < f.cols; x++) {
+            const i = y * f.cols + x;
+            f.mem.settle[i] = hash(x, y) * 0.92 + (x / f.cols) * 0.06;
+            f.mem.target[i] = DECODE_TEXT[(y * f.cols + x) % DECODE_TEXT.length];
+          }
+        }
+      },
+      live(f) { const p = Math.max(f.h, f.k); return p > 0.01 && p < 0.99; },
+      glyph(x, y, f) {
+        const i = y * f.cols + x;
+        const p = Math.max(f.h, f.k);
+        if (p >= f.mem.settle[i]) return f.mem.target[i];
+        if (p < 0.02) return hash(x + f.seed, y) < 0.55 ? ' ' : SCRAM[(hash(x, y + f.seed) * SCRAM.length) | 0];
+        return SCRAM[(Math.random() * SCRAM.length) | 0];
+      },
+    },
+
+    dither: {
+      live: f => false,
+      field(x, y, f) {
+        const level = f.k * 1.25 - 0.12 + f.h * 0.16;
+        const front = f.k * f.cols;
+        const th = (BAYER[(y & 3) * 4 + (x & 3)] + 0.5) / 16;
+        let v = level - (x / f.cols) * 0.9 > th ? 0.9 : 0.05 + hash(x, y) * 0.05;
+        v += f.h * Math.max(0, 1 - Math.abs(x - front) / 4) * 0.5;
+        if (y === 0 || y === f.rows - 1) v = Math.max(v, 0.16 + f.h * 0.2);
+        return v;
+      },
+    },
+
+    life: {
+      init(f) {
+        f.mem.a = new Uint8Array(f.cols * f.rows);
+        f.mem.b = new Uint8Array(f.cols * f.rows);
+        f.mem.acc = 0;
+        for (let i = 0; i < f.mem.a.length; i++) f.mem.a[i] = hash(i, 7) < 0.16 ? 1 : 0;
+      },
+      live: f => f.k > 0.5 || f.h > 0.01,
+      step(f, dt) {
+        const { cols, rows } = f, a = f.mem.a, b = f.mem.b;
+        // hover injects live cells at the pointer
+        if (f.h > 0.05) {
+          for (let n = 0; n < 3; n++) {
+            const jx = (f.px + (Math.random() * 5 - 2.5)) | 0;
+            const jy = (f.py + (Math.random() * 3 - 1.5)) | 0;
+            if (jx >= 0 && jx < cols && jy >= 0 && jy < rows) a[jy * cols + jx] = 1;
+          }
+        }
+        f.mem.acc += dt;
+        const running = f.k > 0.5;
+        if (running && f.mem.acc >= 120) {
+          f.mem.acc = 0;
+          for (let y = 0; y < rows; y++) {
+            for (let x = 0; x < cols; x++) {
+              let n = 0;
+              for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                  if (!dx && !dy) continue;
+                  const yy = (y + dy + rows) % rows, xx = (x + dx + cols) % cols;
+                  n += a[yy * cols + xx];
+                }
+              }
+              const alive = a[y * cols + x];
+              b[y * cols + x] = (alive && (n === 2 || n === 3)) || (!alive && n === 3) ? 1 : 0;
+            }
+          }
+          f.mem.a = b; f.mem.b = a;
+        }
+        const cur = f.mem.a;
+        for (let i = 0; i < cur.length; i++) {
+          const ground = 0.05 + hash(i, 5) * 0.04;
+          const trail = Math.max(ground, f.buf[i] * (running ? 0.70 : 0.93));
+          f.buf[i] = cur[i] ? 0.74 : trail;
+        }
+      },
+    },
+
+    ripple: {
+      live: f => f.h > 0.01 || f.k > 0.5,
+      field(x, y, f) {
+        const freq = 0.55 + f.k * 0.55;
+        const ax = f.cols * 0.18, ay = f.rows * 0.5;
+        const d1 = Math.hypot((x - ax) * 0.42, (y - ay) * 1.1);
+        const d2 = Math.hypot((x - f.px) * 0.42, (y - f.py) * 1.1);
+        const w1 = Math.sin(d1 * freq - f.t * 2.1);
+        const w2 = Math.sin(d2 * freq - f.t * 2.1) * (0.35 + f.h * 0.65);
+        let v = (w1 + w2) * 0.25 + 0.4;
+        if (f.k > 0.5) v = 1 - v;
+        return v * (0.35 + 0.65 * Math.max(f.h, f.k)) + 0.05;
+      },
+    },
+
+    rain: {
+      init(f) {
+        f.mem.head = new Float32Array(f.cols);
+        f.mem.rate = new Float32Array(f.cols);
+        for (let x = 0; x < f.cols; x++) {
+          f.mem.head[x] = hash(x, 3) * f.rows;
+          f.mem.rate[x] = 3 + hash(x, 11) * 7;
+        }
+      },
+      live: f => f.h > 0.01 || f.k > 0.05,
+      step(f, dt) {
+        const { cols, rows } = f, s = dt / 1000;
+        for (let i = 0; i < f.buf.length; i++) f.buf[i] *= 0.86;
+        for (let x = 0; x < cols; x++) {
+          const near = Math.max(0, 1 - Math.abs(x - f.px) / (cols * 0.14)) * f.h;
+          const speed = f.mem.rate[x] * (0.12 + f.k * 0.88 + near * 2.2);
+          f.mem.head[x] += speed * s;
+          if (f.mem.head[x] > rows + 4) f.mem.head[x] -= rows + 4;
+          const hy = f.mem.head[x] | 0;
+          if (hy >= 0 && hy < rows) f.buf[hy * cols + x] = 1;
+          const py = hy - 1;
+          if (py >= 0 && py < rows) f.buf[py * cols + x] = Math.max(f.buf[py * cols + x], 0.7);
+        }
+      },
+    },
+
+    rule: {
+      init(f) {
+        f.mem.gen = [];
+        f.mem.acc = 0;
+        f.mem.seed = (f.cols / 2) | 0;
+        f.mem.rule = 90;
+        f.mem.dirty = true;
+      },
+      live: f => f.k > 0.5,
+      step(f, dt) {
+        const { cols, rows } = f;
+        const rule = f.k > 0.5 ? 110 : 90;
+        const seed = f.h > 0.05 ? Math.min(cols - 1, Math.max(0, f.px | 0)) : f.mem.seed;
+        if (rule !== f.mem.rule || seed !== f.mem.seed) {
+          f.mem.rule = rule; f.mem.seed = seed; f.mem.gen = []; f.mem.dirty = true;
+        }
+        if (f.mem.gen.length === 0) {
+          const row = new Uint8Array(cols);
+          row[seed] = 1;
+          f.mem.gen.push(row);
+          while (f.mem.gen.length < rows) f.mem.gen.push(next(f.mem.gen[f.mem.gen.length - 1]));
+          f.mem.dirty = true;
+        }
+        f.mem.acc += dt;
+        if (f.k > 0.5 && f.mem.acc >= 110) {
+          f.mem.acc = 0;
+          f.mem.gen.push(next(f.mem.gen[f.mem.gen.length - 1]));
+          f.mem.gen.shift();
+          f.mem.dirty = true;
+        }
+        for (let y = 0; y < rows; y++) {
+          const row = f.mem.gen[y];
+          const fade = 0.45 + 0.55 * (y / (rows - 1));
+          for (let x = 0; x < cols; x++) {
+            f.buf[y * cols + x] = row[x]
+              ? (0.35 + 0.65 * Math.max(f.h, f.k)) * fade + 0.25
+              : 0.04 + hash(x, y) * 0.03;
+          }
+        }
+        function next(prev) {
+          const n = prev.length, out = new Uint8Array(n);
+          for (let i = 0; i < n; i++) {
+            const l = prev[(i - 1 + n) % n], c = prev[i], r = prev[(i + 1) % n];
+            const idx = (l << 2) | (c << 1) | r;
+            out[i] = (rule >> idx) & 1;
+          }
+          return out;
+        }
+      },
+    },
+  };
+
+  /* ---------------- field runtime ---------------- */
+  class Field {
+    constructor(plate, def) {
+      this.plate = plate;
+      this.def = def;
+      this.node = plate.querySelector('[data-field]');
+      this.cols = +plate.dataset.cols || 52;
+      this.rows = +plate.dataset.rows || 12;
+      this.mem = {};
+      this.h = 0; this.hT = 0;
+      this.k = 0; this.kT = 0;
+      this.t = 0;
+      this.seed = 1;
+      this.px = this.cols / 2; this.py = this.rows / 2;
+      this.visible = true;
+      this.still = RM.matches;   // reduced motion: oscillators sit at their peak
+      this.cell = { adv: 0, line: 0 };
+      this.build(this.measure());
+      this.settle();
+    }
+    measure() {
+      const m = measureCell(this.node);
+      if (m.adv > 0) this.cell = m;
+      return m.cols || this.cols;
+    }
+    build(cols) {
+      this.cols = cols;
+      this.buf = new Float32Array(cols * this.rows);
+      this.mem = {};
+      this.px = Math.min(this.px, cols - 1);
+      if (this.def.init) this.def.init(this);
+    }
+    reflow() {
+      const cols = this.measure();
+      if (cols === this.cols) return false;
+      this.build(cols);
+      return true;
+    }
+    needsFrame() {
+      if (Math.abs(this.h - this.hT) > 0.003) return true;
+      if (Math.abs(this.k - this.kT) > 0.003) return true;
+      return !!(this.def.live && this.def.live(this));
+    }
+    advance(dt) {
+      const a = 1 - Math.exp(-dt / 130);
+      this.h += (this.hT - this.h) * a;
+      this.k += (this.kT - this.k) * a;
+      this.t += dt / 1000;
+      if (this.def.step) this.def.step(this, dt);
+    }
+    // 0..1 oscillator that resolves to its peak when motion is suppressed, so a
+    // single static frame still shows the state at full strength
+    osc(freq, phase = 0) {
+      return this.still ? 1 : 0.5 + 0.5 * Math.sin(this.t * freq + phase);
+    }
+    render() {
+      const { cols, rows, def } = this;
+      const n = RAMP.length - 1;
+      let s = '';
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          if (def.glyph) { s += def.glyph(x, y, this); continue; }
+          let v = def.step ? this.buf[y * cols + x] : def.field(x, y, this);
+          v = v < 0 ? 0 : v > 1 ? 1 : v;
+          s += RAMP[(v * n + 0.5) | 0];
+        }
+        if (y < rows - 1) s += '\n';
+      }
+      this.node.textContent = s;
+    }
+    settle() {              // reduced-motion / one-shot path
+      this.h = this.hT; this.k = this.kT;
+      if (this.def.step) this.def.step(this, 120);
+      this.render();
+    }
+  }
+
+  /* ---------------- loop ---------------- */
+  const fields = [];
+  let running = false, last = 0;
+
+  function wake() {
+    if (RM.matches) { for (const f of fields) { f.still = true; f.settle(); } return; }
+    for (const f of fields) f.still = false;
+    if (running) return;
+    running = true; last = performance.now();
+    requestAnimationFrame(tick);
+  }
+  function tick(now) {
+    const dt = Math.min(now - last, 80);
+    if (dt < 26) { requestAnimationFrame(tick); return; }
+    last = now;
+    let any = false;
+    for (const f of fields) {
+      if (!f.visible) continue;
+      if (!f.needsFrame()) continue;
+      any = true;
+      f.seed++;
+      f.advance(dt);
+      f.render();
+    }
+    if (any) requestAnimationFrame(tick);
+    else running = false;
+  }
+
+  /* ---------------- wiring ---------------- */
+  function label(plate, f) {
+    const el = plate.querySelector('[data-read]');
+    if (!el) return;
+    const on = plate.getAttribute('aria-checked') === 'true';
+    const probing = plate.matches(':hover, :focus-visible');
+    const spec = plate.dataset.spec;
+    let tail = probing ? 'PROBE' : on ? 'HOLDING' : 'IDLE';
+    if (spec === 'rule') tail = (on ? 'RULE 110' : 'RULE 90') + (probing ? ' · SEED ' + String((f && f.px | 0) || 0).padStart(2, '0') : '');
+    el.textContent = (on ? 'ON' : 'OFF') + ' · ' + tail;
+  }
+
+  const plates = [];
+
+  document.querySelectorAll('[data-spec]').forEach(plate => {
+    const def = DEFS[plate.dataset.spec];
+    const f = def ? new Field(plate, def) : null;
+    if (f) fields.push(f);
+    plates.push({ plate, f });
+
+    const probe = state => {
+      if (f) { f.hT = state ? 1 : 0; wake(); }
+      label(plate, f);
+    };
+    plate.addEventListener('pointerenter', () => probe(true));
+    plate.addEventListener('pointerleave', () => probe(false));
+    plate.addEventListener('focus', () => probe(true));
+    plate.addEventListener('blur', () => probe(false));
+
+    plate.addEventListener('pointermove', e => {
+      if (!f) return;
+      const r = plate.getBoundingClientRect();
+      f.px = ((e.clientX - r.left) / r.width) * f.cols;
+      f.py = ((e.clientY - r.top) / r.height) * f.rows;
+      wake();
+      label(plate, f);
+    });
+
+    // 04 scanner reveal: pointer position straight into the mask, layers painted once
+    const reveal = plate.querySelector('[data-reveal]');
+    if (reveal) {
+      const base = plate.querySelector('[data-base]');
+      plate.addEventListener('pointermove', e => {
+        const r = reveal.getBoundingClientRect();
+        reveal.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100).toFixed(2) + '%');
+        reveal.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100).toFixed(2) + '%');
+      });
+      const msg = 'GHOST LINE // SEC 9 // DIVE // 2501 // ';
+      const paint = () => {
+        const cols = measureCell(base).cols || +plate.dataset.cols;
+        const rows = +plate.dataset.rows;
+        let lo = '', hi = '';
+        for (let y = 0; y < rows; y++) {
+          for (let x = 0; x < cols; x++) {
+            lo += RAMP[(hash(x, y) * 3.2) | 0];
+            const th = (BAYER[(y & 3) * 4 + (x & 3)] + 0.5) / 16;
+            hi += (y % 3 === 1) ? msg[(x + y * 7) % msg.length]
+                                : RAMP[Math.min(RAMP.length - 1, (th * 6 + 3) | 0)];
+          }
+          if (y < rows - 1) { lo += '\n'; hi += '\n'; }
+        }
+        base.textContent = lo;
+        reveal.textContent = hi;
+      };
+      paint();
+      plate._repaint = paint;
+    }
+
+    plate.addEventListener('click', () => {
+      const on = plate.getAttribute('aria-checked') !== 'true';
+      plate.setAttribute('aria-checked', String(on));
+      if (f) { f.kT = on ? 1 : 0; wake(); }
+      label(plate, f);
+    });
+
+    label(plate, f);
+  });
+
+  // pause offscreen work
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(entries => {
+      for (const e of entries) {
+        const f = fields.find(x => x.plate === e.target);
+        if (f) f.visible = e.isIntersecting;
+      }
+      wake();
+    }, { rootMargin: '80px' });
+    fields.forEach(f => io.observe(f.plate));
+  }
+
+  // grids are measured, so a width change means a rebuild
+  if ('ResizeObserver' in window) {
+    let pending = 0;
+    const ro = new ResizeObserver(() => {
+      cancelAnimationFrame(pending);
+      pending = requestAnimationFrame(() => {
+        for (const { plate, f } of plates) {
+          if (f && f.reflow()) f.settle();
+          if (plate._repaint) plate._repaint();
+        }
+        wake();
+      });
+    });
+    plates.forEach(({ plate }) => ro.observe(plate));
+  }
+
+  RM.addEventListener('change', () => { running = false; wake(); });
+  wake();
+})();
+</script>
+</body>
+</html>

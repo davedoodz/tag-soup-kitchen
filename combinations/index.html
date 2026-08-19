@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Four ways the contact sheet and the split browser can work as one surface."
+    />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 44'%3E%3Cpath d='M0 44V0h27.5C38.82 0 48 9.18 48 20.5V44H33.5V22c0-4.14-3.36-7.5-7.5-7.5H14.5V44H0Z'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="../shared/acolorbright.css" />
+    <title>Combinations — sheet × split browser</title>
+    <style>
+      .verdict[data-verdict='accepted'],
+      .verdict[data-verdict='rejected'] {
+        color: var(--color-ink-black);
+      }
+
+      .hub-row__note {
+        grid-column: 2 / -1;
+        color: var(--color-graphite);
+        font-size: var(--text-caption);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header class="nav">
+        <span class="nav__wordmark">David Lafond Designs</span>
+        <div class="nav__actions">
+          <a class="nav__link" href="../designs/index.html">Directions</a>
+          <a class="nav__link" href="../hub.html">Hub</a>
+          <span aria-hidden="true" class="nav__menu">
+            <span></span>
+            <span></span>
+            <span></span>
+          </span>
+        </div>
+      </header>
+
+      <section class="hero hero--compact">
+        <h1 class="hero__statement">
+          You accepted the contact sheet and the split browser. Here are four ways they become one
+          surface — each answering a different question about which one leads.
+        </h1>
+        <p class="hero__meta">
+          Same twelve projects, same filters, same detail overlay in all four. What changes is the
+          composition: who owns the screen, who is summoned, and what survives when you switch.
+          Accept, reject, or comment in the bar at the bottom of each.
+        </p>
+      </section>
+
+      <section class="chapter">
+        <h2 class="chapter__heading"><span class="chapter__badge">1</span>Combinations</h2>
+        <ul class="hub-list">
+          <li class="hub-row">
+            <span class="caption">01</span>
+            <span><a href="01-sheet-with-rail.html">Sheet with archive rail</a></span>
+            <span class="hub-row__description">
+              Sheet is the canvas, list is a permanent rail. Two-way hover and selection sync.
+              Costs horizontal room; pays in orientation.
+            </span>
+            <span class="hub-row__port"><a href="http://localhost:4201/">4201</a></span>
+          </li>
+          <li class="hub-row">
+            <span class="caption">02</span>
+            <span><a href="02-list-scopes-sheet.html">List scopes the sheet</a></span>
+            <span class="hub-row__description">
+              List leads as a scoping tree; the sheet shows whatever is scoped — all work, a
+              category, or one project's frames.
+            </span>
+            <span class="hub-row__port"><a href="http://localhost:4202/">4202</a></span>
+          </li>
+          <li class="hub-row">
+            <span class="caption">03</span>
+            <span><a href="03-density-dial.html">Density dial</a></span>
+            <span class="hub-row__description">
+              Not two views but one continuum: index → rows → cards → sheet, with selection and
+              scroll anchor preserved across every step.
+            </span>
+            <span class="hub-row__port"><a href="http://localhost:4203/">4203</a></span>
+          </li>
+          <li class="hub-row">
+            <span class="caption">04</span>
+            <span><a href="04-sheet-with-slideover.html">Sheet with slide-over list</a></span>
+            <span class="hub-row__description">
+              Sheet takes the whole screen; the list is summoned with ⌘K or “/”, and can be pinned
+              into a column when you want it resident.
+            </span>
+            <span class="hub-row__port"><a href="http://localhost:4204/">4204</a></span>
+          </li>
+        </ul>
+      </section>
+
+      <section class="chapter">
+        <h2 class="chapter__heading"><span class="chapter__badge">2</span>The two parents</h2>
+        <p class="chapter__body">
+          Open these alongside the combinations to judge what each composition gained and what it
+          gave up.
+        </p>
+        <ul class="hub-list">
+          <li class="hub-row">
+            <span class="caption">01</span>
+            <span><a href="../designs/01-contact-sheet.html">Contact sheet</a></span>
+            <span class="hub-row__description">Accepted. Scanning speed, filters, inline overlay.</span>
+            <span class="hub-row__port"><a href="http://localhost:4181/">4181</a></span>
+          </li>
+          <li class="hub-row">
+            <span class="caption">02</span>
+            <span><a href="../designs/03-split-browser.html">Split browser</a></span>
+            <span class="hub-row__description">Accepted. Comparison, keyboard selection, never losing your place.</span>
+            <span class="hub-row__port"><a href="http://localhost:4182/">4182</a></span>
+          </li>
+        </ul>
+      </section>
+
+      <section class="chapter">
+        <h2 class="chapter__heading"><span class="chapter__badge">3</span>Your decisions</h2>
+        <p class="chapter__body">Live from feedback/reviews.json, combinations only.</p>
+        <ul class="hub-list" id="decisions"></ul>
+      </section>
+
+      <footer class="footer">
+        David Lafond Designs — combination review.
+        <a href="../designs/index.html">Back to the current directions</a>.
+      </footer>
+    </div>
+
+    <script>
+      const board = document.getElementById('decisions')
+
+      const fromLocalStorage = () => {
+        const entries = {}
+        for (let index = 0; index < localStorage.length; index += 1) {
+          const key = localStorage.key(index)
+          if (!key?.startsWith('design-review:')) continue
+          try {
+            entries[key.slice('design-review:'.length)] = JSON.parse(localStorage.getItem(key))
+          } catch {
+            /* ignore malformed entry */
+          }
+        }
+        return entries
+      }
+
+      const render = (entries, source) => {
+        const rows = Object.entries(entries).filter(([id]) => id.startsWith('c'))
+
+        if (rows.length === 0) {
+          board.innerHTML =
+            '<li class="hub-row"><span class="caption">—</span><span>No verdicts yet</span><span class="hub-row__description">Open a combination and use the bar at the bottom.</span><span class="hub-row__port"></span></li>'
+          return
+        }
+
+        board.innerHTML = rows
+          .map(([id, entry], index) => {
+            const verdict = entry.verdict ?? 'no verdict'
+            const comment = entry.comment ? `“${entry.comment}”` : '—'
+            return `<li class="hub-row">
+              <span class="caption">${String(index + 1).padStart(2, '0')}</span>
+              <span>${entry.title ?? id}</span>
+              <span class="hub-row__description">${comment}</span>
+              <span class="hub-row__port verdict" data-verdict="${entry.verdict ?? ''}">${verdict}</span>
+            </li>`
+          })
+          .join('')
+
+        const note = document.createElement('li')
+        note.className = 'hub-row'
+        note.innerHTML = `<span class="caption"></span><span class="hub-row__note">Source: ${source}</span>`
+        board.append(note)
+      }
+
+      fetch('/api/review')
+        .then((response) => (response.ok ? response.json() : Promise.reject(response.status)))
+        .then((entries) => render(entries, 'feedback/reviews.json'))
+        .catch(() => render(fromLocalStorage(), 'this browser (review API not running)'))
+    </script>
+  </body>
+</html>

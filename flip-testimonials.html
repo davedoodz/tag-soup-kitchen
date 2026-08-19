@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flip-card testimonials — 5 explorations (mechanics from davidlafond.xyz)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Homemade+Apple&family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================
+   MEASURED FROM davidlafond.xyz (your site) — exact values
+     page ground ............ #030303
+     card ground ............ #0B0B0C
+     cream ink .............. #F5F2EA
+     card ................... 430 x 430
+     card radius ............ 38px
+     perspective (on item) .. 1200px
+     flip transition ........ transform .62s cubic-bezier(.22,1,.36,1)
+     lift transition ........ transform .38s cubic-bezier(.33,1,.68,1)
+     faces .................. position:absolute; backface-visibility:hidden
+     back face .............. rotateY(180deg)
+     band ................... clipped viewport over a wide drifting track
+   Structural discipline carried from HAIRLINE (signature card + AAA):
+     mono uppercase meta @ .06em · 1px hairlines · handwriting as accent only
+   ========================================================== */
+:root{
+  --void:#030303;
+  --card:#0B0B0C;
+  --cream:#F5F2EA;
+  --cream-dim:#A8A49B;      /* derived: AA-safe secondary on #0B0B0C */
+  --hair:#242426;           /* derived hairline for dark ground */
+  --paper:#FFFFFF;
+  --ink:#111111;
+  --line:#E6E6E6;
+  --band:#F2F2F2;
+  --mute-2:#6B6B6B;
+
+  --ui:"Manrope", "Helvetica Neue", Arial, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, monospace;
+  --hand:"Homemade Apple", cursive;
+
+  --r-card:38px;
+  --r-ctl:10px;
+  --r-pill:999px;
+
+  --persp:1200px;
+  --flip:transform .62s cubic-bezier(.22,1,.36,1);
+  --lift:transform .38s cubic-bezier(.33,1,.68,1);
+
+  --card-size:430px;
+  --edge:24px;
+  --gut:12px;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;background:var(--void);color:var(--cream);
+  font-family:var(--ui);font-weight:500;
+  -webkit-font-smoothing:antialiased;font-synthesis:none;
+}
+:where(button){font:inherit;color:inherit;background:none;border:0;}
+:where(button,a):focus-visible{outline:2px solid var(--cream);outline-offset:4px;border-radius:4px;}
+
+.meta{font-family:var(--mono);font-weight:400;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--cream-dim);}
+.meta--micro{font-size:10px;}
+.mark{font-family:var(--hand);font-weight:400;}
+
+.doc{max-width:1920px;margin:0 auto;padding:48px 0 120px;}
+.doc__head{padding:0 48px;margin-bottom:8px;}
+.doc__title{font-size:30px;font-weight:800;letter-spacing:-.03em;margin:0 0 10px;}
+.doc__note{max-width:78ch;margin:0;color:var(--cream-dim);font-size:14px;line-height:22px;}
+.spec{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:baseline;padding:0 48px;margin:72px 0 20px;}
+.spec__id{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--cream-dim);}
+.spec__name{font-size:20px;font-weight:800;letter-spacing:-.02em;}
+.spec__why{flex:1 1 460px;min-width:300px;font-size:13px;line-height:20px;color:var(--cream-dim);}
+
+/* ---------------- core flip mechanism ---------------- */
+.flip{
+  position:relative;
+  perspective:var(--persp);
+  transition:var(--lift);
+  translate:0; rotate:0deg; scale:1;      /* identity transforms: no stacking-context jump */
+  display:block;padding:0;cursor:pointer;text-align:left;
+}
+.flip__inner{
+  display:block;
+  position:relative;width:100%;height:100%;
+  transform-style:preserve-3d;
+  transition:var(--flip);
+  transform:rotateY(0deg);
+  border-radius:var(--r-card);
+}
+.flip[aria-pressed="true"] .flip__inner{transform:rotateY(180deg);}
+.flip__face{
+  position:absolute;inset:0;
+  backface-visibility:hidden;
+  border-radius:var(--r-card);
+  background:var(--card);
+  padding:36px;
+  display:flex;flex-direction:column;justify-content:space-between;gap:20px;
+  transition:background-color .3s, box-shadow .38s cubic-bezier(.33,1,.68,1);
+}
+.flip__face--back{transform:rotateY(180deg);}
+.flip:hover{scale:1.012;}
+.flip:hover .flip__face{box-shadow:0 18px 60px rgba(0,0,0,.55);}
+
+.quote{margin:0;font-size:19px;line-height:28px;letter-spacing:-.01em;color:var(--cream);}
+.quote--sm{font-size:16px;line-height:24px;}
+.author{display:flex;flex-direction:column;gap:3px;}
+.author b{font-size:14px;font-weight:600;}
+.hint{display:flex;align-items:center;gap:8px;}
+.hint__dot{width:5px;height:5px;border-radius:var(--r-pill);background:var(--cream-dim);}
+.rule-d{height:1px;background:var(--hair);border:0;margin:0;}
+.stat{display:flex;align-items:baseline;justify-content:space-between;padding:10px 0;border-top:1px solid var(--hair);}
+.stat b{font-family:var(--mono);font-weight:500;font-size:14px;}
+
+/* reduced motion: cross-fade instead of rotating in 3D */
+@media (prefers-reduced-motion:reduce){
+  .flip__inner{transition:none;transform:none!important;}
+  .flip__face{transition:opacity .2s ease;}
+  .flip__face--back{transform:none;opacity:0;}
+  .flip[aria-pressed="true"] .flip__face--front{opacity:0;}
+  .flip[aria-pressed="true"] .flip__face--back{opacity:1;}
+  .flip:hover{scale:1;}
+  .band__track{animation:none!important;}
+}
+
+/* ================= E1 — BAND (copy of your site) ================= */
+.band{position:relative;overflow:clip;padding:8px 0 24px;}
+.band__viewport{overflow:clip;}
+.band__track{
+  display:flex;gap:24px;width:max-content;padding-inline:48px;
+  animation:drift 64s linear infinite;
+}
+.band:hover .band__track,
+.band:focus-within .band__track{animation-play-state:paused;}
+@keyframes drift{from{translate:0 0;}to{translate:-50% 0;}}
+.band .flip{width:var(--card-size);height:var(--card-size);flex-shrink:0;}
+.band__note{padding:0 48px;margin:0 0 20px;max-width:64ch;color:var(--cream-dim);font-size:13px;line-height:20px;}
+
+/* ================= E2 — QUAD (light front / dark back) ================= */
+.quad{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--gut);padding:0 48px;}
+.quad .flip{aspect-ratio:1/1;}
+.quad .flip__face--front{
+  background:var(--paper);color:var(--ink);border:1px solid var(--line);
+}
+.quad .flip__face--front .quote{color:var(--ink);}
+.quad .flip__face--front .meta{color:var(--mute-2);}
+.quad .flip__face--back{background:var(--card);color:var(--cream);}
+
+/* ================= E3 — ROWS (rotateX) ================= */
+.rows{display:flex;flex-direction:column;gap:var(--gut);padding:0 48px;}
+.rows .flip{height:132px;}
+.rows .flip__inner{transform:rotateX(0deg);}
+.rows .flip[aria-pressed="true"] .flip__inner{transform:rotateX(180deg);}
+.rows .flip__face{
+  border-radius:20px;flex-direction:row;align-items:center;justify-content:space-between;
+  padding:24px 32px;gap:32px;
+}
+.rows .flip__face--back{transform:rotateX(180deg);}
+@media (prefers-reduced-motion:reduce){
+  .rows .flip__inner{transform:none!important;}
+  .rows .flip__face--back{transform:none;}
+}
+
+/* ================= E4 — DECK ================= */
+.deck-wrap{padding:0 48px;display:flex;gap:56px;align-items:flex-start;}
+.deck{position:relative;width:var(--card-size);height:var(--card-size);flex-shrink:0;}
+.deck .flip{position:absolute;inset:0;transition:var(--lift), opacity .24s;}
+.deck .flip[data-depth="1"]{scale:.92;translate:0 26px;opacity:.55;pointer-events:none;}
+.deck .flip[data-depth="2"]{scale:.84;translate:0 48px;opacity:.3;pointer-events:none;}
+.deck .flip[data-depth="0"]{z-index:3;}
+.deck .flip[data-depth="1"]{z-index:2;}
+.deck .flip[data-depth="2"]{z-index:1;}
+.deck-side{padding-top:8px;max-width:360px;}
+.deck-side h3{margin:0 0 12px;font-size:24px;font-weight:800;letter-spacing:-.02em;}
+.deck-side p{margin:0 0 24px;color:var(--cream-dim);font-size:14px;line-height:22px;}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;height:40px;padding-inline:20px;
+  border-radius:var(--r-ctl);background:var(--cream);color:var(--void);font-size:14px;font-weight:600;cursor:pointer;
+}
+.btn--ghost{background:transparent;color:var(--cream);border:1px solid var(--hair);}
+
+/* ================= E5 — TILT → FLIP ================= */
+.tilt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;padding:0 48px;}
+.tilt-grid .flip{aspect-ratio:4/5;}
+.tilt-grid .flip__inner{transition:var(--flip);}
+.tilt-grid .flip:hover .flip__inner{transform:rotateY(10deg) rotateX(-4deg);}
+.tilt-grid .flip[aria-pressed="true"]:hover .flip__inner,
+.tilt-grid .flip[aria-pressed="true"] .flip__inner{transform:rotateY(180deg);}
+.tilt-grid .flip__face{justify-content:flex-end;}
+.tilt-grid .flip__face--front{background:linear-gradient(180deg,#101012 0%,#0B0B0C 100%);}
+.big-name{font-size:26px;font-weight:800;letter-spacing:-.02em;margin:0;}
+@media (prefers-reduced-motion:reduce){
+  .tilt-grid .flip:hover .flip__inner{transform:none;}
+}
+</style>
+</head>
+<body>
+<div class="doc">
+  <header class="doc__head">
+    <h1 class="doc__title">Flip-card testimonials — 5 explorations</h1>
+    <p class="doc__note">
+      Flip mechanics lifted measurement-for-measurement from davidlafond.xyz: 430&times;430 cards, 38px radius,
+      <code>perspective:1200px</code> on the card, <code>preserve-3d</code> flipper transitioning
+      <code>transform .62s cubic-bezier(.22,1,.36,1)</code>, absolutely-positioned faces with
+      <code>backface-visibility:hidden</code>, back face at <code>rotateY(180deg)</code>, on the
+      <code>#030303</code> / <code>#0B0B0C</code> / <code>#F5F2EA</code> palette in Manrope.
+      Every card carries real text on <strong>both</strong> faces. Quotes are placeholder copy, not your clients' actual words.
+      Cards are real <code>&lt;button&gt;</code>s: click, or Tab + Enter/Space. The hidden face is <code>inert</code> so screen
+      readers never read both sides at once, and <code>prefers-reduced-motion</code> swaps the 3D rotation for a cross-fade.
+    </p>
+  </header>
+
+  <!-- ===================== E1 — BAND ===================== -->
+  <div class="spec">
+    <span class="spec__id">E1</span>
+    <span class="spec__name">Band — faithful copy</span>
+    <span class="spec__why">Your existing pattern: a clipped viewport over a wide track drifting right to left, cards flipping in place. Drift pauses on hover and on keyboard focus, so a flipped card can actually be read.</span>
+  </div>
+  <section class="band" aria-labelledby="e1h">
+    <p class="band__note"><span class="meta" id="e1h">what people say</span><br>
+      Cards drift on their own. Hover or focus to hold the band still, then flip any card for the full story.</p>
+    <div class="band__viewport">
+      <div class="band__track" id="track1">
+        <button class="flip" type="button" aria-pressed="false">
+          <span class="flip__inner">
+            <span class="flip__face flip__face--front">
+              <span class="meta">01 — product</span>
+              <p class="quote">He redrew our onboarding in a week and activation jumped. Two years on it is still the flow we ship against.</p>
+              <span class="author"><b>Maya Okonkwo</b><span class="meta">head of product, cadence</span></span>
+            </span>
+            <span class="flip__face flip__face--back">
+              <span class="meta">01 — what happened</span>
+              <p class="quote quote--sm">Six sessions, one week. He rebuilt the first-run flow around a single decision per screen and wrote the spec himself.</p>
+              <span>
+                <span class="stat"><span class="meta">activation</span><b>+22%</b></span>
+                <span class="stat"><span class="meta">time to value</span><b>4m → 90s</b></span>
+                <span class="stat"><span class="meta">still shipping</span><b>2 yrs</b></span>
+              </span>
+            </span>
+          </span>
+        </button>
+
+        <button class="flip" type="button" aria-pressed="false">
+          <span class="flip__inner">
+            <span class="flip__face flip__face--front">
+              <span class="meta">02 — design</span>
+              <p class="quote">The calmest hands in a redesign I have worked with. Ships, documents, and is never precious about cutting his own darlings.</p>
+              <span class="author"><b>Priya Nair</b><span class="meta">design director, northwind</span></span>
+            </span>
+            <span class="flip__face flip__face--back">
+              <span class="meta">02 — what happened</span>
+              <p class="quote quote--sm">Took a stalled rebrand through eleven weeks of reviews without a single missed handoff, and left the system documented.</p>
+              <span>
+                <span class="stat"><span class="meta">components</span><b>64</b></span>
+                <span class="stat"><span class="meta">review cycles</span><b>11</b></span>
+                <span class="stat"><span class="meta">missed handoffs</span><b>0</b></span>
+              </span>
+            </span>
+          </span>
+        </button>
+
+        <button class="flip" type="button" aria-pressed="false">
+          <span class="flip__inner">
+            <span class="flip__face flip__face--front">
+              <span class="meta">03 — brand</span>
+              <p class="quote">He treats typography like it is load-bearing, because it is. Our brand finally reads like one voice.</p>
+              <span class="author"><b>Idris Bello</b><span class="meta">brand lead, halcyon</span></span>
+            </span>
+            <span class="flip__face flip__face--back">
+              <span class="meta">03 — what happened</span>
+              <p class="quote quote--sm">One type system replaced four competing ones across web, deck and print, with a one-page rule sheet anyone could follow.</p>
+              <span>
+                <span class="stat"><span class="meta">typefaces retired</span><b>4 → 1</b></span>
+                <span class="stat"><span class="meta">surfaces aligned</span><b>3</b></span>
+                <span class="stat"><span class="meta">rule sheet</span><b>1 page</b></span>
+              </span>
+            </span>
+          </span>
+        </button>
+
+        <button class="flip" type="button" aria-pressed="false">
+          <span class="flip__inner">
+            <span class="flip__face flip__face--front">
+              <span class="meta">04 — engineering</span>
+              <p class="quote">Handoff was flawless — tokens, states and edge cases documented before we thought to ask.</p>
+              <span class="author"><b>Theo Walsh</b><span class="meta">eng lead, vertex</span></span>
+            </span>
+            <span class="flip__face flip__face--back">
+              <span class="meta">04 — what happened</span>
+              <p class="quote quote--sm">Shipped a token layer the front end could consume directly, so design QA stopped being a negotiation.</p>
+              <span>
+                <span class="stat"><span class="meta">design QA tickets</span><b>-71%</b></span>
+                <span class="stat"><span class="meta">tokens</span><b>128</b></span>
+                <span class="stat"><span class="meta">rework sprints</span><b>0</b></span>
+              </span>
+            </span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== E2 — QUAD ===================== -->
+  <div class="spec">
+    <span class="spec__id">E2</span>
+    <span class="spec__name">Quad — light front, dark back</span>
+    <span class="spec__why">Four static cards, no drift. The flip also inverts the surface: paper front for scanning, your #0B0B0C card on the back for the detail. The tonal switch does the explaining, so no "flip me" affordance is needed.</span>
+  </div>
+  <section class="quad" aria-label="Testimonials, four up">
+    <button class="flip" type="button" aria-pressed="false">
+      <span class="flip__inner">
+        <span class="flip__face flip__face--front">
+          <span class="meta">cadence</span>
+          <p class="quote">Activation jumped in a week. I still send new designers to study how he thinks.</p>
+          <span class="author"><b>Maya Okonkwo</b><span class="meta">head of product</span></span>
+        </span>
+        <span class="flip__face flip__face--back">
+          <p class="quote quote--sm">Rebuilt first-run around one decision per screen, then wrote the spec so the team could keep going without him.</p>
+          <span class="mark" style="font-size:24px">Maya Okonkwo</span>
+        </span>
+      </span>
+    </button>
+    <button class="flip" type="button" aria-pressed="false">
+      <span class="flip__inner">
+        <span class="flip__face flip__face--front">
+          <span class="meta">northwind</span>
+          <p class="quote">Ships, documents, and never precious about killing his own darlings.</p>
+          <span class="author"><b>Priya Nair</b><span class="meta">design director</span></span>
+        </span>
+        <span class="flip__face flip__face--back">
+          <p class="quote quote--sm">Eleven review cycles, zero missed handoffs, and a documented system at the end of it.</p>
+          <span class="mark" style="font-size:24px">Priya Nair</span>
+        </span>
+      </span>
+    </button>
+    <button class="flip" type="button" aria-pressed="false">
+      <span class="flip__inner">
+        <span class="flip__face flip__face--front">
+          <span class="meta">halcyon</span>
+          <p class="quote">Typography as structure, not decoration. We finally read like one voice.</p>
+          <span class="author"><b>Idris Bello</b><span class="meta">brand lead</span></span>
+        </span>
+        <span class="flip__face flip__face--back">
+          <p class="quote quote--sm">Four competing type systems became one, with a single page of rules anybody could apply.</p>
+          <span class="mark" style="font-size:24px">Idris Bello</span>
+        </span>
+      </span>
+    </button>
+    <button class="flip" type="button" aria-pressed="false">
+      <span class="flip__inner">
+        <span class="flip__face flip__face--front">
+          <span class="meta">loop</span>
+          <p class="quote">He found the real problem in an hour, which is why the rest went fast.</p>
+          <span class="author"><b>Ana Reyes</b><span class="meta">product manager</span></span>
+        </span>
+        <span class="flip__face flip__face--back">
+          <p class="quote quote--sm">Reframed a "navigation problem" as a naming problem, and the redesign shrank to two screens.</p>
+          <span class="mark" style="font-size:24px">Ana Reyes</span>
+        </span>
+      </span>
+    </button>
+  </section>
+
+  <!-- ===================== E3 — ROWS ===================== -->
+  <div class="spec">
+    <span class="spec__id">E3</span>
+    <span class="spec__name">Rows — vertical flip</span>
+    <span class="spec__why">Same mechanic on the X axis so it reads as a page turning rather than a card spinning. Front is the one-line claim, back is the number behind it. Fits many voices in little height.</span>
+  </div>
+  <section class="rows" aria-label="Testimonials, rows">
+    <button class="flip" type="button" aria-pressed="false">
+      <span class="flip__inner">
+        <span class="flip__face flip__face--front">
+          <p class="quote" style="max-width:70ch">He redrew our onboarding in a week and activation jumped.</p>
+          <span class="author" style="text-align:right"><b>Maya Okonkwo</b><span class="meta">cadence</span></span>
+        </span>
+        <span class="flip__face flip__face--back">
+          <span class="meta">the number</span>
+          <p class="quote" style="max-width:70ch">Activation <b>+22%</b>, time-to-value from four minutes to ninety seconds.</p>
+          <span class="meta">still shipping, two years on</span>
+        </span>
+      </span>
+    </button>
+    <button class="flip" type="button" aria-pressed="false">
+      <span class="flip__inner">
+        <span class="flip__face flip__face--front">
+          <p class="quote" style="max-width:70ch">Handoff was flawless — tokens, states and edge cases all documented.</p>
+          <span class="author" style="text-align:right"><b>Theo Walsh</b><span class="meta">vertex</span></span>
+        </span>
+        <span class="flip__face flip__face--back">
+          <span class="meta">the number</span>
+          <p class="quote" style="max-width:70ch">Design QA tickets <b>down 71%</b> across two releases. No rework sprints.</p>
+          <span class="meta">128 tokens, consumed directly by the front end</span>
+        </span>
+      </span>
+    </button>
+    <button class="flip" type="button" aria-pressed="false">
+      <span class="flip__inner">
+        <span class="flip__face flip__face--front">
+          <p class="quote" style="max-width:70ch">A rare mix of taste and follow-through.</p>
+          <span class="author" style="text-align:right"><b>Sofia Lund</b><span class="meta">marrow</span></span>
+        </span>
+        <span class="flip__face flip__face--back">
+          <span class="meta">the number</span>
+          <p class="quote" style="max-width:70ch">Three launches, <b>zero</b> slipped dates, one design system still in use.</p>
+          <span class="meta">engaged again the following quarter</span>
+        </span>
+      </span>
+    </button>
+  </section>
+
+  <!-- ===================== E4 — DECK ===================== -->
+  <div class="spec">
+    <span class="spec__id">E4</span>
+    <span class="spec__name">Deck — one at a time</span>
+    <span class="spec__why">Borrows the depth-stack from your project media (is-depth-0/1/2). Only the top card is interactive: flip it for detail, or advance the deck. Turns 40 testimonials into one object instead of a wall.</span>
+  </div>
+  <section class="deck-wrap" aria-label="Testimonial deck">
+    <div class="deck" id="deck">
+      <button class="flip" type="button" aria-pressed="false" data-depth="0">
+        <span class="flip__inner">
+          <span class="flip__face flip__face--front">
+            <span class="meta">01 / 42</span>
+            <p class="quote">He redrew our onboarding in a week and activation jumped. I still send new designers to study how he thinks.</p>
+            <span class="author"><b>Maya Okonkwo</b><span class="meta">head of product, cadence</span></span>
+          </span>
+          <span class="flip__face flip__face--back">
+            <span class="meta">01 / 42 — detail</span>
+            <p class="quote quote--sm">One decision per screen, spec written by hand, team kept shipping it for two years.</p>
+            <span><span class="stat"><span class="meta">activation</span><b>+22%</b></span><span class="stat"><span class="meta">time to value</span><b>4m → 90s</b></span></span>
+          </span>
+        </span>
+      </button>
+      <button class="flip" type="button" aria-pressed="false" data-depth="1" tabindex="-1">
+        <span class="flip__inner">
+          <span class="flip__face flip__face--front">
+            <span class="meta">02 / 42</span>
+            <p class="quote">Ships, documents, and never precious about killing his own darlings.</p>
+            <span class="author"><b>Priya Nair</b><span class="meta">design director, northwind</span></span>
+          </span>
+          <span class="flip__face flip__face--back"><p class="quote quote--sm">Eleven review cycles, zero missed handoffs.</p></span>
+        </span>
+      </button>
+      <button class="flip" type="button" aria-pressed="false" data-depth="2" tabindex="-1">
+        <span class="flip__inner">
+          <span class="flip__face flip__face--front">
+            <span class="meta">03 / 42</span>
+            <p class="quote">Typography as structure, not decoration.</p>
+            <span class="author"><b>Idris Bello</b><span class="meta">brand lead, halcyon</span></span>
+          </span>
+          <span class="flip__face flip__face--back"><p class="quote quote--sm">Four type systems became one.</p></span>
+        </span>
+      </button>
+    </div>
+    <div class="deck-side">
+      <h3>What people say</h3>
+      <p>Forty-two of these. Flip the top card for the detail behind the quote, or move to the next voice.</p>
+      <span style="display:flex;gap:8px">
+        <button class="btn" type="button" id="deckNext">Next voice</button>
+        <button class="btn btn--ghost" type="button" id="deckAll">Read all 42</button>
+      </span>
+    </div>
+  </section>
+
+  <!-- ===================== E5 — TILT → FLIP ===================== -->
+  <div class="spec">
+    <span class="spec__id">E5</span>
+    <span class="spec__name">Tilt then flip — name first</span>
+    <span class="spec__why">Inverts the information order: the front is just who they are, so the wall reads as a client list; the quote is the reward on the back. Hover gives a 10&deg; tilt to telegraph depth before the full flip commits.</span>
+  </div>
+  <section class="tilt-grid" aria-label="Testimonials, name first">
+    <button class="flip" type="button" aria-pressed="false">
+      <span class="flip__inner">
+        <span class="flip__face flip__face--front">
+          <span class="meta">cadence · 2024</span>
+          <span><p class="big-name">Maya Okonkwo</p><span class="meta" style="display:block;margin-top:6px">head of product</span></span>
+        </span>
+        <span class="flip__face flip__face--back">
+          <span class="meta">her words</span>
+          <p class="quote">He redrew our onboarding in a week and activation jumped. I still send new designers to study how he thinks.</p>
+          <span class="hint"><span class="hint__dot"></span><span class="meta">+22% activation</span></span>
+        </span>
+      </span>
+    </button>
+    <button class="flip" type="button" aria-pressed="false">
+      <span class="flip__inner">
+        <span class="flip__face flip__face--front">
+          <span class="meta">northwind · 2025</span>
+          <span><p class="big-name">Priya Nair</p><span class="meta" style="display:block;margin-top:6px">design director</span></span>
+        </span>
+        <span class="flip__face flip__face--back">
+          <span class="meta">her words</span>
+          <p class="quote">The calmest hands in a redesign I have worked with. Ships, documents, and never precious about cutting his own darlings.</p>
+          <span class="hint"><span class="hint__dot"></span><span class="meta">11 cycles, 0 missed handoffs</span></span>
+        </span>
+      </span>
+    </button>
+    <button class="flip" type="button" aria-pressed="false">
+      <span class="flip__inner">
+        <span class="flip__face flip__face--front">
+          <span class="meta">vertex · 2025</span>
+          <span><p class="big-name">Theo Walsh</p><span class="meta" style="display:block;margin-top:6px">engineering lead</span></span>
+        </span>
+        <span class="flip__face flip__face--back">
+          <span class="meta">his words</span>
+          <p class="quote">Handoff was flawless — tokens, states and edge cases documented before we thought to ask.</p>
+          <span class="hint"><span class="hint__dot"></span><span class="meta">design QA −71%</span></span>
+        </span>
+      </span>
+    </button>
+  </section>
+</div>
+
+<script>
+/* Flip: one delegated listener. aria-pressed drives the CSS, and the face that is
+   turned away is made inert so assistive tech never reads both sides at once. */
+function syncFaces(card){
+  const flipped = card.getAttribute('aria-pressed') === 'true';
+  const front = card.querySelector('.flip__face--front');
+  const back  = card.querySelector('.flip__face--back');
+  [[front, flipped], [back, !flipped]].forEach(([face, hidden]) => {
+    if (!face) return;
+    face.inert = hidden;
+    face.setAttribute('aria-hidden', String(hidden));
+  });
+  card.setAttribute('aria-label', (flipped ? 'Hide' : 'Show') + ' the detail behind this testimonial');
+}
+
+document.querySelectorAll('.flip').forEach(syncFaces);
+
+document.addEventListener('click', (e) => {
+  const card = e.target.closest('.flip');
+  if (!card) return;
+  card.setAttribute('aria-pressed', card.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
+  syncFaces(card);
+});
+
+/* Band: duplicate the track once so the -50% drift loops seamlessly. */
+const track = document.getElementById('track1');
+if (track) {
+  track.append(...[...track.children].map((c) => {
+    const clone = c.cloneNode(true);
+    clone.setAttribute('aria-hidden', 'true');
+    clone.tabIndex = -1;
+    syncFaces(clone);
+    return clone;
+  }));
+}
+
+/* Deck: advance depth, keep only the top card focusable. */
+const deck = document.getElementById('deck');
+document.getElementById('deckNext')?.addEventListener('click', () => {
+  const cards = [...deck.querySelectorAll('.flip')];
+  cards.forEach((c) => {
+    const next = (Number(c.dataset.depth) + cards.length - 1) % cards.length;
+    c.dataset.depth = String(next);
+    c.setAttribute('aria-pressed', 'false');
+    c.tabIndex = next === 0 ? 0 : -1;
+    syncFaces(c);
+  });
+});
+</script>
+</body>
+</html>

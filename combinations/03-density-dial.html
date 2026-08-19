@@ -1,0 +1,1369 @@
+<!doctype html>
+<html lang="en" data-design-id="c3-density-dial" data-design-title="Density dial">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A single portfolio surface that travels from index rows to a contact sheet without losing selection, focus, or scroll position."
+    />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 44'%3E%3Cpath d='M0 44V0h27.5C38.82 0 48 9.18 48 20.5V44H33.5V22c0-4.14-3.36-7.5-7.5-7.5H14.5V44H0Z'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="../shared/acolorbright.css" />
+    <link rel="stylesheet" href="../shared/hifi.css" />
+    <link rel="stylesheet" href="../shared/review.css" />
+    <script src="../shared/projects.js"></script>
+    <script src="../shared/review.js" defer></script>
+    <title>Density dial — David Lafond Designs</title>
+    <style>
+      :root {
+        --density-duration: 180ms;
+      }
+
+      body {
+        min-width: 320px;
+      }
+
+      .intro {
+        display: grid;
+        grid-template-columns: minmax(0, 0.72fr) minmax(320px, 0.48fr);
+        align-items: end;
+        gap: var(--spacing-64);
+        padding: var(--spacing-64) var(--spacing-32);
+      }
+
+      .intro__eyebrow,
+      .intro__thesis {
+        color: var(--color-graphite);
+      }
+
+      .intro__eyebrow {
+        margin: 0 0 var(--spacing-16);
+        font-size: var(--text-caption);
+        line-height: var(--leading-caption);
+        text-transform: uppercase;
+      }
+
+      .intro__title {
+        max-width: 14ch;
+        margin: 0;
+        font-size: var(--text-heading);
+        font-weight: 400;
+        line-height: var(--leading-heading);
+      }
+
+      .intro__thesis {
+        max-width: 47ch;
+        margin: 0;
+        font-size: var(--text-body);
+        line-height: var(--leading-body);
+      }
+
+      .controls {
+        position: sticky;
+        z-index: 10;
+        top: 0;
+        border-block: 1px solid var(--line);
+        background: var(--color-paper);
+      }
+
+      .controls__line {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--spacing-24);
+        padding: 12px var(--spacing-32);
+      }
+
+      .controls__line + .controls__line {
+        border-top: 1px solid var(--line);
+      }
+
+      .controls__filters {
+        align-items: baseline;
+      }
+
+      .controls__count {
+        flex: 0 0 auto;
+        margin: 0;
+        color: var(--color-graphite);
+        font-size: var(--text-caption);
+        font-variant-numeric: tabular-nums;
+        line-height: var(--leading-caption);
+        white-space: nowrap;
+      }
+
+      .density-control {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-16);
+      }
+
+      .density-control__label,
+      .density-control__hint {
+        color: var(--color-graphite);
+        font-size: var(--text-caption);
+        line-height: var(--leading-caption);
+        white-space: nowrap;
+      }
+
+      .segments {
+        display: inline-flex;
+        padding: 0;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-buttons);
+        background: var(--color-mist);
+      }
+
+      .segment {
+        min-height: 32px;
+        padding: 0 var(--spacing-16);
+        border: 0;
+        border-radius: var(--radius-buttons);
+        background: transparent;
+        color: var(--color-graphite);
+        cursor: pointer;
+        font: inherit;
+        font-size: var(--text-caption);
+        letter-spacing: inherit;
+        line-height: var(--leading-caption);
+      }
+
+      .segment:hover {
+        color: var(--color-ink-black);
+      }
+
+      .segment[aria-checked='true'] {
+        background: var(--color-ink-black);
+        color: var(--color-paper);
+      }
+
+      .density-readout {
+        min-width: 15ch;
+        margin: 0;
+        color: var(--color-graphite);
+        font-size: var(--text-caption);
+        line-height: var(--leading-caption);
+        text-align: right;
+      }
+
+      .projects-wrap {
+        min-height: 50dvh;
+      }
+
+      .project-list {
+        margin: 0;
+        overflow-anchor: none;
+        list-style: none;
+      }
+
+      .project[hidden] {
+        display: none;
+      }
+
+      .project-hit {
+        position: relative;
+        width: 100%;
+        border: 0;
+        background: transparent;
+        color: var(--color-ink-black);
+        cursor: pointer;
+        font: inherit;
+        letter-spacing: inherit;
+        text-align: left;
+      }
+
+      .project-hit,
+      .project-media,
+      .project-number,
+      .project-meta {
+        transition:
+          background-color var(--density-duration) var(--ease),
+          color var(--density-duration) var(--ease),
+          border-radius var(--density-duration) var(--ease),
+          opacity var(--density-duration) var(--ease),
+          transform var(--density-duration) var(--ease);
+      }
+
+      .project-media {
+        position: relative;
+        display: grid;
+        overflow: hidden;
+        aspect-ratio: var(--project-ratio);
+        border-radius: var(--radius-images);
+        place-items: center;
+      }
+
+      .project-media--mist {
+        background: var(--color-mist);
+        color: var(--color-ink-black);
+      }
+
+      .project-media--fog {
+        background: var(--color-fog);
+        color: var(--color-ink-black);
+      }
+
+      .project-media--graphite {
+        background: var(--color-graphite);
+        color: var(--color-paper);
+      }
+
+      .project-media--charcoal {
+        background: var(--color-charcoal);
+        color: var(--color-paper);
+      }
+
+      .project-media--ink {
+        background: var(--color-ink-black);
+        color: var(--color-paper);
+      }
+
+      .project-mark {
+        font-size: var(--text-display);
+        line-height: var(--leading-display);
+      }
+
+      .project-media__client {
+        position: absolute;
+        right: var(--spacing-16);
+        bottom: var(--spacing-16);
+        font-size: var(--text-caption);
+        line-height: var(--leading-caption);
+      }
+
+      .project-number,
+      .project-category,
+      .project-year {
+        color: var(--color-graphite);
+        font-size: var(--text-caption);
+        font-variant-numeric: tabular-nums;
+        line-height: var(--leading-caption);
+      }
+
+      .project-title {
+        font-size: var(--text-body);
+        line-height: var(--leading-body);
+      }
+
+      .project-description {
+        color: var(--color-graphite);
+        font-size: var(--text-body-sm);
+        line-height: var(--leading-body-sm);
+      }
+
+      .empty {
+        padding: 96px var(--spacing-32);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .empty h2 {
+        margin: 0;
+        font-size: var(--text-heading);
+        font-weight: 400;
+        line-height: var(--leading-heading);
+      }
+
+      .empty p {
+        max-width: 42ch;
+        margin: var(--spacing-16) 0 0;
+        color: var(--color-graphite);
+        font-size: var(--text-body);
+        line-height: var(--leading-body);
+      }
+
+      /* Index — the split browser at its most compressed. */
+      .project-list[data-density='index'] {
+        display: block;
+        padding: var(--spacing-32);
+      }
+
+      .project-list[data-density='index'] .project:nth-child(odd) .project-hit {
+        background: var(--color-mist);
+      }
+
+      .project-list[data-density='index'] .project-hit {
+        display: grid;
+        grid-template-columns: 32px 40px minmax(0, 1fr);
+        align-items: center;
+        gap: var(--spacing-16);
+        min-height: 56px;
+        padding: var(--spacing-8) var(--spacing-16);
+      }
+
+      .project-list[data-density='index'] .project-media {
+        width: 40px;
+        height: 40px;
+        aspect-ratio: auto;
+        border-radius: var(--radius-buttons);
+      }
+
+      .project-list[data-density='index'] .project-mark {
+        font-size: var(--text-caption);
+      }
+
+      .project-list[data-density='index'] .project-media__client {
+        display: none;
+      }
+
+      .project-list[data-density='index'] .project-meta {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 112px 56px;
+        align-items: baseline;
+        gap: var(--spacing-16);
+        min-width: 0;
+      }
+
+      .project-list[data-density='index'] .project-title {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .project-list[data-density='index'] .project-description {
+        display: none;
+      }
+
+      .project-list[data-density='index'] .project-year {
+        text-align: right;
+      }
+
+      .project-list[data-density='index'] .project-hit:hover {
+        background: var(--color-fog);
+      }
+
+      .project-list[data-density='index'] .project-hit[aria-current='true'],
+      .project-list[data-density='index'] .project:nth-child(odd) .project-hit[aria-current='true'] {
+        background: var(--color-ink-black);
+        color: var(--color-paper);
+      }
+
+      .project-list[data-density='index'] .project-hit[aria-current='true'] :is(.project-number, .project-category, .project-year) {
+        color: var(--color-fog);
+      }
+
+      /* Rows — the same records open enough to carry a synopsis. */
+      .project-list[data-density='rows'] {
+        display: block;
+        padding: var(--spacing-32);
+      }
+
+      .project-list[data-density='rows'] .project-hit {
+        display: grid;
+        grid-template-columns: 32px 160px minmax(0, 1fr);
+        align-items: center;
+        gap: var(--spacing-24);
+        padding: var(--spacing-24) var(--spacing-16);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .project-list[data-density='rows'] .project:first-child .project-hit {
+        border-top: 1px solid var(--line);
+      }
+
+      .project-list[data-density='rows'] .project-media {
+        width: 160px;
+      }
+
+      .project-list[data-density='rows'] .project-mark {
+        font-size: var(--text-subheading);
+      }
+
+      .project-list[data-density='rows'] .project-meta {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas:
+          'title year'
+          'description description'
+          'category category';
+        align-items: baseline;
+        gap: var(--spacing-8) var(--spacing-16);
+        min-width: 0;
+      }
+
+      .project-list[data-density='rows'] .project-title {
+        grid-area: title;
+        font-size: var(--text-subheading);
+        line-height: var(--leading-subheading);
+      }
+
+      .project-list[data-density='rows'] .project-description {
+        max-width: 56ch;
+        grid-area: description;
+      }
+
+      .project-list[data-density='rows'] .project-category {
+        grid-area: category;
+      }
+
+      .project-list[data-density='rows'] .project-year {
+        grid-area: year;
+      }
+
+      .project-list[data-density='rows'] .project-hit:hover {
+        background: var(--color-mist);
+      }
+
+      .project-list[data-density='rows'] .project-hit[aria-current='true'] {
+        background: var(--color-ink-black);
+        color: var(--color-paper);
+      }
+
+      .project-list[data-density='rows'] .project-hit[aria-current='true'] :is(.project-number, .project-description, .project-category, .project-year) {
+        color: var(--color-fog);
+      }
+
+      /* Cards — three equal reading columns. */
+      .project-list[data-density='cards'] {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: var(--spacing-64) var(--spacing-32);
+        padding: var(--spacing-64) var(--spacing-32);
+      }
+
+      .project-list[data-density='cards'] .project-number,
+      .project-list[data-density='sheet'] .project-number {
+        position: absolute;
+        z-index: 2;
+        top: var(--spacing-16);
+        left: var(--spacing-16);
+        display: grid;
+        width: 24px;
+        height: 24px;
+        place-items: center;
+        border-radius: 50%;
+        background: var(--color-pure-black);
+        color: var(--color-paper);
+      }
+
+      .project-list[data-density='cards'] .project-meta {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas:
+          'title year'
+          'description description'
+          'category category';
+        align-items: baseline;
+        gap: var(--spacing-8) var(--spacing-16);
+        margin-top: var(--spacing-16);
+      }
+
+      .project-list[data-density='cards'] .project-title {
+        grid-area: title;
+      }
+
+      .project-list[data-density='cards'] .project-description {
+        grid-area: description;
+      }
+
+      .project-list[data-density='cards'] .project-category {
+        grid-area: category;
+      }
+
+      .project-list[data-density='cards'] .project-year {
+        grid-area: year;
+        text-align: right;
+      }
+
+      .project-list[data-density='cards'] .project-hit:hover .project-media {
+        filter: contrast(0.88) brightness(1.04);
+      }
+
+      .project-list[data-density='cards'] .project-hit[aria-current='true'] .project-media,
+      .project-list[data-density='sheet'] .project-hit[aria-current='true'] .project-media {
+        outline: 2px solid var(--color-ink-black);
+        outline-offset: 4px;
+      }
+
+      /* Sheet — six across; captions appear only when requested. */
+      .project-list[data-density='sheet'] {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: var(--spacing-24) var(--spacing-16);
+        padding: var(--spacing-32);
+      }
+
+      .project-list[data-density='sheet'] .project-number {
+        top: var(--spacing-8);
+        left: var(--spacing-8);
+      }
+
+      .project-list[data-density='sheet'] .project-mark {
+        font-size: var(--text-subheading);
+      }
+
+      .project-list[data-density='sheet'] .project-media__client {
+        display: none;
+      }
+
+      .project-list[data-density='sheet'] .project-meta {
+        position: absolute;
+        z-index: 1;
+        right: var(--spacing-8);
+        bottom: var(--spacing-8);
+        left: var(--spacing-8);
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas:
+          'title year'
+          'category category';
+        gap: var(--spacing-8);
+        padding: var(--spacing-8);
+        border-radius: var(--radius-buttons);
+        background: var(--color-paper);
+        opacity: 0;
+        transform: translateY(var(--spacing-8));
+      }
+
+      .project-list[data-density='sheet'] .project-title {
+        overflow: hidden;
+        grid-area: title;
+        font-size: var(--text-body-sm);
+        line-height: var(--leading-body-sm);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .project-list[data-density='sheet'] .project-description {
+        display: none;
+      }
+
+      .project-list[data-density='sheet'] .project-category {
+        overflow: hidden;
+        grid-area: category;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .project-list[data-density='sheet'] .project-year {
+        grid-area: year;
+        text-align: right;
+      }
+
+      .project-list[data-density='sheet'] .project-hit:hover .project-meta,
+      .project-list[data-density='sheet'] .project-hit:focus-visible .project-meta {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .project-list[data-density='sheet'] .project-hit:hover .project-media,
+      .project-list[data-density='sheet'] .project-hit:focus-visible .project-media {
+        filter: contrast(0.88) brightness(1.04);
+      }
+
+      .colophon {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: var(--spacing-16);
+        padding: var(--spacing-32);
+        border-top: 1px solid var(--line);
+        color: var(--color-graphite);
+        font-size: var(--text-body-sm);
+        line-height: var(--leading-body-sm);
+      }
+
+      /* Detail overlay */
+      .viewer {
+        width: min(1120px, calc(100vw - var(--spacing-64)));
+        max-width: none;
+        height: min(800px, calc(100dvh - var(--review-bar-height, 0px) - var(--spacing-64)));
+        max-height: none;
+        padding: 0;
+        border: 0;
+        border-radius: var(--radius-images);
+        background: var(--color-paper);
+        color: var(--color-ink-black);
+      }
+
+      .viewer::backdrop {
+        background: rgb(26 26 26 / 62%);
+      }
+
+      .viewer__shell {
+        display: grid;
+        height: 100%;
+        grid-template-rows: auto minmax(0, 1fr) auto;
+      }
+
+      .viewer__bar,
+      .viewer__foot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--spacing-16);
+        padding: var(--spacing-16) var(--spacing-24);
+      }
+
+      .viewer__bar {
+        border-bottom: 1px solid var(--line);
+      }
+
+      .viewer__foot {
+        border-top: 1px solid var(--line);
+      }
+
+      .viewer__position {
+        margin: 0;
+        color: var(--color-graphite);
+        font-size: var(--text-caption);
+        font-variant-numeric: tabular-nums;
+        line-height: var(--leading-caption);
+      }
+
+      .viewer__body {
+        overflow-y: auto;
+        padding: var(--spacing-32);
+        overscroll-behavior: contain;
+      }
+
+      .viewer__spread {
+        display: grid;
+        grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+        gap: var(--spacing-64);
+      }
+
+      .viewer__cover {
+        position: sticky;
+        top: 0;
+        align-self: start;
+      }
+
+      .viewer__intro {
+        min-width: 0;
+      }
+
+      .viewer__kicker {
+        margin: 0 0 var(--spacing-16);
+        color: var(--color-graphite);
+        font-size: var(--text-caption);
+        line-height: var(--leading-caption);
+      }
+
+      .viewer__title {
+        margin: 0;
+        font-size: var(--text-heading);
+        font-weight: 400;
+        line-height: var(--leading-heading);
+      }
+
+      .viewer__lead {
+        margin: var(--spacing-24) 0 0;
+        font-size: var(--text-body);
+        line-height: var(--leading-body);
+      }
+
+      .viewer__chapters {
+        margin-top: var(--spacing-32);
+      }
+
+      .viewer__chapter + .viewer__chapter {
+        margin-top: var(--spacing-24);
+      }
+
+      .viewer__chapter h3 {
+        margin: 0 0 var(--spacing-8);
+        font-size: var(--text-body);
+        font-weight: 400;
+        line-height: var(--leading-body);
+      }
+
+      .viewer__chapter p {
+        margin: 0;
+        color: var(--color-graphite);
+        font-size: var(--text-body-sm);
+        line-height: var(--leading-body-sm);
+      }
+
+      .viewer__facts {
+        margin-top: var(--spacing-32);
+      }
+
+      .viewer__actions {
+        display: flex;
+        gap: var(--spacing-8);
+      }
+
+      ::view-transition-group(*) {
+        animation-duration: var(--density-duration);
+        animation-timing-function: var(--ease);
+      }
+
+      ::view-transition-old(*),
+      ::view-transition-new(*) {
+        animation-duration: var(--density-duration);
+      }
+
+      @media (max-width: 1200px) {
+        .project-list[data-density='sheet'] {
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 900px) {
+        .intro {
+          grid-template-columns: 1fr;
+          align-items: start;
+          gap: var(--spacing-32);
+        }
+
+        .project-list[data-density='cards'] {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .project-list[data-density='sheet'] {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .viewer__spread {
+          grid-template-columns: 1fr;
+          gap: var(--spacing-32);
+        }
+
+        .viewer__cover {
+          position: static;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .intro {
+          gap: var(--spacing-24);
+          padding: var(--spacing-32) var(--spacing-16);
+        }
+
+        .intro__title {
+          font-size: var(--text-subheading);
+          line-height: var(--leading-subheading);
+        }
+
+        .controls__line {
+          align-items: flex-start;
+          gap: 12px;
+          padding: 12px var(--spacing-16);
+        }
+
+        .controls__filters {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto;
+        }
+
+        .chips {
+          gap: 12px;
+        }
+
+        .density-control {
+          min-width: 0;
+          align-items: flex-start;
+          flex-direction: column;
+          gap: var(--spacing-8);
+        }
+
+        .segments {
+          width: 100%;
+        }
+
+        .segment {
+          min-width: 0;
+          flex: 1 1 25%;
+          padding-inline: var(--spacing-8);
+        }
+
+        .density-control__hint,
+        .density-readout {
+          display: none;
+        }
+
+        .project-list[data-density='index'],
+        .project-list[data-density='rows'],
+        .project-list[data-density='cards'],
+        .project-list[data-density='sheet'] {
+          padding-inline: var(--spacing-16);
+        }
+
+        .project-list[data-density='index'] .project-hit {
+          grid-template-columns: 24px 40px minmax(0, 1fr);
+          gap: 12px;
+          padding-inline: var(--spacing-8);
+        }
+
+        .project-list[data-density='index'] .project-meta {
+          grid-template-columns: minmax(0, 1fr) 44px;
+          grid-template-areas:
+            'title year'
+            'category year';
+          gap: var(--spacing-8);
+        }
+
+        .project-list[data-density='index'] .project-title {
+          grid-area: title;
+        }
+
+        .project-list[data-density='index'] .project-category {
+          grid-area: category;
+        }
+
+        .project-list[data-density='index'] .project-year {
+          grid-area: year;
+          align-self: center;
+        }
+
+        .project-list[data-density='rows'] .project-hit {
+          grid-template-columns: 24px 160px minmax(0, 1fr);
+          align-items: start;
+          gap: 12px;
+          padding-inline: var(--spacing-8);
+        }
+
+        .project-list[data-density='rows'] .project-meta {
+          grid-template-columns: 1fr;
+          grid-template-areas:
+            'title'
+            'description'
+            'category'
+            'year';
+        }
+
+        .project-list[data-density='rows'] .project-title {
+          font-size: var(--text-body);
+          line-height: var(--leading-body);
+        }
+
+        .project-list[data-density='cards'] {
+          grid-template-columns: 1fr;
+          gap: var(--spacing-32);
+        }
+
+        .project-list[data-density='sheet'] {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .project-list[data-density='sheet'] .project-title {
+          font-size: var(--text-caption);
+          line-height: var(--leading-caption);
+        }
+
+        .project-list[data-density='sheet'] .project-category {
+          display: none;
+        }
+
+        .viewer {
+          width: 100vw;
+          height: calc(100dvh - var(--review-bar-height, 0px));
+          border-radius: 0;
+        }
+
+        .viewer__body {
+          padding: var(--spacing-16);
+        }
+
+        .viewer__title {
+          font-size: var(--text-subheading);
+          line-height: var(--leading-subheading);
+        }
+
+        .viewer__foot .viewer__position {
+          display: none;
+        }
+
+        .empty,
+        .colophon {
+          padding-inline: var(--spacing-16);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        :root {
+          --density-duration: 0ms;
+        }
+
+        .project {
+          view-transition-name: none !important;
+        }
+
+        .project-list,
+        .project-list *,
+        .project-list *::before,
+        .project-list *::after {
+          animation: none !important;
+          transition: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar__identity">
+        <span class="topbar__wordmark">David Lafond Designs</span>
+        <span class="topbar__context">Combination 03 — Density dial</span>
+      </div>
+      <div class="topbar__actions">
+        <a class="topbar__link" href="index.html">All combinations</a>
+        <a class="topbar__link" href="../designs/01-contact-sheet.html">Contact sheet</a>
+        <a class="topbar__link" href="../designs/03-split-browser.html">Split browser</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="intro" aria-labelledby="pageTitle">
+        <div>
+          <p class="intro__eyebrow">Density dial · 01—04</p>
+          <h1 class="intro__title" id="pageTitle">One archive, four resolutions.</h1>
+        </div>
+        <p class="intro__thesis">
+          The split browser’s list and the contact sheet are not two views — they are two ends of one
+          density continuum. A single control travels between them and nothing is lost on the way.
+        </p>
+      </section>
+
+      <section class="controls" id="controls" aria-label="Project controls">
+        <div class="controls__line controls__filters">
+          <div class="chips" id="chips" role="group" aria-label="Filter projects by category">
+            <button class="chip" type="button" data-category="All" aria-pressed="true">All</button>
+            <button class="chip" type="button" data-category="Product" aria-pressed="false">Product</button>
+            <button class="chip" type="button" data-category="Web" aria-pressed="false">Web</button>
+            <button class="chip" type="button" data-category="Branding" aria-pressed="false">Branding</button>
+            <button class="chip" type="button" data-category="Motion" aria-pressed="false">Motion</button>
+            <button class="chip" type="button" data-category="3D" aria-pressed="false">3D</button>
+            <button class="chip" type="button" data-category="Illustration" aria-pressed="false">Illustration</button>
+            <button class="chip" type="button" data-category="Print" aria-pressed="false">Print</button>
+          </div>
+          <p class="controls__count" id="count" aria-live="polite">12 of 12 projects</p>
+        </div>
+        <div class="controls__line">
+          <div class="density-control">
+            <span class="density-control__label" id="densityLabel">Density</span>
+            <div class="segments" id="segments" role="radiogroup" aria-labelledby="densityLabel">
+              <button class="segment" type="button" role="radio" data-density="index" aria-checked="true" tabindex="0">Index</button>
+              <button class="segment" type="button" role="radio" data-density="rows" aria-checked="false" tabindex="-1">Rows</button>
+              <button class="segment" type="button" role="radio" data-density="cards" aria-checked="false" tabindex="-1">Cards</button>
+              <button class="segment" type="button" role="radio" data-density="sheet" aria-checked="false" tabindex="-1">Sheet</button>
+            </div>
+            <span class="density-control__hint"><kbd>[</kbd> <kbd>]</kbd> to step</span>
+          </div>
+          <p class="density-readout" id="densityStatus" aria-live="polite">Index · densest</p>
+        </div>
+      </section>
+
+      <section class="projects-wrap" aria-label="Selected work">
+        <ul class="project-list" id="projectList" data-density="index" aria-label="Twelve portfolio projects"></ul>
+        <div class="empty" id="empty" hidden>
+          <h2>No projects in that category</h2>
+          <p>Choose All or another discipline to bring the archive back into view.</p>
+        </div>
+      </section>
+
+      <footer class="colophon">
+        <span>David Lafond Designs — selected work, 2023–2026.</span>
+        <span>One list. Density changes; context does not.</span>
+      </footer>
+    </main>
+
+    <dialog class="viewer" id="viewer" aria-labelledby="detailTitle">
+      <div class="viewer__shell">
+        <header class="viewer__bar">
+          <p class="viewer__position" id="viewerPosition"></p>
+          <button class="button button--outlined" id="viewerClose" type="button">Close</button>
+        </header>
+        <div class="viewer__body" id="viewerBody"></div>
+        <footer class="viewer__foot">
+          <p class="viewer__position">← → move through the filtered set</p>
+          <div class="viewer__actions">
+            <button class="button button--outlined" type="button" data-step="previous">Previous</button>
+            <button class="button button--filled" type="button" data-step="next">Next project</button>
+          </div>
+        </footer>
+      </div>
+    </dialog>
+
+    <script>
+      ;(() => {
+        const projects = window.PORTFOLIO_PROJECTS
+        const densitySteps = ['index', 'rows', 'cards', 'sheet']
+        const densityDescriptions = ['Index · densest', 'Rows · expanded', 'Cards · three across', 'Sheet · six across']
+        const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)')
+        const projectList = document.querySelector('#projectList')
+        const controls = document.querySelector('#controls')
+        const chips = document.querySelector('#chips')
+        const count = document.querySelector('#count')
+        const empty = document.querySelector('#empty')
+        const segments = document.querySelector('#segments')
+        const densityStatus = document.querySelector('#densityStatus')
+        const viewer = document.querySelector('#viewer')
+        const viewerBody = document.querySelector('#viewerBody')
+        const viewerPosition = document.querySelector('#viewerPosition')
+
+        let category = 'All'
+        let densityIndex = 0
+        let densityTransition = null
+        let visible = projects.map((_, index) => index)
+        let selected = 0
+        let openIndex = -1
+        let opener = null
+
+        const escapeText = (value) =>
+          String(value).replace(
+            /[&<>'"]/g,
+            (character) =>
+              ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[character],
+          )
+
+        const projectMarkup = (project, index) => `
+          <li class="project" data-project-index="${index}">
+            <button
+              class="project-hit"
+              type="button"
+              data-index="${index}"
+              aria-current="${index === selected}"
+              aria-label="${escapeText(project.title)}, ${escapeText(project.category)}, ${project.year}. Open project detail."
+              tabindex="${index === selected ? '0' : '-1'}"
+            >
+              <span class="project-number">${String(index + 1).padStart(2, '0')}</span>
+              <span
+                class="project-media project-media--${escapeText(project.tone)}"
+                style="--project-ratio: ${project.ratio}"
+                role="img"
+                aria-label="${escapeText(project.title)} — ${escapeText(project.subtitle)}"
+              >
+                <span class="project-mark" aria-hidden="true">${escapeText(project.title.slice(0, 2).toUpperCase())}</span>
+                <span class="project-media__client">${escapeText(project.client)}</span>
+              </span>
+              <span class="project-meta">
+                <span class="project-title">${escapeText(project.title)}</span>
+                <span class="project-description">${escapeText(project.subtitle)} — ${escapeText(project.client)}</span>
+                <span class="project-category">${escapeText(project.category)}</span>
+                <span class="project-year">${project.year}</span>
+              </span>
+            </button>
+          </li>
+        `
+
+        projectList.innerHTML = projects.map(projectMarkup).join('')
+
+        for (const item of projectList.children) {
+          const project = projects[Number(item.dataset.projectIndex)]
+          item.style.viewTransitionName = `project-${project.id}`
+        }
+
+        const projectButton = (index) => projectList.querySelector(`[data-index="${index}"]`)
+        const visibleButtons = () => visible.map(projectButton).filter(Boolean)
+
+        function setSelected(index, { focus = false } = {}) {
+          if (!visible.includes(index)) return
+          const previous = projectButton(selected)
+          previous?.setAttribute('aria-current', 'false')
+          previous?.setAttribute('tabindex', '-1')
+          selected = index
+          const current = projectButton(selected)
+          current?.setAttribute('aria-current', 'true')
+          current?.setAttribute('tabindex', '0')
+          if (focus) current?.focus({ preventScroll: true })
+        }
+
+        function anchorLine() {
+          return Math.min(controls.getBoundingClientRect().bottom + 8, innerHeight - 1)
+        }
+
+        function captureAnchor() {
+          const line = anchorLine()
+          const candidates = visible
+            .map((index) => projectButton(index)?.closest('.project'))
+            .filter(Boolean)
+            .map((item) => ({ item, rect: item.getBoundingClientRect() }))
+            .filter(({ rect }) => rect.bottom > line && rect.top < innerHeight)
+
+          if (candidates.length === 0) return null
+
+          candidates.sort(
+            (a, b) => Math.abs(a.rect.top - line) - Math.abs(b.rect.top - line),
+          )
+
+          return { item: candidates[0].item, top: candidates[0].rect.top }
+        }
+
+        function restoreAnchor(anchor) {
+          if (!anchor?.item?.isConnected || anchor.item.hidden) return
+          const delta = anchor.item.getBoundingClientRect().top - anchor.top
+          if (Math.abs(delta) > 0.5) scrollTo(scrollX, scrollY + delta)
+        }
+
+        function syncDensityControls() {
+          const activeDensity = densitySteps[densityIndex]
+          projectList.dataset.density = activeDensity
+          for (const button of segments.querySelectorAll('[data-density]')) {
+            const active = button.dataset.density === activeDensity
+            button.setAttribute('aria-checked', String(active))
+            button.tabIndex = active ? 0 : -1
+          }
+          densityStatus.textContent = densityDescriptions[densityIndex]
+        }
+
+        function changeDensity(nextIndex) {
+          const clamped = Math.min(Math.max(nextIndex, 0), densitySteps.length - 1)
+          if (clamped === densityIndex) return Promise.resolve()
+
+          const anchor = captureAnchor()
+          const focused = document.activeElement
+          const update = () => {
+            densityIndex = clamped
+            syncDensityControls()
+            projectList.getBoundingClientRect()
+            restoreAnchor(anchor)
+            if (focused?.isConnected) focused.focus({ preventScroll: true })
+          }
+
+          if (!reduceMotion.matches && document.startViewTransition) {
+            densityTransition?.skipTransition()
+            const transition = document.startViewTransition(update)
+            const updateDone = transition.updateCallbackDone.catch(() => {})
+            densityTransition = transition
+            transition.ready.catch(() => {})
+            transition.finished.then(
+              () => {
+                if (densityTransition === transition) densityTransition = null
+              },
+              () => {
+                if (densityTransition === transition) densityTransition = null
+              },
+            )
+            return updateDone
+          }
+
+          update()
+          return Promise.resolve()
+        }
+
+        function applyFilter(nextCategory) {
+          category = nextCategory
+          visible = projects
+            .map((project, index) => ({ project, index }))
+            .filter(({ project }) => category === 'All' || project.category === category)
+            .map(({ index }) => index)
+
+          for (const item of projectList.children) {
+            item.hidden = !visible.includes(Number(item.dataset.projectIndex))
+          }
+
+          for (const chip of chips.querySelectorAll('[data-category]')) {
+            chip.setAttribute('aria-pressed', String(chip.dataset.category === category))
+          }
+
+          count.textContent = `${visible.length} of ${projects.length} projects`
+          empty.hidden = visible.length !== 0
+          projectList.hidden = visible.length === 0
+
+          if (visible.length === 0) {
+            const current = projectButton(selected)
+            current?.setAttribute('aria-current', 'false')
+            current?.setAttribute('tabindex', '-1')
+            selected = -1
+          } else if (!visible.includes(selected)) {
+            selected = visible[0]
+            const current = projectButton(selected)
+            current?.setAttribute('aria-current', 'true')
+            current?.setAttribute('tabindex', '0')
+          }
+        }
+
+        function gridColumns() {
+          if (densitySteps[densityIndex] === 'index' || densitySteps[densityIndex] === 'rows') return 1
+          const buttons = visibleButtons()
+          if (buttons.length < 2) return 1
+          const firstTop = buttons[0].getBoundingClientRect().top
+          const firstDifferentRow = buttons.findIndex(
+            (button) => Math.abs(button.getBoundingClientRect().top - firstTop) > 2,
+          )
+          return firstDifferentRow === -1 ? buttons.length : firstDifferentRow
+        }
+
+        function moveSelection(key) {
+          if (visible.length === 0) return
+          const position = Math.max(visible.indexOf(selected), 0)
+          const columns = gridColumns()
+          const moves = {
+            ArrowLeft: -1,
+            ArrowRight: 1,
+            ArrowUp: -columns,
+            ArrowDown: columns,
+            Home: -position,
+            End: visible.length - 1 - position,
+          }
+          const move = moves[key]
+          if (move === undefined) return
+          const nextPosition = Math.min(Math.max(position + move, 0), visible.length - 1)
+          setSelected(visible[nextPosition], { focus: true })
+          projectButton(selected)?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+        }
+
+        function detailMarkup(project, index) {
+          const chapters = [
+            ['Problem', project.problem],
+            ['Approach', project.approach],
+            ['Outcome', project.outcome],
+          ]
+
+          return `
+            <div class="viewer__spread">
+              <div class="viewer__cover">
+                <div
+                  class="project-media project-media--${escapeText(project.tone)}"
+                  style="--project-ratio: ${project.ratio}"
+                  role="img"
+                  aria-label="${escapeText(project.title)} — ${escapeText(project.subtitle)}"
+                >
+                  <span class="project-mark" aria-hidden="true">${escapeText(project.title.slice(0, 2).toUpperCase())}</span>
+                  <span class="project-media__client">${escapeText(project.client)}</span>
+                </div>
+              </div>
+              <div class="viewer__intro">
+                <p class="viewer__kicker">${escapeText(project.category)} — ${project.year} — ${escapeText(project.subtitle)}</p>
+                <h2 class="viewer__title" id="detailTitle">${escapeText(project.title)}</h2>
+                <p class="viewer__lead">${escapeText(project.lead)}</p>
+                <div class="viewer__chapters">
+                  ${chapters
+                    .map(
+                      ([title, body]) => `
+                        <section class="viewer__chapter">
+                          <h3>${title}</h3>
+                          <p>${escapeText(body)}</p>
+                        </section>
+                      `,
+                    )
+                    .join('')}
+                </div>
+                <dl class="facts viewer__facts">
+                  <div class="fact"><dt>Client</dt><dd>${escapeText(project.client)}</dd></div>
+                  <div class="fact"><dt>Role</dt><dd>${escapeText(project.role)}</dd></div>
+                  <div class="fact"><dt>Team</dt><dd>${escapeText(project.team)}</dd></div>
+                  <div class="fact"><dt>Duration</dt><dd>${escapeText(project.duration)}</dd></div>
+                </dl>
+              </div>
+            </div>
+          `
+        }
+
+        function paintViewer(index) {
+          const position = visible.indexOf(index)
+          if (position < 0) return
+          openIndex = index
+          const project = projects[index]
+          viewerBody.innerHTML = detailMarkup(project, index)
+          viewerPosition.textContent = `${String(position + 1).padStart(2, '0')} / ${String(visible.length).padStart(2, '0')} — ${project.title}`
+          viewerBody.scrollTop = 0
+          const disabled = visible.length < 2
+          for (const button of viewer.querySelectorAll('[data-step]')) button.disabled = disabled
+        }
+
+        function openViewer(index, trigger) {
+          setSelected(index)
+          opener = trigger
+          paintViewer(index)
+          viewer.showModal()
+        }
+
+        function stepViewer(direction) {
+          if (visible.length < 2) return
+          const position = visible.indexOf(openIndex)
+          const delta = direction === 'next' ? 1 : -1
+          const nextIndex = visible[(position + delta + visible.length) % visible.length]
+          setSelected(nextIndex)
+          paintViewer(nextIndex)
+        }
+
+        function closeViewer() {
+          if (!viewer.open) return
+          const returnIndex = openIndex
+          viewer.close()
+          setTimeout(() => {
+            if (visible.includes(returnIndex)) {
+              setSelected(returnIndex, { focus: true })
+              projectButton(returnIndex)?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+            } else if (opener?.isConnected) {
+              opener.focus({ preventScroll: true })
+            }
+          }, 0)
+        }
+
+        chips.addEventListener('click', (event) => {
+          const chip = event.target.closest('[data-category]')
+          if (chip) applyFilter(chip.dataset.category)
+        })
+
+        segments.addEventListener('click', (event) => {
+          const segment = event.target.closest('[data-density]')
+          if (!segment) return
+          changeDensity(densitySteps.indexOf(segment.dataset.density))
+        })
+
+        segments.addEventListener('keydown', (event) => {
+          const destination = {
+            ArrowLeft: densityIndex - 1,
+            ArrowRight: densityIndex + 1,
+            Home: 0,
+            End: densitySteps.length - 1,
+          }[event.key]
+          if (destination === undefined) return
+          event.preventDefault()
+          const clamped = Math.min(Math.max(destination, 0), densitySteps.length - 1)
+          changeDensity(clamped).then(() => {
+            segments.querySelector(`[data-density="${densitySteps[clamped]}"]`)?.focus({ preventScroll: true })
+          })
+        })
+
+        projectList.addEventListener('focusin', (event) => {
+          const button = event.target.closest('[data-index]')
+          if (button) setSelected(Number(button.dataset.index))
+        })
+
+        projectList.addEventListener('click', (event) => {
+          const button = event.target.closest('[data-index]')
+          if (button) openViewer(Number(button.dataset.index), button)
+        })
+
+        projectList.addEventListener('keydown', (event) => {
+          if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(event.key)) return
+          event.preventDefault()
+          moveSelection(event.key)
+        })
+
+        viewer.addEventListener('click', (event) => {
+          if (event.target === viewer || event.target.closest('#viewerClose')) {
+            closeViewer()
+            return
+          }
+          const step = event.target.closest('[data-step]')
+          if (step && !step.disabled) stepViewer(step.dataset.step)
+        })
+
+        viewer.addEventListener('keydown', (event) => {
+          if (event.key === 'ArrowRight') {
+            event.preventDefault()
+            stepViewer('next')
+          } else if (event.key === 'ArrowLeft') {
+            event.preventDefault()
+            stepViewer('previous')
+          }
+        })
+
+        viewer.addEventListener('cancel', (event) => {
+          event.preventDefault()
+          closeViewer()
+        })
+
+        addEventListener('keydown', (event) => {
+          if (viewer.open || event.metaKey || event.ctrlKey || event.altKey) return
+          const active = document.activeElement
+          if (active?.matches('input, textarea, select, [contenteditable="true"]')) return
+          if (event.key === '[') {
+            event.preventDefault()
+            changeDensity(densityIndex - 1)
+          } else if (event.key === ']') {
+            event.preventDefault()
+            changeDensity(densityIndex + 1)
+          }
+        })
+
+        syncDensityControls()
+      })()
+    </script>
+  </body>
+</html>

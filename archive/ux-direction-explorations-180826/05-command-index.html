@@ -1,0 +1,1341 @@
+<!doctype html>
+<html lang="en" data-design-id="05-command-index" data-design-title="Command index">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A keyboard-first searchable project index for David Lafond Designs."
+    />
+    <title>Command index — David Lafond Designs</title>
+    <link rel="stylesheet" href="../../shared/review.css" />
+    <script src="../../shared/review.js" defer></script>
+    <style>
+      :root {
+        color-scheme: light;
+        --color-canvas: #edf0f2;
+        --color-surface: #f7f8f6;
+        --color-surface-strong: #e2e7e9;
+        --color-ink: #17232d;
+        --color-muted: #64717a;
+        --color-line: #c8d0d4;
+        --color-line-strong: #909ca3;
+        --color-accent: #c94f2c;
+        --color-accent-soft: #f2d8cd;
+        --color-focus: #245fa6;
+        --color-shadow: rgb(23 35 45 / 18%);
+        --color-zebra: rgb(247 248 246 / 56%);
+        --color-backdrop: rgb(23 35 45 / 70%);
+        --swatch-ledger: #39556a;
+        --swatch-northbound: #c5663c;
+        --swatch-atlas: #67978f;
+        --swatch-signal: #755f80;
+        --swatch-foundry: #7d8589;
+        --swatch-quarter: #b68b43;
+        --swatch-meridian: #6d8750;
+        --swatch-harbour: #427e95;
+        --swatch-cadence: #9b5e5d;
+        --swatch-solstice: #be7544;
+        --swatch-terrace: #466d65;
+        --swatch-prism: #536aa0;
+        --font-display: "Avenir Next Condensed", "Arial Narrow", sans-serif;
+        --font-body: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+        --font-data: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        --text-10: 0.625rem;
+        --text-11: 0.6875rem;
+        --text-12: 0.75rem;
+        --text-14: 0.875rem;
+        --text-16: 1rem;
+        --text-20: 1.25rem;
+        --text-40: clamp(2.25rem, 5vw, 4rem);
+        --space-1: 0.25rem;
+        --space-2: 0.5rem;
+        --space-3: 0.75rem;
+        --space-4: 1rem;
+        --space-5: 1.5rem;
+        --space-6: 2rem;
+        --space-7: 3rem;
+        --space-8: 4rem;
+        --radius-1: 0.125rem;
+        --radius-2: 0.25rem;
+        --focus-ring: 0.1875rem;
+        --swatch-size: 2.5rem;
+        --content-max: 112rem;
+        --transition-fast: 140ms ease-out;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html {
+        min-width: 20rem;
+        background: var(--color-canvas);
+        color: var(--color-ink);
+        font-family: var(--font-body);
+        font-synthesis: none;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        padding-bottom: 8rem;
+        background:
+          linear-gradient(var(--color-line) 1px, transparent 1px) 0 0 / 100% 8rem,
+          var(--color-canvas);
+      }
+
+      button,
+      input {
+        font: inherit;
+      }
+
+      button,
+      a {
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      button {
+        color: inherit;
+      }
+
+      a {
+        color: inherit;
+        text-underline-offset: 0.2em;
+      }
+
+      :focus-visible {
+        outline: var(--focus-ring) solid var(--color-focus);
+        outline-offset: var(--focus-ring);
+      }
+
+      .shell {
+        width: min(100%, var(--content-max));
+        margin-inline: auto;
+        padding-inline: var(--space-6);
+      }
+
+      .masthead {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: var(--space-6);
+        align-items: start;
+        padding-block: var(--space-5) var(--space-8);
+      }
+
+      .masthead__back {
+        width: fit-content;
+        font-family: var(--font-data);
+        font-size: var(--text-11);
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .masthead__identity {
+        grid-column: 1;
+        margin-top: var(--space-8);
+      }
+
+      .masthead__eyebrow,
+      .archive-status,
+      .section-label {
+        margin: 0;
+        color: var(--color-muted);
+        font-family: var(--font-data);
+        font-size: var(--text-11);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        max-width: 13ch;
+        margin: var(--space-3) 0 0;
+        font-family: var(--font-display);
+        font-size: var(--text-40);
+        font-stretch: condensed;
+        font-weight: 600;
+        letter-spacing: -0.045em;
+        line-height: 0.9;
+      }
+
+      .direction-note {
+        max-width: 40rem;
+        margin: var(--space-4) 0 0;
+        color: var(--color-muted);
+        font-size: var(--text-14);
+        line-height: 1.45;
+      }
+
+      .command-trigger {
+        display: inline-flex;
+        grid-column: 2;
+        grid-row: 1 / span 2;
+        align-items: center;
+        gap: var(--space-4);
+        min-height: 2.75rem;
+        padding: var(--space-2) var(--space-3);
+        border: 1px solid var(--color-line-strong);
+        border-radius: var(--radius-2);
+        background: var(--color-surface);
+        box-shadow: 0 0.1875rem 0 var(--color-line);
+        cursor: pointer;
+        font-family: var(--font-data);
+        font-size: var(--text-12);
+        font-weight: 700;
+        transition:
+          background var(--transition-fast),
+          transform var(--transition-fast),
+          box-shadow var(--transition-fast);
+      }
+
+      .command-trigger:hover {
+        background: var(--color-surface-strong);
+      }
+
+      .command-trigger:active {
+        transform: translateY(0.125rem);
+        box-shadow: 0 0.0625rem 0 var(--color-line);
+      }
+
+      kbd {
+        display: inline-flex;
+        min-width: 1.5rem;
+        height: 1.5rem;
+        align-items: center;
+        justify-content: center;
+        padding-inline: var(--space-1);
+        border: 1px solid var(--color-line-strong);
+        border-radius: var(--radius-1);
+        background: var(--color-surface);
+        color: var(--color-ink);
+        box-shadow: 0 0.125rem 0 var(--color-line);
+        font-family: var(--font-data);
+        font-size: var(--text-10);
+        line-height: 1;
+      }
+
+      .hint-bar {
+        position: sticky;
+        z-index: 20;
+        top: 0;
+        display: flex;
+        min-height: 2.75rem;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-4);
+        margin-inline: calc(var(--space-6) * -1);
+        padding: var(--space-2) var(--space-6);
+        border-block: 1px solid var(--color-line-strong);
+        background: var(--color-ink);
+        color: var(--color-surface);
+      }
+
+      .hint-bar__label {
+        flex: 0 0 auto;
+        font-family: var(--font-data);
+        font-size: var(--text-10);
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .hint-bar__keys {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: var(--space-4);
+        margin: 0;
+        font-family: var(--font-data);
+        font-size: var(--text-10);
+      }
+
+      .hint-bar__keys span {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+        white-space: nowrap;
+      }
+
+      .hint-bar kbd {
+        border-color: var(--color-muted);
+        background: transparent;
+        color: var(--color-surface);
+        box-shadow: none;
+      }
+
+      .archive-head {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: var(--space-4);
+        padding-block: var(--space-7) var(--space-3);
+      }
+
+      .archive-status {
+        text-align: right;
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+        border-top: 0.1875rem solid var(--color-ink);
+        scrollbar-color: var(--color-line-strong) var(--color-canvas);
+      }
+
+      table {
+        width: 100%;
+        min-width: 43rem;
+        border-collapse: collapse;
+        table-layout: fixed;
+      }
+
+      col.index-col {
+        width: 4rem;
+      }
+
+      col.category-col {
+        width: 13.75rem;
+      }
+
+      col.year-col {
+        width: 6rem;
+      }
+
+      col.swatch-col {
+        width: 4rem;
+      }
+
+      th {
+        height: 2.5rem;
+        padding: 0 var(--space-3);
+        border-bottom: 1px solid var(--color-line-strong);
+        color: var(--color-muted);
+        font-family: var(--font-data);
+        font-size: var(--text-10);
+        letter-spacing: 0.06em;
+        text-align: left;
+        text-transform: uppercase;
+      }
+
+      th:first-child,
+      td:first-child {
+        padding-left: var(--space-2);
+      }
+
+      th:last-child,
+      td:last-child {
+        padding-right: var(--space-2);
+      }
+
+      .sort-button {
+        display: inline-flex;
+        width: 100%;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-2);
+        padding: var(--space-2) 0;
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+        font: inherit;
+        letter-spacing: inherit;
+        text-align: left;
+        text-transform: inherit;
+      }
+
+      .sort-button:hover {
+        color: var(--color-ink);
+      }
+
+      .sort-button[aria-pressed="true"] {
+        color: var(--color-accent);
+        font-weight: 800;
+      }
+
+      .sort-indicator {
+        min-width: 1.2em;
+        font-size: var(--text-12);
+        text-align: right;
+      }
+
+      .project-row {
+        cursor: pointer;
+      }
+
+      .project-row:nth-of-type(4n + 1) {
+        background: var(--color-zebra);
+      }
+
+      .project-row:hover,
+      .project-row[data-open="true"] {
+        background: var(--color-accent-soft);
+      }
+
+      .project-row[data-open="true"] {
+        box-shadow: inset 0.25rem 0 0 var(--color-accent);
+      }
+
+      .project-row td {
+        height: 3.5rem;
+        padding: var(--space-2) var(--space-3);
+        border-bottom: 1px solid var(--color-line);
+        font-size: var(--text-14);
+        vertical-align: middle;
+      }
+
+      .project-row td:not(.title-cell) {
+        font-family: var(--font-data);
+        font-size: var(--text-12);
+      }
+
+      .index-number {
+        color: var(--color-muted);
+      }
+
+      .project-button {
+        display: grid;
+        width: 100%;
+        grid-template-columns: minmax(0, max-content) minmax(0, 1fr) auto;
+        gap: var(--space-2);
+        align-items: baseline;
+        padding: var(--space-2) 0;
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+        text-align: left;
+      }
+
+      .project-name {
+        font-weight: 700;
+      }
+
+      .project-kind {
+        overflow: hidden;
+        color: var(--color-muted);
+        font-size: var(--text-12);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .row-state {
+        color: var(--color-muted);
+        font-family: var(--font-data);
+        font-size: var(--text-12);
+      }
+
+      .project-row[data-open="true"] .row-state {
+        color: var(--color-accent);
+      }
+
+      .swatch {
+        width: var(--swatch-size);
+        aspect-ratio: 1;
+        margin-left: auto;
+        border: 1px solid var(--color-shadow);
+        border-radius: var(--radius-1);
+        background: var(--swatch);
+      }
+
+      .detail-row td {
+        padding: 0;
+        border-bottom: 1px solid var(--color-line-strong);
+        background: var(--color-surface);
+      }
+
+      .detail-panel {
+        display: grid;
+        grid-template-columns: minmax(16rem, 1.15fr) minmax(20rem, 0.85fr);
+        gap: var(--space-6);
+        padding: var(--space-6) var(--space-7) var(--space-7) 4rem;
+        box-shadow: inset 0.25rem 0 0 var(--color-accent);
+      }
+
+      .detail-media {
+        min-height: 14rem;
+        aspect-ratio: var(--ratio);
+        border-radius: var(--radius-2);
+        background: var(--swatch);
+      }
+
+      .detail-copy {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: var(--space-6);
+      }
+
+      .detail-kicker {
+        margin: 0 0 var(--space-3);
+        color: var(--color-accent);
+        font-family: var(--font-data);
+        font-size: var(--text-10);
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .detail-description {
+        max-width: 36rem;
+        margin: 0;
+        font-family: var(--font-display);
+        font-size: var(--text-20);
+        font-weight: 500;
+        letter-spacing: -0.02em;
+        line-height: 1.25;
+      }
+
+      .spec-list {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        margin: 0;
+        border-top: 1px solid var(--color-line);
+      }
+
+      .spec-list div {
+        min-width: 0;
+        padding: var(--space-3) var(--space-3) 0 0;
+      }
+
+      .spec-list dt {
+        color: var(--color-muted);
+        font-family: var(--font-data);
+        font-size: var(--text-10);
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+
+      .spec-list dd {
+        margin: var(--space-1) 0 0;
+        font-family: var(--font-data);
+        font-size: var(--text-11);
+        line-height: 1.35;
+      }
+
+      .command-dialog {
+        width: min(42rem, calc(100% - var(--space-6)));
+        max-height: min(42rem, calc(100dvh - var(--space-6)));
+        margin: auto;
+        padding: 0;
+        overflow: hidden;
+        border: 1px solid var(--color-line-strong);
+        border-top: 0.25rem solid var(--color-accent);
+        border-radius: var(--radius-2);
+        background: var(--color-surface);
+        color: var(--color-ink);
+        box-shadow: 0 1.5rem 4rem var(--color-shadow);
+      }
+
+      .command-dialog::backdrop {
+        background: var(--color-backdrop);
+      }
+
+      .command-form {
+        display: flex;
+        max-height: inherit;
+        flex-direction: column;
+      }
+
+      .command-input-wrap {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        gap: var(--space-3);
+        align-items: center;
+        padding: var(--space-4);
+        border-bottom: 1px solid var(--color-line-strong);
+      }
+
+      .command-input-wrap:focus-within {
+        box-shadow: inset 0 0 0 var(--focus-ring) var(--color-focus);
+      }
+
+      .command-mark {
+        color: var(--color-accent);
+        font-family: var(--font-data);
+        font-size: var(--text-20);
+        font-weight: 800;
+      }
+
+      .command-input {
+        width: 100%;
+        padding: 0;
+        border: 0;
+        outline: 0;
+        background: transparent;
+        color: var(--color-ink);
+        font-family: var(--font-data);
+        font-size: var(--text-16);
+      }
+
+      .command-input::placeholder {
+        color: var(--color-muted);
+      }
+
+      .dialog-close {
+        min-height: 2rem;
+        padding: 0 var(--space-2);
+        border: 1px solid var(--color-line);
+        border-radius: var(--radius-1);
+        background: transparent;
+        cursor: pointer;
+        color: var(--color-muted);
+        font-family: var(--font-data);
+        font-size: var(--text-10);
+        text-transform: uppercase;
+      }
+
+      .dialog-close:hover {
+        border-color: var(--color-line-strong);
+        color: var(--color-ink);
+      }
+
+      .command-meta {
+        display: flex;
+        justify-content: space-between;
+        gap: var(--space-4);
+        padding: var(--space-2) var(--space-4);
+        border-bottom: 1px solid var(--color-line);
+        color: var(--color-muted);
+        font-family: var(--font-data);
+        font-size: var(--text-10);
+      }
+
+      .command-results {
+        min-height: 10rem;
+        margin: 0;
+        padding: var(--space-2);
+        overflow-y: auto;
+        list-style: none;
+      }
+
+      .result-button {
+        display: grid;
+        width: 100%;
+        grid-template-columns: 2.25rem minmax(0, 1fr) auto;
+        gap: var(--space-3);
+        align-items: center;
+        min-height: 3.25rem;
+        padding: var(--space-2);
+        border: 0;
+        border-radius: var(--radius-1);
+        background: transparent;
+        cursor: pointer;
+        text-align: left;
+      }
+
+      .result-button[aria-selected="true"] {
+        background: var(--color-ink);
+        color: var(--color-surface);
+      }
+
+      .result-index,
+      .result-meta {
+        color: var(--color-muted);
+        font-family: var(--font-data);
+        font-size: var(--text-10);
+      }
+
+      .result-button[aria-selected="true"] .result-index,
+      .result-button[aria-selected="true"] .result-meta {
+        color: var(--color-line);
+      }
+
+      .result-title {
+        display: block;
+        font-size: var(--text-14);
+        font-weight: 700;
+      }
+
+      .result-kind {
+        display: block;
+        margin-top: var(--space-1);
+        color: var(--color-muted);
+        font-size: var(--text-11);
+      }
+
+      .result-button[aria-selected="true"] .result-kind {
+        color: var(--color-line);
+      }
+
+      .empty-results {
+        display: grid;
+        min-height: 9rem;
+        place-items: center;
+        padding: var(--space-6);
+        color: var(--color-muted);
+        font-family: var(--font-data);
+        font-size: var(--text-12);
+        text-align: center;
+      }
+
+      @media (max-width: 51.25rem) {
+        .shell {
+          padding-inline: var(--space-4);
+        }
+
+        .masthead {
+          padding-bottom: var(--space-7);
+        }
+
+        .hint-bar {
+          margin-inline: calc(var(--space-4) * -1);
+          padding-inline: var(--space-4);
+        }
+
+        .hint-bar__label {
+          display: none;
+        }
+
+        .hint-bar__keys {
+          width: 100%;
+          justify-content: space-between;
+          gap: var(--space-2);
+        }
+
+        .detail-panel {
+          grid-template-columns: 1fr;
+          padding: var(--space-5) var(--space-5) var(--space-6) var(--space-6);
+        }
+
+        .detail-media {
+          min-height: 0;
+          max-height: 24rem;
+        }
+      }
+
+      @media (max-width: 35rem) {
+        body {
+          padding-bottom: 10rem;
+        }
+
+        .shell {
+          padding-inline: var(--space-3);
+        }
+
+        .masthead {
+          grid-template-columns: 1fr auto;
+          gap: var(--space-4);
+          padding-block: var(--space-4) var(--space-6);
+        }
+
+        .masthead__identity {
+          grid-column: 1 / -1;
+          margin-top: var(--space-6);
+        }
+
+        .command-trigger {
+          grid-row: 1;
+          padding-inline: var(--space-2);
+        }
+
+        .command-trigger__label {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          padding: 0;
+          overflow: hidden;
+          clip: rect(0, 0, 0, 0);
+          white-space: nowrap;
+          border: 0;
+        }
+
+        .hint-bar {
+          margin-inline: calc(var(--space-3) * -1);
+          padding-inline: var(--space-3);
+        }
+
+        .hint-bar__keys span:nth-child(2) {
+          display: none;
+        }
+
+        .archive-head {
+          padding-top: var(--space-6);
+        }
+
+        table {
+          min-width: 36rem;
+        }
+
+        col.index-col {
+          width: 3rem;
+        }
+
+        col.category-col {
+          width: 7.5rem;
+        }
+
+        col.year-col {
+          width: 4.5rem;
+        }
+
+        col.swatch-col {
+          width: 3.25rem;
+        }
+
+        th,
+        .project-row td {
+          padding-inline: var(--space-2);
+        }
+
+        .project-kind {
+          display: none;
+        }
+
+        .project-button {
+          grid-template-columns: minmax(0, 1fr) auto;
+        }
+
+        .detail-panel {
+          padding: var(--space-4) var(--space-4) var(--space-5) var(--space-5);
+        }
+
+        .spec-list {
+          grid-template-columns: 1fr;
+        }
+
+        .command-input-wrap {
+          grid-template-columns: auto minmax(0, 1fr);
+        }
+
+        .dialog-close {
+          grid-column: 1 / -1;
+          min-height: 2.5rem;
+        }
+
+        .command-meta span:last-child {
+          display: none;
+        }
+
+        .result-button {
+          grid-template-columns: 2rem minmax(0, 1fr);
+        }
+
+        .result-meta {
+          display: none;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <header class="masthead">
+        <a class="masthead__back" href="index.html">← All designs</a>
+        <div class="masthead__identity">
+          <p class="masthead__eyebrow">David Lafond Designs / Direction 05</p>
+          <h1>Command index</h1>
+          <p class="direction-note">
+            A keyboard-first archive that treats the portfolio as searchable information, not a gallery.
+          </p>
+        </div>
+        <button class="command-trigger" id="command-trigger" type="button" aria-haspopup="dialog">
+          <span class="command-trigger__label">Search projects</span>
+          <span aria-hidden="true"><kbd class="platform-key">⌘</kbd> <kbd>K</kbd></span>
+        </button>
+      </header>
+
+      <aside class="hint-bar" aria-label="Keyboard shortcuts">
+        <span class="hint-bar__label">Index controls</span>
+        <p class="hint-bar__keys">
+          <span><kbd class="platform-key">⌘</kbd><kbd>K</kbd> search</span>
+          <span><kbd>↑</kbd><kbd>↓</kbd> move</span>
+          <span><kbd>↵</kbd> open</span>
+          <span><kbd>Esc</kbd> close</span>
+        </p>
+      </aside>
+
+      <section aria-labelledby="archive-heading">
+        <div class="archive-head">
+          <p class="section-label" id="archive-heading">Selected work / master index</p>
+          <p class="archive-status" id="archive-status">12 records · 2023—2026</p>
+        </div>
+        <div class="table-wrap">
+          <table aria-describedby="archive-status">
+            <colgroup>
+              <col class="index-col" />
+              <col />
+              <col class="category-col" />
+              <col class="year-col" />
+              <col class="swatch-col" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th scope="col">No.</th>
+                <th scope="col">
+                  <button class="sort-button" type="button" data-sort="title" aria-pressed="false">
+                    <span>Title</span><span class="sort-indicator" aria-hidden="true">↕</span>
+                  </button>
+                </th>
+                <th scope="col">
+                  <button class="sort-button" type="button" data-sort="category" aria-pressed="false">
+                    <span>Category</span><span class="sort-indicator" aria-hidden="true">↕</span>
+                  </button>
+                </th>
+                <th scope="col">
+                  <button class="sort-button" type="button" data-sort="year" aria-pressed="false">
+                    <span>Year</span><span class="sort-indicator" aria-hidden="true">↕</span>
+                  </button>
+                </th>
+                <th scope="col">Tone</th>
+              </tr>
+            </thead>
+            <tbody id="project-list"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <dialog class="command-dialog" id="command-dialog" aria-labelledby="command-dialog-title">
+      <form class="command-form" method="dialog" novalidate>
+        <div class="command-input-wrap">
+          <span class="command-mark" aria-hidden="true">/</span>
+          <label id="command-dialog-title" for="command-input" hidden>Search projects</label>
+          <input
+            class="command-input"
+            id="command-input"
+            type="search"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="Project or category…"
+            aria-controls="command-results"
+            aria-autocomplete="list"
+            aria-expanded="true"
+          />
+          <button class="dialog-close" id="dialog-close" type="button">Esc · close</button>
+        </div>
+        <div class="command-meta">
+          <span id="result-count" aria-live="polite">12 matches</span>
+          <span>Fuzzy match / title + category</span>
+        </div>
+        <ul class="command-results" id="command-results" role="listbox" aria-label="Matching projects"></ul>
+      </form>
+    </dialog>
+
+    <script>
+      (() => {
+        const projects = [
+          {
+            id: "ledger",
+            index: 1,
+            title: "Ledger",
+            kind: "payments console",
+            category: "Product",
+            year: 2026,
+            ratio: "4 / 3",
+            color: "var(--swatch-ledger)",
+            description: "A calm operations console that makes high-volume payment reconciliation legible at a glance.",
+            specs: ["8-week engagement", "UX + interface", "Desktop / responsive"]
+          },
+          {
+            id: "northbound",
+            index: 2,
+            title: "Northbound",
+            kind: "brand system",
+            category: "Branding",
+            year: 2026,
+            ratio: "1 / 1",
+            color: "var(--swatch-northbound)",
+            description: "A durable identity system built to move from trail signage to technical product packaging.",
+            specs: ["14-week engagement", "Strategy + identity", "Global rollout"]
+          },
+          {
+            id: "atlas",
+            index: 3,
+            title: "Atlas",
+            kind: "marketing site",
+            category: "Web",
+            year: 2026,
+            ratio: "16 / 9",
+            color: "var(--swatch-atlas)",
+            description: "An editorial marketing site that turns a complex service map into a direct product story.",
+            specs: ["10-week engagement", "Direction + web", "18 templates"]
+          },
+          {
+            id: "signal",
+            index: 4,
+            title: "Signal",
+            kind: "motion study",
+            category: "Motion",
+            year: 2025,
+            ratio: "16 / 10",
+            color: "var(--swatch-signal)",
+            description: "A modular motion language that gives live broadcast information pace without visual noise.",
+            specs: ["6-week study", "Motion direction", "24 sequences"]
+          },
+          {
+            id: "foundry",
+            index: 5,
+            title: "Foundry",
+            kind: "3D explorations",
+            category: "3D",
+            year: 2025,
+            ratio: "4 / 3",
+            color: "var(--swatch-foundry)",
+            description: "Material and lighting experiments that gave an abstract product launch a tactile center.",
+            specs: ["4-week sprint", "Art direction + 3D", "12 studies"]
+          },
+          {
+            id: "quarter",
+            index: 6,
+            title: "Quarter",
+            kind: "print annual",
+            category: "Print",
+            year: 2025,
+            ratio: "3 / 4",
+            color: "var(--swatch-quarter)",
+            description: "A compact annual report where financial detail and human stories share one clear rhythm.",
+            specs: ["12-week engagement", "Editorial + print", "96 pages"]
+          },
+          {
+            id: "meridian",
+            index: 7,
+            title: "Meridian",
+            kind: "wayfinding kit",
+            category: "Illustration",
+            year: 2025,
+            ratio: "1 / 1",
+            color: "var(--swatch-meridian)",
+            description: "An illustrated wayfinding family that helps a sprawling civic campus feel connected.",
+            specs: ["16-week engagement", "Illustration system", "42 destinations"]
+          },
+          {
+            id: "harbour",
+            index: 8,
+            title: "Harbour",
+            kind: "booking flow",
+            category: "Product",
+            year: 2024,
+            ratio: "4 / 3",
+            color: "var(--swatch-harbour)",
+            description: "A reworked booking flow that keeps changing dates, rooms, and rates easy to compare.",
+            specs: ["9-week engagement", "Research + product", "Mobile / desktop"]
+          },
+          {
+            id: "cadence",
+            index: 9,
+            title: "Cadence",
+            kind: "design system",
+            category: "Product",
+            year: 2024,
+            ratio: "16 / 9",
+            color: "var(--swatch-cadence)",
+            description: "A shared product language that let three teams ship consistent workflows independently.",
+            specs: ["6-month program", "Systems + governance", "64 components"]
+          },
+          {
+            id: "solstice",
+            index: 10,
+            title: "Solstice",
+            kind: "campaign film",
+            category: "Motion",
+            year: 2024,
+            ratio: "16 / 9",
+            color: "var(--swatch-solstice)",
+            description: "A restrained campaign film using shifting daylight to reveal a new seasonal collection.",
+            specs: ["5-week production", "Concept + direction", "90 seconds"]
+          },
+          {
+            id: "terrace",
+            index: 11,
+            title: "Terrace",
+            kind: "retail identity",
+            category: "Branding",
+            year: 2024,
+            ratio: "1 / 1",
+            color: "var(--swatch-terrace)",
+            description: "A flexible retail identity designed to feel local across a growing family of stores.",
+            specs: ["18-week engagement", "Identity + environments", "7 locations"]
+          },
+          {
+            id: "prism",
+            index: 12,
+            title: "Prism",
+            kind: "data viz suite",
+            category: "Web",
+            year: 2023,
+            ratio: "3 / 2",
+            color: "var(--swatch-prism)",
+            description: "A data visualization suite that makes long-range climate scenarios useful to planners.",
+            specs: ["12-week engagement", "Data + interface", "9 chart types"]
+          }
+        ];
+
+        const list = document.querySelector("#project-list");
+        const sortButtons = [...document.querySelectorAll(".sort-button")];
+        const trigger = document.querySelector("#command-trigger");
+        const dialog = document.querySelector("#command-dialog");
+        const input = document.querySelector("#command-input");
+        const closeButton = document.querySelector("#dialog-close");
+        const resultsList = document.querySelector("#command-results");
+        const resultCount = document.querySelector("#result-count");
+        const platformKeys = document.querySelectorAll(".platform-key");
+        const isMac = /Mac|iPhone|iPad/.test(navigator.platform);
+
+        let sortedProjects = [...projects];
+        let sortState = { key: null, direction: "asc" };
+        let openProjectId = null;
+        let activeResult = 0;
+        let matchedProjects = [...projects];
+        let returnFocus = null;
+
+        platformKeys.forEach((key) => {
+          key.textContent = isMac ? "⌘" : "Ctrl";
+        });
+
+        function projectLabel(project) {
+          return `${project.title} — ${project.kind}`;
+        }
+
+        function renderProjects() {
+          list.innerHTML = sortedProjects
+            .map((project) => {
+              const open = project.id === openProjectId;
+              const paddedIndex = String(project.index).padStart(2, "0");
+              return `
+                <tr class="project-row" data-project-id="${project.id}" data-open="${open}" aria-controls="detail-${project.id}">
+                  <td class="index-number">${paddedIndex}</td>
+                  <td class="title-cell">
+                    <button class="project-button" type="button" aria-expanded="${open}" aria-controls="detail-${project.id}">
+                      <span class="project-name">${project.title}</span>
+                      <span class="project-kind">— ${project.kind}</span>
+                      <span class="row-state" aria-hidden="true">${open ? "−" : "+"}</span>
+                    </button>
+                  </td>
+                  <td>${project.category}</td>
+                  <td>${project.year}</td>
+                  <td><div class="swatch" style="--swatch: ${project.color}" aria-label="${project.title} placeholder colour"></div></td>
+                </tr>
+                <tr class="detail-row" id="detail-${project.id}" ${open ? "" : "hidden"}>
+                  <td colspan="5">
+                    <div class="detail-panel">
+                      <div class="detail-media" style="--ratio: ${project.ratio}; --swatch: ${project.color}" role="img" aria-label="Placeholder media for ${project.title}"></div>
+                      <div class="detail-copy">
+                        <div>
+                          <p class="detail-kicker">${project.category} / ${project.year}</p>
+                          <p class="detail-description">${project.description}</p>
+                        </div>
+                        <dl class="spec-list">
+                          <div><dt>Schedule</dt><dd>${project.specs[0]}</dd></div>
+                          <div><dt>Scope</dt><dd>${project.specs[1]}</dd></div>
+                          <div><dt>Delivery</dt><dd>${project.specs[2]}</dd></div>
+                        </dl>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              `;
+            })
+            .join("");
+        }
+
+        function toggleProject(projectId, forceOpen = false) {
+          openProjectId = forceOpen || openProjectId !== projectId ? projectId : null;
+          renderProjects();
+        }
+
+        function sortProjects(key) {
+          const nextDirection = sortState.key === key && sortState.direction === "asc" ? "desc" : "asc";
+          sortState = { key, direction: nextDirection };
+          const factor = nextDirection === "asc" ? 1 : -1;
+          sortedProjects = [...projects].sort((a, b) => {
+            const primary = key === "year"
+              ? a.year - b.year
+              : a[key].localeCompare(b[key], undefined, { sensitivity: "base" });
+            return primary === 0 ? a.index - b.index : primary * factor;
+          });
+          sortButtons.forEach((button) => {
+            const active = button.dataset.sort === key;
+            button.setAttribute("aria-pressed", String(active));
+            button.setAttribute(
+              "aria-label",
+              `${button.dataset.sort}, ${active ? `sorted ${nextDirection === "asc" ? "ascending" : "descending"}` : "not sorted"}`
+            );
+            button.querySelector(".sort-indicator").textContent = active
+              ? nextDirection === "asc" ? "↑" : "↓"
+              : "↕";
+          });
+          renderProjects();
+        }
+
+        function fuzzyScore(query, candidate) {
+          const needle = query.toLocaleLowerCase().trim();
+          const haystack = candidate.toLocaleLowerCase();
+          if (!needle) return 1;
+          if (haystack === needle) return 1000;
+          if (haystack.startsWith(needle)) return 800 - (haystack.length - needle.length);
+          const substringIndex = haystack.indexOf(needle);
+          if (substringIndex !== -1) return 600 - substringIndex * 4 - (haystack.length - needle.length);
+
+          let score = 300;
+          let cursor = -1;
+          let streak = 0;
+          for (const character of needle) {
+            const next = haystack.indexOf(character, cursor + 1);
+            if (next === -1) return Number.NEGATIVE_INFINITY;
+            if (next === cursor + 1) {
+              streak += 1;
+              score += 16 + streak * 3;
+            } else {
+              streak = 0;
+              score -= (next - cursor - 1) * 5;
+            }
+            if (next === 0 || /[\s—-]/.test(haystack[next - 1])) score += 24;
+            cursor = next;
+          }
+          return score - haystack.length;
+        }
+
+        function findMatches(query) {
+          return projects
+            .map((project) => {
+              const titleScore = fuzzyScore(query, projectLabel(project));
+              const categoryScore = fuzzyScore(query, project.category) + 10;
+              return { project, score: Math.max(titleScore, categoryScore) };
+            })
+            .filter((entry) => Number.isFinite(entry.score))
+            .sort((a, b) => b.score - a.score || a.project.index - b.project.index)
+            .map((entry) => entry.project);
+        }
+
+        function renderResults() {
+          matchedProjects = findMatches(input.value);
+          activeResult = Math.min(activeResult, Math.max(0, matchedProjects.length - 1));
+          resultCount.textContent = `${matchedProjects.length} ${matchedProjects.length === 1 ? "match" : "matches"}`;
+
+          if (!matchedProjects.length) {
+            resultsList.innerHTML = `<li class="empty-results">No matching project.<br />Try a title or category such as “Product”.</li>`;
+            input.removeAttribute("aria-activedescendant");
+            return;
+          }
+
+          resultsList.innerHTML = matchedProjects
+            .map((project, index) => `
+              <li role="option" id="result-${project.id}" aria-selected="${index === activeResult}">
+                <button class="result-button" type="button" data-result-id="${project.id}" data-result-index="${index}" aria-selected="${index === activeResult}" tabindex="-1">
+                  <span class="result-index">${String(project.index).padStart(2, "0")}</span>
+                  <span>
+                    <span class="result-title">${project.title}</span>
+                    <span class="result-kind">${project.kind}</span>
+                  </span>
+                  <span class="result-meta">${project.category} · ${project.year}</span>
+                </button>
+              </li>
+            `)
+            .join("");
+          input.setAttribute("aria-activedescendant", `result-${matchedProjects[activeResult].id}`);
+          resultsList.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: "nearest" });
+        }
+
+        function moveResult(step) {
+          if (!matchedProjects.length) return;
+          activeResult = (activeResult + step + matchedProjects.length) % matchedProjects.length;
+          renderResults();
+        }
+
+        function openPalette() {
+          if (dialog.open) return;
+          returnFocus = document.activeElement;
+          input.value = "";
+          activeResult = 0;
+          renderResults();
+          dialog.showModal();
+          requestAnimationFrame(() => input.focus());
+        }
+
+        function closePalette() {
+          if (!dialog.open) return;
+          dialog.close();
+        }
+
+        function selectProject(projectId) {
+          const targetIndex = sortedProjects.findIndex((project) => project.id === projectId);
+          if (targetIndex === -1) return;
+          openProjectId = projectId;
+          renderProjects();
+          closePalette();
+          requestAnimationFrame(() => {
+            const row = list.querySelector(`[data-project-id="${projectId}"]`);
+            row?.scrollIntoView({ behavior: "smooth", block: "center" });
+            row?.querySelector(".project-button")?.focus({ preventScroll: true });
+          });
+        }
+
+        list.addEventListener("click", (event) => {
+          const row = event.target.closest(".project-row");
+          if (!row) return;
+          toggleProject(row.dataset.projectId);
+        });
+
+        sortButtons.forEach((button) => {
+          button.addEventListener("click", () => sortProjects(button.dataset.sort));
+        });
+
+        trigger.addEventListener("click", openPalette);
+        closeButton.addEventListener("click", closePalette);
+
+        input.addEventListener("input", () => {
+          activeResult = 0;
+          renderResults();
+        });
+
+        input.addEventListener("keydown", (event) => {
+          if (event.key === "ArrowDown") {
+            event.preventDefault();
+            moveResult(1);
+          } else if (event.key === "ArrowUp") {
+            event.preventDefault();
+            moveResult(-1);
+          } else if (event.key === "Enter") {
+            event.preventDefault();
+            const selected = matchedProjects[activeResult];
+            if (selected) selectProject(selected.id);
+          }
+        });
+
+        resultsList.addEventListener("mousemove", (event) => {
+          const button = event.target.closest(".result-button");
+          if (!button) return;
+          const nextIndex = Number(button.dataset.resultIndex);
+          if (nextIndex === activeResult) return;
+          activeResult = nextIndex;
+          renderResults();
+        });
+
+        resultsList.addEventListener("click", (event) => {
+          const button = event.target.closest(".result-button");
+          if (button) selectProject(button.dataset.resultId);
+        });
+
+        dialog.addEventListener("cancel", (event) => {
+          event.preventDefault();
+          closePalette();
+        });
+
+        dialog.addEventListener("close", () => {
+          const focusTarget = returnFocus;
+          returnFocus = null;
+          if (focusTarget instanceof HTMLElement && document.contains(focusTarget)) focusTarget.focus();
+        });
+
+        document.addEventListener("keydown", (event) => {
+          if (event.key.toLocaleLowerCase() === "k" && (event.metaKey || event.ctrlKey)) {
+            event.preventDefault();
+            openPalette();
+          }
+        });
+
+        renderProjects();
+      })();
+    </script>
+  </body>
+</html>

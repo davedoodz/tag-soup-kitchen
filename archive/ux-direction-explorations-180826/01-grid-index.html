@@ -1,0 +1,1067 @@
+<!doctype html>
+<html lang="en" data-design-id="01-grid-index" data-design-title="Contact sheet grid">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A dense, filterable contact-sheet direction for David Lafond Designs."
+    />
+    <link rel="stylesheet" href="../../shared/review.css" />
+    <script src="../../shared/review.js" defer></script>
+    <title>Contact sheet grid — David Lafond Designs</title>
+    <style>
+      :root {
+        --canvas: #edf0eb;
+        --surface: #f7f8f4;
+        --surface-strong: #dfe4dc;
+        --ink: #182019;
+        --ink-muted: #596059;
+        --line: #b9c0b7;
+        --line-strong: #737b72;
+        --accent: #ed5d3b;
+        --overlay: rgb(24 32 25 / 90%);
+        --overlay-ink: #f3f5ef;
+        --focus: #2458d6;
+
+        --ledger: #d9583b;
+        --northbound: #6f8065;
+        --atlas: #416cad;
+        --signal: #d38c2f;
+        --foundry: #675b73;
+        --quarter: #c7b377;
+        --meridian: #497d78;
+        --harbour: #8b5044;
+        --cadence: #4f6680;
+        --solstice: #ae604c;
+        --terrace: #64704b;
+        --prism: #737bb1;
+
+        --font-display: "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+        --font-utility: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+        --text-xs: 0.6875rem;
+        --text-sm: 0.8125rem;
+        --text-body: 1rem;
+        --text-title: clamp(2.75rem, 7vw, 6.75rem);
+        --leading-tight: 0.86;
+        --leading-body: 1.35;
+
+        --space-1: 0.25rem;
+        --space-2: 0.5rem;
+        --space-3: 0.75rem;
+        --space-4: 1rem;
+        --space-5: 1.5rem;
+        --space-6: 2rem;
+        --space-8: 3rem;
+        --space-10: 4rem;
+        --page-gutter: clamp(0.75rem, 2vw, 2rem);
+        --control-height: 2rem;
+        --rule: 1px;
+        --focus-width: 3px;
+        --cell-height: 15rem;
+        --grid-gap: 0.5rem;
+        --grid-columns: 6;
+        --total-rows: 2;
+        --grid-min-height: calc(
+          (var(--total-rows) * var(--cell-height)) +
+            ((var(--total-rows) - 1) * var(--grid-gap))
+        );
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        background: var(--canvas);
+        color: var(--ink);
+        font-family: var(--font-utility);
+        font-synthesis: none;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      body {
+        min-width: 20rem;
+        margin: 0;
+        padding-bottom: 96px;
+        background: var(--canvas);
+        font-size: var(--text-sm);
+        line-height: var(--leading-body);
+      }
+
+      button,
+      a {
+        color: inherit;
+        font: inherit;
+      }
+
+      button {
+        border: 0;
+      }
+
+      button:not(:disabled),
+      a {
+        cursor: pointer;
+      }
+
+      :focus-visible {
+        outline: var(--focus-width) solid var(--focus);
+        outline-offset: var(--space-1);
+      }
+
+      .skip-link {
+        position: fixed;
+        z-index: 20;
+        top: var(--space-2);
+        left: var(--space-2);
+        translate: 0 -200%;
+        padding: var(--space-2) var(--space-3);
+        background: var(--ink);
+        color: var(--surface);
+      }
+
+      .skip-link:focus {
+        translate: 0;
+      }
+
+      .masthead {
+        min-height: clamp(15rem, 34vw, 32rem);
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        padding: var(--space-4) var(--page-gutter) var(--space-5);
+        border-bottom: var(--rule) solid var(--line-strong);
+      }
+
+      .masthead__topline {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: var(--space-4);
+      }
+
+      .back-link {
+        text-decoration-color: var(--line-strong);
+        text-decoration-thickness: var(--rule);
+        text-underline-offset: var(--space-1);
+      }
+
+      .back-link:hover {
+        text-decoration-color: var(--accent);
+      }
+
+      .masthead__edition {
+        color: var(--ink-muted);
+        text-align: right;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        align-self: end;
+        max-width: 11ch;
+        margin: var(--space-8) 0 var(--space-5);
+        font-family: var(--font-display);
+        font-size: var(--text-title);
+        font-stretch: condensed;
+        font-weight: 700;
+        letter-spacing: -0.065em;
+        line-height: var(--leading-tight);
+        text-transform: uppercase;
+      }
+
+      .direction-note {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: end;
+        gap: var(--space-5);
+        margin: 0;
+        color: var(--ink-muted);
+      }
+
+      .direction-note span:first-child {
+        max-width: 42rem;
+      }
+
+      .tools {
+        position: sticky;
+        z-index: 10;
+        top: 0;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: var(--space-4);
+        min-height: 4rem;
+        padding: var(--space-3) var(--page-gutter);
+        border-bottom: var(--rule) solid var(--line-strong);
+        background: var(--canvas);
+      }
+
+      .filters,
+      .density {
+        display: flex;
+        align-items: center;
+        gap: var(--space-1);
+      }
+
+      .filters {
+        min-width: 0;
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+
+      .filters::-webkit-scrollbar {
+        display: none;
+      }
+
+      .filter-button,
+      .density-button {
+        min-height: var(--control-height);
+        flex: 0 0 auto;
+        padding: var(--space-1) var(--space-2);
+        border: var(--rule) solid transparent;
+        background: transparent;
+        color: var(--ink-muted);
+      }
+
+      .filter-button:hover,
+      .density-button:hover {
+        color: var(--ink);
+        border-color: var(--line);
+      }
+
+      .filter-button[aria-pressed="true"],
+      .density-button[aria-pressed="true"] {
+        border-color: var(--ink);
+        background: var(--ink);
+        color: var(--surface);
+      }
+
+      .density {
+        padding-left: var(--space-4);
+        border-left: var(--rule) solid var(--line);
+      }
+
+      .density__label {
+        min-width: 12ch;
+        color: var(--ink-muted);
+        white-space: nowrap;
+      }
+
+      .work-index {
+        padding: var(--page-gutter);
+      }
+
+      .project-grid {
+        min-height: var(--grid-min-height);
+        display: grid;
+        grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+        grid-auto-rows: var(--cell-height);
+        gap: var(--grid-gap);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .project-item {
+        min-width: 0;
+      }
+
+      .project-trigger {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr);
+        gap: var(--space-2);
+        padding: var(--space-2);
+        border: var(--rule) solid var(--line);
+        background: var(--surface);
+        text-align: left;
+      }
+
+      .project-trigger:hover {
+        border-color: var(--ink);
+      }
+
+      .project-trigger:focus-visible {
+        z-index: 1;
+      }
+
+      .project-register {
+        display: flex;
+        justify-content: space-between;
+        gap: var(--space-2);
+        color: var(--ink-muted);
+        font-size: var(--text-xs);
+      }
+
+      .media-stage {
+        min-height: 0;
+        display: grid;
+        place-items: center;
+      }
+
+      .media-viewport {
+        position: relative;
+        height: 100%;
+        max-width: 100%;
+        aspect-ratio: var(--ratio);
+        overflow: hidden;
+        background: var(--swatch);
+      }
+
+      .project-meta {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding: var(--space-3);
+        background: var(--overlay);
+        color: var(--overlay-ink);
+        opacity: 0;
+        transition: opacity 160ms ease-out;
+      }
+
+      .project-meta__title {
+        margin: 0 0 var(--space-2);
+        font-family: var(--font-display);
+        font-size: clamp(1.125rem, 1.5vw, 1.5rem);
+        font-weight: 700;
+        letter-spacing: -0.035em;
+        line-height: 1;
+      }
+
+      .project-meta__details {
+        display: flex;
+        justify-content: space-between;
+        gap: var(--space-2);
+        color: var(--overlay-ink);
+        font-size: var(--text-xs);
+      }
+
+      .project-trigger:hover .project-meta,
+      .project-trigger:focus-visible .project-meta {
+        opacity: 1;
+      }
+
+      .project-dialog {
+        width: min(70rem, calc(100vw - (2 * var(--page-gutter))));
+        max-width: none;
+        max-height: calc(100dvh - (2 * var(--page-gutter)));
+        margin: auto;
+        padding: 0;
+        border: var(--rule) solid var(--ink);
+        background: var(--surface);
+        color: var(--ink);
+      }
+
+      .project-dialog::backdrop {
+        background: rgb(24 32 25 / 72%);
+      }
+
+      .dialog-shell {
+        min-height: min(44rem, calc(100dvh - (2 * var(--page-gutter))));
+        display: grid;
+        grid-template-columns: minmax(0, 1.7fr) minmax(18rem, 0.8fr);
+      }
+
+      .dialog-media-stage {
+        min-height: 24rem;
+        display: grid;
+        place-items: center;
+        padding: var(--space-6);
+        border-right: var(--rule) solid var(--line-strong);
+        background: var(--surface-strong);
+      }
+
+      .dialog-media {
+        width: 100%;
+        max-height: calc(100dvh - (4 * var(--space-8)));
+        aspect-ratio: var(--dialog-ratio);
+        background: var(--dialog-swatch);
+      }
+
+      .dialog-copy {
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        min-width: 0;
+        padding: var(--space-5);
+      }
+
+      .dialog-topline {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: var(--space-4);
+        padding-bottom: var(--space-4);
+        border-bottom: var(--rule) solid var(--line);
+        color: var(--ink-muted);
+      }
+
+      .dialog-close {
+        min-height: var(--control-height);
+        padding: var(--space-1) var(--space-2);
+        background: transparent;
+        border: var(--rule) solid var(--line);
+      }
+
+      .dialog-close:hover {
+        border-color: var(--ink);
+      }
+
+      .dialog-body {
+        align-self: center;
+        padding-block: var(--space-6);
+      }
+
+      .dialog-title {
+        margin: 0;
+        font-family: var(--font-display);
+        font-size: clamp(2.5rem, 5vw, 5.5rem);
+        font-weight: 700;
+        letter-spacing: -0.06em;
+        line-height: var(--leading-tight);
+      }
+
+      .dialog-subtitle {
+        margin: var(--space-3) 0 var(--space-6);
+        color: var(--ink-muted);
+      }
+
+      .dialog-description {
+        max-width: 34ch;
+        margin: 0;
+        font-family: var(--font-display);
+        font-size: 1.25rem;
+        line-height: 1.25;
+      }
+
+      .dialog-controls {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-2);
+        padding-top: var(--space-4);
+        border-top: var(--rule) solid var(--line);
+      }
+
+      .dialog-nav {
+        min-height: 2.75rem;
+        padding: var(--space-2) var(--space-3);
+        border: var(--rule) solid var(--line-strong);
+        background: transparent;
+        text-align: left;
+      }
+
+      .dialog-nav:last-child {
+        text-align: right;
+      }
+
+      .dialog-nav:hover:not(:disabled) {
+        background: var(--ink);
+        color: var(--surface);
+      }
+
+      .dialog-nav:disabled {
+        color: var(--line-strong);
+        cursor: not-allowed;
+      }
+
+      .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      html[data-density="dense"] {
+        --cell-height: 11.75rem;
+        --grid-gap: 0.25rem;
+        --grid-columns: 8;
+        --total-rows: 2;
+      }
+
+      @media (max-width: 72rem) {
+        :root {
+          --grid-columns: 4;
+          --total-rows: 3;
+        }
+
+        html[data-density="dense"] {
+          --grid-columns: 6;
+          --total-rows: 2;
+        }
+      }
+
+      @media (max-width: 60rem) {
+        .tools {
+          grid-template-columns: 1fr;
+          gap: var(--space-2);
+        }
+
+        .density {
+          grid-row: 1;
+          justify-content: flex-end;
+          padding: 0 0 var(--space-2);
+          border-left: 0;
+          border-bottom: var(--rule) solid var(--line);
+        }
+      }
+
+      @media (max-width: 48rem) {
+        :root {
+          --grid-columns: 2;
+          --total-rows: 6;
+        }
+
+        html[data-density="dense"] {
+          --grid-columns: 3;
+          --total-rows: 4;
+        }
+
+        .masthead {
+          min-height: 22rem;
+        }
+
+        .direction-note {
+          grid-template-columns: 1fr;
+        }
+
+
+        .dialog-shell {
+          min-height: 0;
+          grid-template-columns: 1fr;
+        }
+
+        .dialog-media-stage {
+          min-height: 18rem;
+          padding: var(--space-4);
+          border-right: 0;
+          border-bottom: var(--rule) solid var(--line-strong);
+        }
+
+        .dialog-media {
+          width: auto;
+          height: min(42vw, 15rem);
+        }
+
+        .dialog-copy {
+          padding: var(--space-4);
+        }
+      }
+
+      @media (max-width: 30rem) {
+        :root {
+          --cell-height: 18rem;
+          --grid-columns: 1;
+          --total-rows: 12;
+        }
+
+        html[data-density="dense"] {
+          --cell-height: 13rem;
+          --grid-columns: 2;
+          --total-rows: 6;
+        }
+
+        .masthead__edition,
+        .direction-note span:last-child {
+          display: none;
+        }
+
+        .project-dialog {
+          width: calc(100vw - (2 * var(--space-2)));
+          max-height: calc(100dvh - (2 * var(--space-2)));
+        }
+
+        .dialog-shell {
+          display: block;
+        }
+
+        .dialog-media-stage {
+          min-height: 13rem;
+        }
+
+        .dialog-copy {
+          display: block;
+        }
+
+        .dialog-body {
+          padding-block: var(--space-5);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip-link" href="#projects">Skip to projects</a>
+
+    <header class="masthead">
+      <div class="masthead__topline">
+        <a class="back-link" href="index.html">All designs</a>
+        <span class="masthead__edition">David Lafond Designs / Selected work 2023—2026</span>
+      </div>
+      <h1>Contact sheet</h1>
+      <p class="direction-note">
+        <span>A high-speed archive view: filter, scan, and open twelve projects without leaving the sheet.</span>
+        <span>Use arrow keys to move through work</span>
+      </p>
+    </header>
+
+    <nav class="tools" aria-label="Project view controls">
+      <div class="filters" role="group" aria-label="Filter projects">
+        <button class="filter-button" type="button" data-filter="All" aria-pressed="true">All</button>
+        <button class="filter-button" type="button" data-filter="Product" aria-pressed="false">Product</button>
+        <button class="filter-button" type="button" data-filter="Web" aria-pressed="false">Web</button>
+        <button class="filter-button" type="button" data-filter="Branding" aria-pressed="false">Branding</button>
+        <button class="filter-button" type="button" data-filter="Motion" aria-pressed="false">Motion</button>
+        <button class="filter-button" type="button" data-filter="3D" aria-pressed="false">3D</button>
+        <button class="filter-button" type="button" data-filter="Illustration" aria-pressed="false">Illustration</button>
+        <button class="filter-button" type="button" data-filter="Print" aria-pressed="false">Print</button>
+      </div>
+
+      <div class="density" role="group" aria-label="Grid density">
+        <span class="density__label" id="result-count" aria-live="polite">12 projects</span>
+        <button class="density-button" type="button" data-density="comfortable" aria-pressed="true">Comfortable</button>
+        <button class="density-button" type="button" data-density="dense" aria-pressed="false">Dense</button>
+      </div>
+    </nav>
+
+    <main class="work-index" id="projects" tabindex="-1">
+      <h2 class="visually-hidden">Selected projects</h2>
+      <ol class="project-grid" aria-label="12 projects">
+        <li class="project-item" data-category="Product">
+          <button class="project-trigger" type="button" data-project="0" tabindex="0" aria-label="Open Ledger — payments console">
+            <span class="project-register"><span>01 / LDG</span><span>4:3</span></span>
+            <span class="media-stage">
+              <span class="media-viewport" style="--ratio: 4 / 3; --swatch: var(--ledger)">
+                <span class="project-meta"><strong class="project-meta__title">Ledger — payments console</strong><span class="project-meta__details"><span>Product</span><span>2026</span></span></span>
+              </span>
+            </span>
+          </button>
+        </li>
+        <li class="project-item" data-category="Branding">
+          <button class="project-trigger" type="button" data-project="1" tabindex="-1" aria-label="Open Northbound — brand system">
+            <span class="project-register"><span>02 / NTH</span><span>1:1</span></span>
+            <span class="media-stage">
+              <span class="media-viewport" style="--ratio: 1 / 1; --swatch: var(--northbound)">
+                <span class="project-meta"><strong class="project-meta__title">Northbound — brand system</strong><span class="project-meta__details"><span>Branding</span><span>2026</span></span></span>
+              </span>
+            </span>
+          </button>
+        </li>
+        <li class="project-item" data-category="Web">
+          <button class="project-trigger" type="button" data-project="2" tabindex="-1" aria-label="Open Atlas — marketing site">
+            <span class="project-register"><span>03 / ATL</span><span>16:9</span></span>
+            <span class="media-stage">
+              <span class="media-viewport" style="--ratio: 16 / 9; --swatch: var(--atlas)">
+                <span class="project-meta"><strong class="project-meta__title">Atlas — marketing site</strong><span class="project-meta__details"><span>Web</span><span>2026</span></span></span>
+              </span>
+            </span>
+          </button>
+        </li>
+        <li class="project-item" data-category="Motion">
+          <button class="project-trigger" type="button" data-project="3" tabindex="-1" aria-label="Open Signal — motion study">
+            <span class="project-register"><span>04 / SGL</span><span>16:10</span></span>
+            <span class="media-stage">
+              <span class="media-viewport" style="--ratio: 16 / 10; --swatch: var(--signal)">
+                <span class="project-meta"><strong class="project-meta__title">Signal — motion study</strong><span class="project-meta__details"><span>Motion</span><span>2025</span></span></span>
+              </span>
+            </span>
+          </button>
+        </li>
+        <li class="project-item" data-category="3D">
+          <button class="project-trigger" type="button" data-project="4" tabindex="-1" aria-label="Open Foundry — 3D explorations">
+            <span class="project-register"><span>05 / FND</span><span>4:3</span></span>
+            <span class="media-stage">
+              <span class="media-viewport" style="--ratio: 4 / 3; --swatch: var(--foundry)">
+                <span class="project-meta"><strong class="project-meta__title">Foundry — 3D explorations</strong><span class="project-meta__details"><span>3D</span><span>2025</span></span></span>
+              </span>
+            </span>
+          </button>
+        </li>
+        <li class="project-item" data-category="Print">
+          <button class="project-trigger" type="button" data-project="5" tabindex="-1" aria-label="Open Quarter — print annual">
+            <span class="project-register"><span>06 / QTR</span><span>3:4</span></span>
+            <span class="media-stage">
+              <span class="media-viewport" style="--ratio: 3 / 4; --swatch: var(--quarter)">
+                <span class="project-meta"><strong class="project-meta__title">Quarter — print annual</strong><span class="project-meta__details"><span>Print</span><span>2025</span></span></span>
+              </span>
+            </span>
+          </button>
+        </li>
+        <li class="project-item" data-category="Illustration">
+          <button class="project-trigger" type="button" data-project="6" tabindex="-1" aria-label="Open Meridian — wayfinding kit">
+            <span class="project-register"><span>07 / MRD</span><span>1:1</span></span>
+            <span class="media-stage">
+              <span class="media-viewport" style="--ratio: 1 / 1; --swatch: var(--meridian)">
+                <span class="project-meta"><strong class="project-meta__title">Meridian — wayfinding kit</strong><span class="project-meta__details"><span>Illustration</span><span>2025</span></span></span>
+              </span>
+            </span>
+          </button>
+        </li>
+        <li class="project-item" data-category="Product">
+          <button class="project-trigger" type="button" data-project="7" tabindex="-1" aria-label="Open Harbour — booking flow">
+            <span class="project-register"><span>08 / HBR</span><span>4:3</span></span>
+            <span class="media-stage">
+              <span class="media-viewport" style="--ratio: 4 / 3; --swatch: var(--harbour)">
+                <span class="project-meta"><strong class="project-meta__title">Harbour — booking flow</strong><span class="project-meta__details"><span>Product</span><span>2024</span></span></span>
+              </span>
+            </span>
+          </button>
+        </li>
+        <li class="project-item" data-category="Product">
+          <button class="project-trigger" type="button" data-project="8" tabindex="-1" aria-label="Open Cadence — design system">
+            <span class="project-register"><span>09 / CDN</span><span>16:9</span></span>
+            <span class="media-stage">
+              <span class="media-viewport" style="--ratio: 16 / 9; --swatch: var(--cadence)">
+                <span class="project-meta"><strong class="project-meta__title">Cadence — design system</strong><span class="project-meta__details"><span>Product</span><span>2024</span></span></span>
+              </span>
+            </span>
+          </button>
+        </li>
+        <li class="project-item" data-category="Motion">
+          <button class="project-trigger" type="button" data-project="9" tabindex="-1" aria-label="Open Solstice — campaign film">
+            <span class="project-register"><span>10 / SOL</span><span>16:9</span></span>
+            <span class="media-stage">
+              <span class="media-viewport" style="--ratio: 16 / 9; --swatch: var(--solstice)">
+                <span class="project-meta"><strong class="project-meta__title">Solstice — campaign film</strong><span class="project-meta__details"><span>Motion</span><span>2024</span></span></span>
+              </span>
+            </span>
+          </button>
+        </li>
+        <li class="project-item" data-category="Branding">
+          <button class="project-trigger" type="button" data-project="10" tabindex="-1" aria-label="Open Terrace — retail identity">
+            <span class="project-register"><span>11 / TRC</span><span>1:1</span></span>
+            <span class="media-stage">
+              <span class="media-viewport" style="--ratio: 1 / 1; --swatch: var(--terrace)">
+                <span class="project-meta"><strong class="project-meta__title">Terrace — retail identity</strong><span class="project-meta__details"><span>Branding</span><span>2024</span></span></span>
+              </span>
+            </span>
+          </button>
+        </li>
+        <li class="project-item" data-category="Web">
+          <button class="project-trigger" type="button" data-project="11" tabindex="-1" aria-label="Open Prism — data viz suite">
+            <span class="project-register"><span>12 / PRS</span><span>3:2</span></span>
+            <span class="media-stage">
+              <span class="media-viewport" style="--ratio: 3 / 2; --swatch: var(--prism)">
+                <span class="project-meta"><strong class="project-meta__title">Prism — data viz suite</strong><span class="project-meta__details"><span>Web</span><span>2023</span></span></span>
+              </span>
+            </span>
+          </button>
+        </li>
+      </ol>
+    </main>
+
+    <dialog class="project-dialog" aria-labelledby="dialog-title" aria-describedby="dialog-description">
+      <div class="dialog-shell">
+        <div class="dialog-media-stage">
+          <div class="dialog-media" aria-hidden="true"></div>
+        </div>
+        <div class="dialog-copy">
+          <div class="dialog-topline">
+            <span class="dialog-register"></span>
+            <button class="dialog-close" type="button" aria-label="Close project">Close</button>
+          </div>
+          <div class="dialog-body">
+            <h2 class="dialog-title" id="dialog-title"></h2>
+            <p class="dialog-subtitle"></p>
+            <p class="dialog-description" id="dialog-description"></p>
+          </div>
+          <div class="dialog-controls">
+            <button class="dialog-nav" type="button" data-dialog-action="previous">← Previous</button>
+            <button class="dialog-nav" type="button" data-dialog-action="next">Next →</button>
+          </div>
+        </div>
+      </div>
+    </dialog>
+
+    <script>
+      const projects = [
+        {
+          title: "Ledger — payments console",
+          description: "A calm operations console that turns complex payment reconciliation into clear, auditable decisions.",
+          category: "Product",
+          year: "2026",
+          ratio: "4 / 3",
+          ratioLabel: "4:3",
+          swatch: "var(--ledger)",
+          code: "LDG",
+        },
+        {
+          title: "Northbound — brand system",
+          description: "A modular identity built to guide an outdoor label from trail signage to product packaging.",
+          category: "Branding",
+          year: "2026",
+          ratio: "1 / 1",
+          ratioLabel: "1:1",
+          swatch: "var(--northbound)",
+          code: "NTH",
+        },
+        {
+          title: "Atlas — marketing site",
+          description: "An editorial web system that makes a global research platform feel direct, useful, and human.",
+          category: "Web",
+          year: "2026",
+          ratio: "16 / 9",
+          ratioLabel: "16:9",
+          swatch: "var(--atlas)",
+          code: "ATL",
+        },
+        {
+          title: "Signal — motion study",
+          description: "A compact motion language that gives live broadcast graphics pace without sacrificing clarity.",
+          category: "Motion",
+          year: "2025",
+          ratio: "16 / 10",
+          ratioLabel: "16:10",
+          swatch: "var(--signal)",
+          code: "SGL",
+        },
+        {
+          title: "Foundry — 3D explorations",
+          description: "Material, light, and form studies that shaped the visual world of a new hardware launch.",
+          category: "3D",
+          year: "2025",
+          ratio: "4 / 3",
+          ratioLabel: "4:3",
+          swatch: "var(--foundry)",
+          code: "FND",
+        },
+        {
+          title: "Quarter — print annual",
+          description: "A tactile annual report that turns a year of dense business data into a paced reading experience.",
+          category: "Print",
+          year: "2025",
+          ratio: "3 / 4",
+          ratioLabel: "3:4",
+          swatch: "var(--quarter)",
+          code: "QTR",
+        },
+        {
+          title: "Meridian — wayfinding kit",
+          description: "An illustrated navigation family that helps visitors move through a mixed-use waterfront district.",
+          category: "Illustration",
+          year: "2025",
+          ratio: "1 / 1",
+          ratioLabel: "1:1",
+          swatch: "var(--meridian)",
+          code: "MRD",
+        },
+        {
+          title: "Harbour — booking flow",
+          description: "A faster, more reassuring reservation flow for travellers comparing flexible coastal stays.",
+          category: "Product",
+          year: "2024",
+          ratio: "4 / 3",
+          ratioLabel: "4:3",
+          swatch: "var(--harbour)",
+          code: "HBR",
+        },
+        {
+          title: "Cadence — design system",
+          description: "A shared product language that aligned five teams around accessible patterns and predictable releases.",
+          category: "Product",
+          year: "2024",
+          ratio: "16 / 9",
+          ratioLabel: "16:9",
+          swatch: "var(--cadence)",
+          code: "CDN",
+        },
+        {
+          title: "Solstice — campaign film",
+          description: "A restrained campaign film that follows one summer day through shifting light and sound.",
+          category: "Motion",
+          year: "2024",
+          ratio: "16 / 9",
+          ratioLabel: "16:9",
+          swatch: "var(--solstice)",
+          code: "SOL",
+        },
+        {
+          title: "Terrace — retail identity",
+          description: "A flexible identity that brings the texture and sociability of a street market into modern retail.",
+          category: "Branding",
+          year: "2024",
+          ratio: "1 / 1",
+          ratioLabel: "1:1",
+          swatch: "var(--terrace)",
+          code: "TRC",
+        },
+        {
+          title: "Prism — data viz suite",
+          description: "A legible visualization toolkit for comparing public datasets across place, scale, and time.",
+          category: "Web",
+          year: "2023",
+          ratio: "3 / 2",
+          ratioLabel: "3:2",
+          swatch: "var(--prism)",
+          code: "PRS",
+        },
+      ];
+
+      const root = document.documentElement;
+      const grid = document.querySelector(".project-grid");
+      const items = [...document.querySelectorAll(".project-item")];
+      const triggers = [...document.querySelectorAll(".project-trigger")];
+      const filterButtons = [...document.querySelectorAll(".filter-button")];
+      const densityButtons = [...document.querySelectorAll(".density-button")];
+      const resultCount = document.querySelector("#result-count");
+      const dialog = document.querySelector(".project-dialog");
+      const dialogMedia = dialog.querySelector(".dialog-media");
+      const dialogRegister = dialog.querySelector(".dialog-register");
+      const dialogTitle = dialog.querySelector(".dialog-title");
+      const dialogSubtitle = dialog.querySelector(".dialog-subtitle");
+      const dialogDescription = dialog.querySelector(".dialog-description");
+      const previousButton = dialog.querySelector('[data-dialog-action="previous"]');
+      const nextButton = dialog.querySelector('[data-dialog-action="next"]');
+      const closeButton = dialog.querySelector(".dialog-close");
+
+      let activeFilter = "All";
+      let activeProjectIndex = 0;
+      let lastOpener = triggers[0];
+
+      function visibleTriggers() {
+        return triggers.filter((trigger) => !trigger.closest(".project-item").hidden);
+      }
+
+      function setRovingTarget(target) {
+        for (const trigger of triggers) trigger.tabIndex = trigger === target ? 0 : -1;
+      }
+
+      function setFilter(filter) {
+        activeFilter = filter;
+        for (const button of filterButtons) {
+          button.setAttribute("aria-pressed", String(button.dataset.filter === filter));
+        }
+
+        for (const item of items) {
+          item.hidden = filter !== "All" && item.dataset.category !== filter;
+        }
+
+        const visible = visibleTriggers();
+        setRovingTarget(visible[0]);
+        resultCount.textContent = `${visible.length} ${visible.length === 1 ? "project" : "projects"}`;
+        grid.setAttribute(
+          "aria-label",
+          `${visible.length} ${filter === "All" ? "" : `${filter} `}${visible.length === 1 ? "project" : "projects"}`,
+        );
+      }
+
+      function setDensity(density) {
+        root.dataset.density = density;
+        for (const button of densityButtons) {
+          button.setAttribute("aria-pressed", String(button.dataset.density === density));
+        }
+      }
+
+      function columnCount() {
+        return getComputedStyle(grid).gridTemplateColumns.split(" ").filter(Boolean).length;
+      }
+
+      function moveGridFocus(current, key) {
+        const visible = visibleTriggers();
+        const currentPosition = visible.indexOf(current);
+        const columns = columnCount();
+        let nextPosition = currentPosition;
+
+        if (key === "ArrowRight") nextPosition = Math.min(currentPosition + 1, visible.length - 1);
+        if (key === "ArrowLeft") nextPosition = Math.max(currentPosition - 1, 0);
+        if (key === "ArrowDown") nextPosition = Math.min(currentPosition + columns, visible.length - 1);
+        if (key === "ArrowUp") nextPosition = Math.max(currentPosition - columns, 0);
+        if (key === "Home") nextPosition = 0;
+        if (key === "End") nextPosition = visible.length - 1;
+
+        const next = visible[nextPosition];
+        if (!next || next === current) return;
+        setRovingTarget(next);
+        next.focus();
+      }
+
+      function filteredProjectIndices() {
+        return visibleTriggers().map((trigger) => Number(trigger.dataset.project));
+      }
+
+      function paintDialog(projectIndex) {
+        activeProjectIndex = projectIndex;
+        const project = projects[projectIndex];
+        const filtered = filteredProjectIndices();
+        const position = filtered.indexOf(projectIndex);
+
+        dialog.style.setProperty("--dialog-ratio", project.ratio);
+        dialog.style.setProperty("--dialog-swatch", project.swatch);
+        dialogRegister.textContent = `${String(projectIndex + 1).padStart(2, "0")} / ${project.code}`;
+        dialogTitle.textContent = project.title;
+        dialogSubtitle.textContent = `${project.category} · ${project.year} · ${project.ratioLabel}`;
+        dialogDescription.textContent = project.description;
+        previousButton.disabled = filtered.length < 2;
+        nextButton.disabled = filtered.length < 2;
+        previousButton.setAttribute("aria-label", `Previous project, ${projects[filtered[(position - 1 + filtered.length) % filtered.length]].title}`);
+        nextButton.setAttribute("aria-label", `Next project, ${projects[filtered[(position + 1) % filtered.length]].title}`);
+      }
+
+      function openProject(projectIndex, opener) {
+        lastOpener = opener;
+        paintDialog(projectIndex);
+        dialog.showModal();
+        closeButton.focus();
+      }
+
+      function moveDialog(direction) {
+        const filtered = filteredProjectIndices();
+        if (filtered.length < 2) return;
+        const position = filtered.indexOf(activeProjectIndex);
+        const nextPosition = (position + direction + filtered.length) % filtered.length;
+        paintDialog(filtered[nextPosition]);
+      }
+
+      for (const filterButton of filterButtons) {
+        filterButton.addEventListener("click", () => setFilter(filterButton.dataset.filter));
+      }
+
+      for (const densityButton of densityButtons) {
+        densityButton.addEventListener("click", () => setDensity(densityButton.dataset.density));
+      }
+
+      for (const trigger of triggers) {
+        trigger.addEventListener("focus", () => setRovingTarget(trigger));
+        trigger.addEventListener("click", () => openProject(Number(trigger.dataset.project), trigger));
+        trigger.addEventListener("keydown", (event) => {
+          if (!["ArrowRight", "ArrowLeft", "ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
+          event.preventDefault();
+          moveGridFocus(trigger, event.key);
+        });
+      }
+
+      closeButton.addEventListener("click", () => dialog.close());
+      previousButton.addEventListener("click", () => moveDialog(-1));
+      nextButton.addEventListener("click", () => moveDialog(1));
+
+      dialog.addEventListener("click", (event) => {
+        if (event.target === dialog) dialog.close();
+      });
+
+      dialog.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowLeft" && event.target === dialog) moveDialog(-1);
+        if (event.key === "ArrowRight" && event.target === dialog) moveDialog(1);
+      });
+
+      dialog.addEventListener("close", () => {
+        const returnTarget = lastOpener.closest(".project-item").hidden ? visibleTriggers()[0] : lastOpener;
+        setRovingTarget(returnTarget);
+        returnTarget.focus();
+      });
+    </script>
+  </body>
+</html>

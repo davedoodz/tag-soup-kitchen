@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E5 band — small flip cards, drifting horizontally</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================
+   E5 (tilt → flip) rebuilt as a drifting horizontal band.
+   Values measured from davidlafond.xyz:
+     page #030303 · card #0B0B0C · cream #F5F2EA · Manrope
+     perspective 1200px on the card
+     flip  transform .62s cubic-bezier(.22,1,.36,1)
+     lift  transform .38s cubic-bezier(.33,1,.68,1)
+     faces absolute + backface-visibility:hidden, back at rotateY(180deg)
+     band  = clipped viewport over a wide track, drifts on its own,
+             draggable / swipeable / scrollable sideways by hand
+   Changed from E5: cards are much smaller so many are on screen at once,
+   and the band is a real scroll container (wheel, drag, touch, keyboard).
+   ========================================================== */
+:root{
+  --void:#030303;
+  --card:#0B0B0C;
+  --card-hi:#101012;
+  --cream:#F5F2EA;
+  --cream-dim:#A8A49B;
+  --hair:#242426;
+
+  --ui:"Manrope","Helvetica Neue",Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+
+  --persp:1200px;
+  --flip:transform .62s cubic-bezier(.22,1,.36,1);
+  --lift:transform .38s cubic-bezier(.33,1,.68,1);
+
+  /* small cards — the point of this exploration */
+  --w-a:280px;  --h-a:350px;  --r-a:28px;
+  --w-b:216px;  --h-b:270px;  --r-b:22px;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;background:var(--void);color:var(--cream);
+  font-family:var(--ui);font-weight:500;
+  -webkit-font-smoothing:antialiased;font-synthesis:none;
+}
+:where(button){font:inherit;color:inherit;background:none;border:0;}
+:where(button):focus-visible{outline:2px solid var(--cream);outline-offset:4px;border-radius:6px;}
+
+.meta{font-family:var(--mono);font-weight:400;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--cream-dim);}
+.doc{padding:56px 0 120px;}
+.head{padding:0 48px;max-width:80ch;}
+.head h1{font-size:28px;font-weight:800;letter-spacing:-.03em;margin:0 0 10px;}
+.head p{margin:0;color:var(--cream-dim);font-size:14px;line-height:22px;}
+.spec{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:baseline;padding:0 48px;margin:64px 0 18px;}
+.spec__id{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--cream-dim);}
+.spec__name{font-size:19px;font-weight:800;letter-spacing:-.02em;}
+.spec__why{flex:1 1 460px;min-width:300px;font-size:13px;line-height:20px;color:var(--cream-dim);}
+
+/* ---------------- the band ---------------- */
+.band{
+  overflow-x:auto;overflow-y:hidden;
+  overscroll-behavior-x:contain;
+  scrollbar-width:none;
+  cursor:grab;
+  /* fade both edges so cards enter and leave instead of being cut */
+  mask-image:linear-gradient(to right,transparent 0,#000 90px,#000 calc(100% - 90px),transparent 100%);
+  padding:26px 0 30px;
+}
+.band::-webkit-scrollbar{display:none;}
+.band.is-dragging{cursor:grabbing;}
+.band__track{display:flex;gap:16px;width:max-content;padding-inline:48px;}
+
+/* ---------------- card ---------------- */
+.flip{
+  position:relative;flex-shrink:0;
+  width:var(--w-a);height:var(--h-a);
+  perspective:var(--persp);
+  transition:var(--lift);
+  translate:0;rotate:0deg;scale:1;      /* identity transforms first */
+  padding:0;text-align:left;cursor:pointer;
+}
+.flip__inner{
+  display:block;position:relative;width:100%;height:100%;
+  transform-style:preserve-3d;
+  transition:var(--flip);
+  transform:rotateY(0deg);
+  border-radius:var(--r-a);
+}
+.flip__face{
+  position:absolute;inset:0;
+  backface-visibility:hidden;
+  border-radius:var(--r-a);
+  background:var(--card);
+  padding:22px;
+  display:flex;flex-direction:column;justify-content:flex-end;gap:14px;
+  transition:box-shadow .38s cubic-bezier(.33,1,.68,1);
+}
+.flip__face--front{background:linear-gradient(180deg,var(--card-hi) 0%,var(--card) 100%);}
+.flip__face--back{transform:rotateY(180deg);justify-content:space-between;}
+
+/* tilt telegraphs depth, click commits the full flip (E5 behaviour) */
+.flip:hover .flip__inner{transform:rotateY(10deg) rotateX(-4deg);}
+.flip[aria-pressed="true"] .flip__inner,
+.flip[aria-pressed="true"]:hover .flip__inner{transform:rotateY(180deg);}
+.flip:hover{scale:1.03;}
+.flip:hover .flip__face{box-shadow:0 20px 50px rgba(0,0,0,.6);}
+
+.name{font-size:18px;font-weight:800;letter-spacing:-.02em;margin:0;line-height:1.2;}
+.role{display:block;margin-top:5px;}
+.quote{margin:0;font-size:13.5px;line-height:20px;letter-spacing:-.005em;color:var(--cream);}
+.tag{display:flex;align-items:center;gap:7px;}
+.tag__dot{width:4px;height:4px;border-radius:999px;background:var(--cream-dim);flex-shrink:0;}
+
+/* smaller variant */
+.band--b .flip{width:var(--w-b);height:var(--h-b);}
+.band--b .flip__inner,
+.band--b .flip__face{border-radius:var(--r-b);}
+.band--b .flip__face{padding:18px;}
+.band--b .name{font-size:15px;}
+.band--b .quote{font-size:12.5px;line-height:18px;}
+.band--b .band__track{gap:12px;}
+
+/* progressive enhancement: cards settle as they cross the viewport.
+   Pure decoration — layout is identical without it. */
+@supports (animation-timeline:view(inline)){
+  @media (prefers-reduced-motion:no-preference){
+    @keyframes settle{
+      0%  {opacity:.35;scale:.94;}
+      18% {opacity:1;scale:1;}
+      82% {opacity:1;scale:1;}
+      100%{opacity:.35;scale:.94;}
+    }
+    .band__track > .flip{
+      animation:settle auto linear both;
+      animation-timeline:view(inline);
+    }
+    .band__track > .flip:hover{scale:1.03;}
+  }
+}
+
+.hint{padding:14px 48px 0;display:flex;gap:18px;flex-wrap:wrap;}
+
+@media (prefers-reduced-motion:reduce){
+  .flip__inner{transition:none;transform:none!important;}
+  .flip__face{transition:opacity .2s ease;}
+  .flip__face--back{transform:none;opacity:0;}
+  .flip[aria-pressed="true"] .flip__face--front{opacity:0;}
+  .flip[aria-pressed="true"] .flip__face--back{opacity:1;}
+  .flip:hover{scale:1;}
+}
+</style>
+</head>
+<body>
+<div class="doc">
+  <header class="head">
+    <h1>E5 as a drifting band</h1>
+    <p>
+      Same tilt-then-flip card, shrunk so a crowd of them is on screen at once, riding a real horizontal
+      scroller. It drifts on its own and you can also grab it, swipe it, shift-scroll it, or Tab through it.
+      Drift stops the moment you hover, focus, or touch it, and resumes when you let go — so a flipped card
+      can actually be read. Front is who they are; the quote is on the back.
+    </p>
+  </header>
+
+  <!-- ============ BAND A — drifts left → right ============ -->
+  <div class="spec">
+    <span class="spec__id">Band A</span>
+    <span class="spec__name">280&times;350 · drifts left → right</span>
+    <span class="spec__why">The direction you asked for: cards travel rightward across the page. Five to six visible at 1440, so it reads as a crowd rather than three big panels.</span>
+  </div>
+  <div class="band" data-band data-dir="rtl-visual" data-speed="0.35" aria-label="Testimonials, drifting band">
+    <div class="band__track" data-track></div>
+  </div>
+  <div class="hint">
+    <span class="meta">drag · swipe · scroll sideways</span>
+    <span class="meta">click a card to flip it</span>
+    <span class="meta">hover to hold the band</span>
+  </div>
+
+  <!-- ============ BAND B — smaller, opposite direction ============ -->
+  <div class="spec">
+    <span class="spec__id">Band B</span>
+    <span class="spec__name">216&times;270 · drifts right → left</span>
+    <span class="spec__why">Smaller again and running the other way, matching your site's original direction. Stack A over B for two opposing rows — the crowd effect doubles and the page gets a slow, quiet motion.</span>
+  </div>
+  <div class="band band--b" data-band data-dir="ltr-visual" data-speed="0.28" aria-label="Testimonials, second band">
+    <div class="band__track" data-track></div>
+  </div>
+  <div class="hint">
+    <span class="meta">same mechanics, opposite drift</span>
+  </div>
+</div>
+
+<script>
+/* ---------- data (placeholder copy) ---------- */
+const PEOPLE = [
+  {n:"Maya Okonkwo", r:"head of product", c:"cadence · 2024", q:"He redrew our onboarding in a week and activation jumped. I still send new designers to study how he thinks.", m:"+22% activation"},
+  {n:"Priya Nair", r:"design director", c:"northwind · 2025", q:"The calmest hands in a redesign I have worked with. Ships, documents, and never precious about cutting his own darlings.", m:"11 cycles, 0 missed handoffs"},
+  {n:"Idris Bello", r:"brand lead", c:"halcyon · 2024", q:"He treats typography like it is load-bearing, because it is. Our brand finally reads like one voice.", m:"4 type systems → 1"},
+  {n:"Theo Walsh", r:"engineering lead", c:"vertex · 2025", q:"Handoff was flawless — tokens, states and edge cases documented before we thought to ask.", m:"design QA −71%"},
+  {n:"Ana Reyes", r:"product manager", c:"loop · 2025", q:"He found the real problem in an hour, which is why the rest of it went fast.", m:"scope cut to 2 screens"},
+  {n:"Sofia Lund", r:"chief executive", c:"marrow · 2023", q:"A rare mix of taste and follow-through. Three launches, not one slipped date.", m:"3 launches, 0 slips"},
+  {n:"Rui Tanaka", r:"founder", c:"kestrel · 2025", q:"Shipped a full design system before our next round. Investors noticed the difference.", m:"raised on the deck he shaped"},
+  {n:"Nadia Haddad", r:"head of design", c:"aperture · 2024", q:"He left the team better than he found it. The system is still the way we work.", m:"in use 18 months on"}
+];
+
+function cardMarkup(p){
+  return `<button class="flip" type="button" aria-pressed="false">
+    <span class="flip__inner">
+      <span class="flip__face flip__face--front">
+        <span class="meta">${p.c}</span>
+        <span><p class="name">${p.n}</p><span class="meta role">${p.r}</span></span>
+      </span>
+      <span class="flip__face flip__face--back">
+        <span class="meta">their words</span>
+        <p class="quote">${p.q}</p>
+        <span class="tag"><span class="tag__dot"></span><span class="meta">${p.m}</span></span>
+      </span>
+    </span>
+  </button>`;
+}
+
+/* Only the visible face is exposed to assistive tech. */
+function syncFaces(card){
+  const flipped = card.getAttribute("aria-pressed") === "true";
+  const front = card.querySelector(".flip__face--front");
+  const back  = card.querySelector(".flip__face--back");
+  [[front, flipped], [back, !flipped]].forEach(([face, hidden]) => {
+    face.inert = hidden;
+    face.setAttribute("aria-hidden", String(hidden));
+  });
+  card.setAttribute("aria-label",
+    `${flipped ? "Hide" : "Read"} what ${card.querySelector(".name").textContent} said`);
+}
+
+/* ---------- build both bands (content doubled for a seamless loop) ---------- */
+document.querySelectorAll("[data-band]").forEach((band) => {
+  const track = band.querySelector("[data-track]");
+  const html = PEOPLE.map(cardMarkup).join("");
+  track.innerHTML = html + html;                     // pass 2 is the loop tail
+  const cards = [...track.querySelectorAll(".flip")];
+  cards.forEach(syncFaces);
+  cards.slice(PEOPLE.length).forEach((c) => {         // clones stay out of the tab order
+    c.tabIndex = -1;
+    c.setAttribute("aria-hidden", "true");
+  });
+
+  const half = () => track.scrollWidth / 2;
+  // left → right drift starts at the midpoint so there is content to reveal on both sides
+  if (band.dataset.dir === "rtl-visual") band.scrollLeft = half();
+
+  let paused = false, resumeTimer = 0;
+  const speed = Number(band.dataset.speed) || 0.3;
+  const dir = band.dataset.dir === "rtl-visual" ? -1 : 1;
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)");
+
+  /* Own float accumulator: scrollLeft rounds on read, so `+= 0.35` would
+     round straight back and the band would never move. */
+  let pos = band.scrollLeft;
+  const resync = () => { pos = band.scrollLeft; };
+
+  const step = () => {
+    if (!paused && !reduce.matches && !band.matches(":hover") && !band.contains(document.activeElement)) {
+      pos += dir * speed;
+      if (pos <= 0) pos += half();
+      else if (pos >= half()) pos -= half();
+      band.scrollLeft = pos;
+    }
+    requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+
+  /* hand off cleanly when the user takes over with the wheel or trackpad */
+  band.addEventListener("wheel", () => {
+    paused = true;
+    resync();
+    clearTimeout(resumeTimer);
+    resumeTimer = setTimeout(() => { paused = false; }, 700);
+  }, {passive:true});
+
+  /* drag to scroll — and suppress the flip when the pointer actually travelled */
+  let down = false, startX = 0, startLeft = 0, moved = 0;
+  band.addEventListener("pointerdown", (e) => {
+    down = true; paused = true; moved = 0;
+    startX = e.clientX; startLeft = band.scrollLeft;
+    band.classList.add("is-dragging");
+  });
+  band.addEventListener("pointermove", (e) => {
+    if (!down) return;
+    const dx = e.clientX - startX;
+    moved = Math.max(moved, Math.abs(dx));
+    band.scrollLeft = startLeft - dx;
+  });
+  const release = () => {
+    if (!down) return;
+    down = false; paused = false;
+    resync();                       // adopt the position the user dragged to
+    band.classList.remove("is-dragging");
+  };
+  band.addEventListener("pointerup", release);
+  band.addEventListener("pointercancel", release);
+  band.addEventListener("pointerleave", release);
+
+  band.addEventListener("click", (e) => {
+    const card = e.target.closest(".flip");
+    if (!card || moved > 6) return;                  // it was a drag, not a tap
+    card.setAttribute("aria-pressed", card.getAttribute("aria-pressed") === "true" ? "false" : "true");
+    syncFaces(card);
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,382 @@
+/* AColorBright — primitives shared by the high-fidelity surfaces in /public/designs.
+   Loads after shared/acolorbright.css and stays inside its token set:
+   one weight, six type sizes, the achromatic ramp, 12px images, 8px buttons, no shadows. */
+
+:root {
+  --line: var(--color-fog);
+  --line-strong: var(--color-ash);
+  --shell-height: calc(100dvh - var(--review-bar-height, 0px) - var(--spacing-24));
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+}
+
+.sr-only {
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+:where(button, input, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-ink-black);
+  outline-offset: 2px;
+}
+
+/* Icons — the 24-unit set from the icon study, 1.5px round, currentColor only */
+
+/* The inline symbol sprite: [hidden] does not reach SVG roots from the UA sheet. */
+svg[hidden] {
+  display: none;
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.5;
+}
+
+.icon--16 {
+  width: 16px;
+  height: 16px;
+  stroke-width: 1.75;
+}
+
+.icon-frame {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  place-items: center;
+  border: 1px solid var(--color-ink-black);
+  border-radius: var(--radius-nav);
+  background: transparent;
+  color: var(--color-ink-black);
+  cursor: pointer;
+}
+
+.icon-frame:hover {
+  background: var(--color-mist);
+}
+
+/* Top bar — wordmark left, links and one framed control right */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-24);
+  padding: var(--spacing-16) var(--spacing-32);
+  border-bottom: 1px solid var(--line);
+  background: var(--color-paper);
+}
+
+.topbar__identity {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  gap: var(--spacing-16);
+}
+
+.topbar__wordmark {
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  white-space: nowrap;
+}
+
+.topbar__context {
+  overflow: hidden;
+  color: var(--color-graphite);
+  font-size: var(--text-body-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.topbar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-24);
+}
+
+.topbar__link {
+  color: var(--color-ink-black);
+  font-size: var(--text-body-sm);
+  text-decoration: underline solid 1px;
+  text-decoration-color: transparent;
+  text-underline-offset: 5px;
+  white-space: nowrap;
+}
+
+.topbar__link:hover {
+  text-decoration-color: var(--color-ink-black);
+}
+
+/* Controls */
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px var(--spacing-16);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-buttons);
+  background: var(--color-paper);
+  color: var(--color-graphite);
+}
+
+.field:focus-within {
+  border-color: var(--color-ink-black);
+  color: var(--color-ink-black);
+}
+
+.field__input {
+  min-width: 0;
+  flex: 1 1 auto;
+  border: 0;
+  background: transparent;
+  color: var(--color-ink-black);
+  font: inherit;
+  letter-spacing: inherit;
+  outline: 0;
+}
+
+.field__input::placeholder {
+  color: var(--color-ash);
+}
+
+.field__input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--spacing-16);
+}
+
+.chip {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-graphite);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--text-body-sm);
+  letter-spacing: inherit;
+  text-decoration: underline solid 1px;
+  text-decoration-color: transparent;
+  text-underline-offset: 6px;
+}
+
+.chip:hover {
+  color: var(--color-ink-black);
+}
+
+.chip[aria-pressed='true'] {
+  color: var(--color-ink-black);
+  text-decoration-color: var(--color-ink-black);
+}
+
+.button {
+  border: 0;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: inherit;
+  text-align: center;
+}
+
+.button--filled:hover {
+  background: var(--color-ink-black);
+}
+
+.button--outlined:hover {
+  border-color: var(--color-ink-black);
+}
+
+.button:disabled {
+  color: var(--color-ash);
+  cursor: not-allowed;
+}
+
+.button--outlined:disabled {
+  border-color: var(--line);
+}
+
+.button--icon {
+  display: inline-grid;
+  width: 40px;
+  min-width: 0;
+  height: 40px;
+  padding: 0;
+  place-items: center;
+}
+
+/* Cover plate — typographic stand-in for the photography this system expects.
+   Tone comes from the achromatic ramp; the mark is the project's own initials. */
+
+.cover {
+  position: relative;
+  display: grid;
+  overflow: hidden;
+  aspect-ratio: var(--cover-ratio, 4 / 3);
+  border-radius: var(--radius-images);
+  background: var(--color-mist);
+  color: var(--color-ink-black);
+  place-items: center;
+}
+
+.cover::before {
+  position: absolute;
+  background-image: repeating-linear-gradient(
+    to right,
+    currentColor 0 1px,
+    transparent 1px var(--cover-rule, 64px)
+  );
+  content: '';
+  inset: 0;
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+.cover--fog {
+  background: var(--color-fog);
+}
+
+.cover--graphite {
+  background: var(--color-graphite);
+  color: var(--color-paper);
+}
+
+.cover--charcoal {
+  background: var(--color-charcoal);
+  color: var(--color-paper);
+}
+
+.cover--ink {
+  background: var(--color-ink-black);
+  color: var(--color-paper);
+}
+
+.cover__mark {
+  position: relative;
+  font-size: var(--text-display);
+  line-height: var(--leading-display);
+}
+
+.cover__index,
+.cover__note {
+  position: absolute;
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+}
+
+.cover__index {
+  top: var(--spacing-16);
+  left: var(--spacing-16);
+}
+
+.cover__note {
+  right: var(--spacing-16);
+  bottom: var(--spacing-16);
+}
+
+/* Facts — banded rows, no borders */
+
+.facts {
+  margin: 0;
+}
+
+.fact {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  align-items: baseline;
+  gap: var(--spacing-16);
+  padding: 12px var(--spacing-16);
+}
+
+.fact:nth-child(odd) {
+  background: var(--color-mist);
+}
+
+.fact dt {
+  color: var(--color-graphite);
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+}
+
+.fact dd {
+  margin: 0;
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body-sm);
+}
+
+/* Metrics — one row of outcomes */
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--spacing-24);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.metric {
+  min-width: 0;
+  padding-top: var(--spacing-16);
+  border-top: 1px solid var(--color-ink-black);
+}
+
+.metric__value {
+  margin: 0;
+  font-size: var(--text-subheading);
+  line-height: var(--leading-subheading);
+}
+
+.metric__label {
+  margin: var(--spacing-8) 0 0;
+  color: var(--color-graphite);
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+}
+
+@media (max-width: 640px) {
+  .topbar {
+    padding: 12px var(--spacing-16);
+  }
+
+  .topbar__context {
+    display: none;
+  }
+
+  /* Logo left, one control right — the nav pattern the system specifies. */
+  .topbar__link {
+    display: none;
+  }
+
+  .topbar__link:first-child {
+    display: inline;
+  }
+
+  .metrics {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-16);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

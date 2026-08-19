@@ -1,0 +1,1292 @@
+<!doctype html>
+<html lang="en" data-design-id="c2-list-scopes-sheet" data-design-title="List scopes the sheet">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A portfolio browser where a grouped project tree scopes a responsive contact sheet."
+    />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 44'%3E%3Cpath d='M0 44V0h27.5C38.82 0 48 9.18 48 20.5V44H33.5V22c0-4.14-3.36-7.5-7.5-7.5H14.5V44H0Z'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="../shared/acolorbright.css" />
+    <link rel="stylesheet" href="../shared/hifi.css" />
+    <link rel="stylesheet" href="../shared/review.css" />
+    <script src="../shared/projects.js"></script>
+    <script src="../shared/review.js" defer></script>
+    <title>List scopes the sheet — David Lafond Designs</title>
+    <style>
+      :root {
+        --scope-pane-width: 360px;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        min-width: 320px;
+      }
+
+      button {
+        font: inherit;
+        letter-spacing: inherit;
+      }
+
+      .topbar__identity {
+        flex-wrap: wrap;
+      }
+
+      .topbar__link {
+        text-decoration-color: var(--color-ink-black);
+      }
+
+      .thesis {
+        display: grid;
+        grid-template-columns: var(--scope-pane-width) minmax(0, 1fr);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .thesis__label,
+      .thesis__statement {
+        margin: 0;
+        padding: var(--spacing-24);
+      }
+
+      .thesis__label {
+        border-right: 1px solid var(--line);
+        color: var(--color-graphite);
+        font-size: var(--text-caption);
+        line-height: var(--leading-caption);
+        text-transform: uppercase;
+      }
+
+      .thesis__statement {
+        max-width: 72ch;
+        font-size: var(--text-body);
+        line-height: var(--leading-body);
+      }
+
+      .workspace {
+        display: grid;
+        grid-template-columns: var(--scope-pane-width) minmax(0, 1fr);
+        align-items: start;
+      }
+
+      .scope-pane {
+        position: sticky;
+        top: 0;
+        display: grid;
+        max-height: 100dvh;
+        grid-template-rows: auto minmax(0, 1fr) auto;
+        border-right: 1px solid var(--line);
+        background: var(--color-paper);
+      }
+
+      .scope-pane__head {
+        padding: var(--spacing-32) var(--spacing-24) var(--spacing-16);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .scope-pane__eyebrow,
+      .scope-pane__hint,
+      .scope-pane__status {
+        margin: 0;
+        color: var(--color-graphite);
+        font-size: var(--text-caption);
+        line-height: var(--leading-caption);
+      }
+
+      .scope-pane__title {
+        margin: var(--spacing-8) 0 0;
+        font-size: var(--text-subheading);
+        font-weight: 400;
+        line-height: var(--leading-subheading);
+      }
+
+      .tree-scroll {
+        min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scrollbar-color: var(--color-fog) transparent;
+        scrollbar-width: thin;
+      }
+
+      .scope-tree {
+        padding-block: var(--spacing-8);
+      }
+
+      .tree-branch {
+        margin: 0;
+      }
+
+      .tree-row {
+        display: grid;
+        width: 100%;
+        min-height: 48px;
+        grid-template-columns: 24px minmax(0, 1fr) auto;
+        align-items: center;
+        gap: var(--spacing-8);
+        padding: var(--spacing-8) var(--spacing-24);
+        border: 0;
+        background: transparent;
+        color: var(--color-ink-black);
+        cursor: pointer;
+        text-align: left;
+      }
+
+      .tree-row:hover {
+        background: var(--color-mist);
+      }
+
+      .tree-row[aria-current='page'] {
+        background: var(--color-ink-black);
+        color: var(--color-paper);
+      }
+
+      .tree-row[data-last-selected='true']:not([aria-current='page']) .tree-row__name::after {
+        display: inline-block;
+        width: var(--spacing-8);
+        height: var(--spacing-8);
+        margin-left: var(--spacing-8);
+        border-radius: 50%;
+        background: var(--color-ink-black);
+        content: '';
+        vertical-align: 1px;
+      }
+
+      .tree-row--project {
+        padding-left: var(--spacing-64);
+      }
+
+      .tree-row__disclosure {
+        display: grid;
+        width: 24px;
+        height: 24px;
+        place-items: center;
+        color: var(--color-graphite);
+      }
+
+      .tree-row[aria-current='page'] .tree-row__disclosure,
+      .tree-row[aria-current='page'] .tree-row__meta {
+        color: var(--color-fog);
+      }
+
+      .tree-row__caret {
+        display: block;
+        width: var(--spacing-8);
+        height: var(--spacing-8);
+        border-right: 1px solid currentColor;
+        border-bottom: 1px solid currentColor;
+        transform: rotate(-45deg);
+        transition: transform 160ms var(--ease);
+      }
+
+      .tree-row[aria-expanded='true'] .tree-row__caret {
+        transform: rotate(45deg) translate(-2px, -2px);
+      }
+
+      .tree-row__index {
+        color: var(--color-ash);
+        font-size: var(--text-caption);
+        font-variant-numeric: tabular-nums;
+        line-height: var(--leading-caption);
+      }
+
+      .tree-row__name {
+        min-width: 0;
+        overflow: hidden;
+        font-size: var(--text-body-sm);
+        line-height: var(--leading-body-sm);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .tree-row__meta {
+        color: var(--color-graphite);
+        font-size: var(--text-caption);
+        font-variant-numeric: tabular-nums;
+        line-height: var(--leading-caption);
+      }
+
+      .tree-children {
+        margin: 0;
+      }
+
+      .scope-pane__foot {
+        display: grid;
+        gap: var(--spacing-8);
+        padding: var(--spacing-16) var(--spacing-24);
+        border-top: 1px solid var(--line);
+        background: var(--color-paper);
+      }
+
+      .sheet-pane {
+        min-width: 0;
+        padding: var(--spacing-32);
+      }
+
+      .breadcrumbs {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--spacing-8);
+        min-height: 40px;
+        padding-bottom: var(--spacing-24);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .breadcrumb {
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: var(--color-graphite);
+        cursor: pointer;
+        text-decoration: underline solid 1px;
+        text-decoration-color: transparent;
+        text-underline-offset: 5px;
+      }
+
+      .breadcrumb:hover,
+      .breadcrumb[aria-current='page'] {
+        color: var(--color-ink-black);
+        text-decoration-color: var(--color-ink-black);
+      }
+
+      .breadcrumb-separator {
+        color: var(--color-ash);
+      }
+
+      .scope-heading {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: end;
+        gap: var(--spacing-24);
+        padding-block: var(--spacing-32);
+      }
+
+      .scope-heading__kicker,
+      .scope-heading__count {
+        margin: 0;
+        color: var(--color-graphite);
+        font-size: var(--text-caption);
+        font-variant-numeric: tabular-nums;
+        line-height: var(--leading-caption);
+      }
+
+      .scope-heading__title {
+        max-width: 22ch;
+        margin: var(--spacing-8) 0 0;
+        font-size: var(--text-heading);
+        font-weight: 400;
+        line-height: var(--leading-heading);
+      }
+
+      .project-intro {
+        display: grid;
+        grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+        gap: var(--spacing-64);
+        margin-bottom: var(--spacing-64);
+        padding-bottom: var(--spacing-32);
+        border-bottom: 1px solid var(--color-ink-black);
+      }
+
+      .project-intro[hidden] {
+        display: none;
+      }
+
+      .project-intro__lead {
+        max-width: 58ch;
+        margin: 0;
+        font-size: var(--text-body);
+        line-height: var(--leading-body);
+      }
+
+      .facts {
+        margin: 0;
+      }
+
+      .fact {
+        display: grid;
+        grid-template-columns: 96px minmax(0, 1fr);
+        gap: var(--spacing-16);
+        padding: var(--spacing-8) var(--spacing-16);
+      }
+
+      .fact:nth-child(odd) {
+        background: var(--color-mist);
+      }
+
+      .fact dt,
+      .fact dd {
+        margin: 0;
+        font-size: var(--text-caption);
+        line-height: var(--leading-caption);
+      }
+
+      .fact dt {
+        color: var(--color-graphite);
+      }
+
+      .contact-sheet {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        align-items: start;
+        gap: var(--spacing-32) var(--spacing-24);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .contact-sheet.is-group {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: var(--spacing-64) var(--spacing-32);
+      }
+
+      .contact-sheet.is-project {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--spacing-64) var(--spacing-32);
+      }
+
+      .sheet-cell {
+        display: block;
+        width: 100%;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        cursor: pointer;
+        text-align: left;
+      }
+
+      .sheet-cell__media,
+      .viewer__media {
+        position: relative;
+        display: grid;
+        overflow: hidden;
+        aspect-ratio: var(--media-ratio, 4 / 3);
+        border-radius: var(--radius-images);
+        background: var(--color-mist);
+        color: var(--color-ink-black);
+        place-items: center;
+        transition: filter 180ms var(--ease);
+      }
+
+      .sheet-cell__media[data-tone='fog'],
+      .viewer__media[data-tone='fog'] {
+        background: var(--color-fog);
+      }
+
+      .sheet-cell__media[data-tone='graphite'],
+      .viewer__media[data-tone='graphite'] {
+        background: var(--color-graphite);
+        color: var(--color-paper);
+      }
+
+      .sheet-cell__media[data-tone='charcoal'],
+      .viewer__media[data-tone='charcoal'] {
+        background: var(--color-charcoal);
+        color: var(--color-paper);
+      }
+
+      .sheet-cell__media[data-tone='ink'],
+      .viewer__media[data-tone='ink'] {
+        background: var(--color-ink-black);
+        color: var(--color-paper);
+      }
+
+      .sheet-cell:hover .sheet-cell__media,
+      .sheet-cell:focus-visible .sheet-cell__media {
+        filter: contrast(0.86) brightness(1.06);
+      }
+
+      .sheet-cell[data-last-selected='true'] .sheet-cell__media {
+        outline: 2px solid var(--color-ink-black);
+        outline-offset: var(--spacing-8);
+      }
+
+      .sheet-cell__mark,
+      .viewer__mark {
+        font-size: var(--text-display);
+        line-height: var(--leading-display);
+      }
+
+      .sheet-cell__corner,
+      .viewer__corner {
+        position: absolute;
+        font-size: var(--text-caption);
+        line-height: var(--leading-caption);
+      }
+
+      .sheet-cell__corner--top,
+      .viewer__corner--top {
+        top: var(--spacing-16);
+        left: var(--spacing-16);
+      }
+
+      .sheet-cell__corner--bottom,
+      .viewer__corner--bottom {
+        right: var(--spacing-16);
+        bottom: var(--spacing-16);
+      }
+
+      .sheet-cell__caption {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: baseline;
+        gap: var(--spacing-16);
+        margin-top: var(--spacing-16);
+      }
+
+      .sheet-cell__title {
+        font-size: var(--text-body);
+        line-height: var(--leading-body);
+      }
+
+      .sheet-cell__meta {
+        color: var(--color-graphite);
+        font-size: var(--text-caption);
+        line-height: var(--leading-caption);
+      }
+
+      .sheet-cell__note {
+        display: block;
+        margin-top: var(--spacing-8);
+        color: var(--color-graphite);
+        font-size: var(--text-body-sm);
+        line-height: var(--leading-body-sm);
+      }
+
+      .viewer {
+        width: min(1080px, calc(100vw - var(--spacing-64)));
+        max-width: none;
+        height: min(840px, calc(100dvh - var(--spacing-64)));
+        max-height: none;
+        padding: 0;
+        border: 0;
+        border-radius: var(--radius-images);
+        background: var(--color-paper);
+        color: var(--color-ink-black);
+      }
+
+      .viewer::backdrop {
+        background: rgb(26 26 26 / 62%);
+      }
+
+      .viewer__shell {
+        display: grid;
+        height: 100%;
+        grid-template-rows: auto minmax(0, 1fr) auto;
+      }
+
+      .viewer__bar,
+      .viewer__foot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--spacing-16);
+        padding: var(--spacing-16) var(--spacing-24);
+      }
+
+      .viewer__bar {
+        border-bottom: 1px solid var(--line);
+      }
+
+      .viewer__foot {
+        border-top: 1px solid var(--line);
+      }
+
+      .viewer__position,
+      .viewer__hint {
+        margin: 0;
+        color: var(--color-graphite);
+        font-size: var(--text-caption);
+        font-variant-numeric: tabular-nums;
+        line-height: var(--leading-caption);
+      }
+
+      .viewer__body {
+        display: grid;
+        min-height: 0;
+        grid-template-columns: minmax(0, 1.35fr) minmax(240px, 0.65fr);
+        align-items: start;
+        gap: var(--spacing-32);
+        overflow-y: auto;
+        padding: var(--spacing-32);
+        overscroll-behavior: contain;
+      }
+
+      .viewer__copy {
+        align-self: end;
+      }
+
+      .viewer__kicker {
+        margin: 0 0 var(--spacing-8);
+        color: var(--color-graphite);
+        font-size: var(--text-caption);
+        line-height: var(--leading-caption);
+      }
+
+      .viewer__title {
+        margin: 0;
+        font-size: var(--text-heading);
+        font-weight: 400;
+        line-height: var(--leading-heading);
+      }
+
+      .viewer__description {
+        margin: var(--spacing-24) 0 0;
+        color: var(--color-graphite);
+        font-size: var(--text-body-sm);
+        line-height: var(--leading-body-sm);
+      }
+
+      .viewer__steps {
+        display: flex;
+        gap: var(--spacing-8);
+      }
+
+      .viewer-button {
+        min-height: 40px;
+        padding-inline: var(--spacing-16);
+        border: 1px solid var(--color-ink-black);
+        border-radius: var(--radius-buttons);
+        background: transparent;
+        color: var(--color-ink-black);
+        cursor: pointer;
+      }
+
+      .viewer-button:hover {
+        background: var(--color-mist);
+      }
+
+      .viewer-button--close {
+        min-width: 40px;
+        padding: 0;
+      }
+
+      @media (min-width: 1500px) {
+        .contact-sheet.is-project {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 1100px) {
+        .project-intro {
+          grid-template-columns: 1fr;
+          gap: var(--spacing-32);
+        }
+
+        .contact-sheet.is-project {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 899px) {
+        .thesis,
+        .workspace {
+          grid-template-columns: 1fr;
+        }
+
+        .thesis__label {
+          padding-bottom: 0;
+          border-right: 0;
+        }
+
+        .thesis__statement {
+          padding-top: var(--spacing-8);
+        }
+
+        .scope-pane {
+          position: static;
+          max-height: none;
+          border-right: 0;
+          border-bottom: 1px solid var(--line);
+        }
+
+        .tree-scroll {
+          overflow: visible;
+        }
+
+        .sheet-pane {
+          scroll-margin-top: var(--spacing-16);
+        }
+
+        .contact-sheet.is-group,
+        .contact-sheet.is-project {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: var(--spacing-32) var(--spacing-24);
+        }
+      }
+
+      @media (max-width: 639px) {
+        .topbar,
+        .thesis__label,
+        .thesis__statement,
+        .sheet-pane {
+          padding-inline: var(--spacing-16);
+        }
+
+        .topbar {
+          align-items: flex-start;
+        }
+
+        .topbar__context {
+          width: 100%;
+        }
+
+        .scope-heading {
+          grid-template-columns: 1fr;
+          align-items: start;
+        }
+
+        .scope-heading__title {
+          font-size: var(--text-subheading);
+          line-height: var(--leading-subheading);
+        }
+
+        .contact-sheet,
+        .contact-sheet.is-group,
+        .contact-sheet.is-project {
+          grid-template-columns: 1fr;
+        }
+
+        .project-intro {
+          margin-bottom: var(--spacing-32);
+        }
+
+        .viewer {
+          width: calc(100vw - var(--spacing-32));
+          height: calc(100dvh - var(--spacing-32) - var(--review-bar-height, 0px));
+        }
+
+        .viewer__body {
+          grid-template-columns: 1fr;
+          padding: var(--spacing-16);
+        }
+
+        .viewer__foot {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .viewer__steps,
+        .viewer-button:not(.viewer-button--close) {
+          width: 100%;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar__identity">
+        <span class="topbar__wordmark">David Lafond Designs</span>
+        <span class="topbar__context">Combination 02 — List scopes the sheet</span>
+      </div>
+      <div class="topbar__actions">
+        <a class="topbar__link" href="index.html">All combinations</a>
+      </div>
+    </header>
+
+    <section class="thesis" aria-labelledby="pageTitle">
+      <p class="thesis__label">Composition thesis</p>
+      <h1 class="thesis__statement" id="pageTitle">
+        The split browser's list leads and the contact sheet responds. The list is a scoping
+        instrument: what you select on the left decides what the sheet on the right shows.
+      </h1>
+    </section>
+
+    <main class="workspace">
+      <nav class="scope-pane" aria-labelledby="scopeNavTitle">
+        <div class="scope-pane__head">
+          <p class="scope-pane__eyebrow">Project index</p>
+          <h2 class="scope-pane__title" id="scopeNavTitle">Browse by scope</h2>
+        </div>
+        <div class="tree-scroll" id="treeScroll">
+          <div
+            class="scope-tree"
+            id="scopeTree"
+            role="tree"
+            aria-label="Project categories and projects"
+          ></div>
+        </div>
+        <div class="scope-pane__foot">
+          <p class="scope-pane__status" id="treeStatus" aria-live="polite">12 projects in scope</p>
+          <p class="scope-pane__hint">↑ ↓ move · → expand · ← collapse · Enter scope</p>
+        </div>
+      </nav>
+
+      <section class="sheet-pane" id="sheetPane" aria-labelledby="sheetTitle" tabindex="-1">
+        <nav class="breadcrumbs" id="breadcrumbs" aria-label="Current scope"></nav>
+        <header class="scope-heading">
+          <div>
+            <p class="scope-heading__kicker" id="scopeKicker">Selected work · 2023–2026</p>
+            <h2 class="scope-heading__title" id="sheetTitle">All work</h2>
+          </div>
+          <p class="scope-heading__count" id="scopeCount" aria-live="polite">12 projects</p>
+        </header>
+        <div class="project-intro" id="projectIntro" hidden></div>
+        <ul class="contact-sheet" id="contactSheet" aria-label="All work contact sheet"></ul>
+      </section>
+    </main>
+
+    <dialog class="viewer" id="viewer" aria-labelledby="viewerTitle">
+      <div class="viewer__shell">
+        <header class="viewer__bar">
+          <p class="viewer__position" id="viewerPosition"></p>
+          <button
+            class="viewer-button viewer-button--close"
+            id="viewerClose"
+            type="button"
+            aria-label="Close frame viewer"
+          >
+            ×
+          </button>
+        </header>
+        <div class="viewer__body" id="viewerBody"></div>
+        <footer class="viewer__foot">
+          <p class="viewer__hint">← → step within this scope</p>
+          <div class="viewer__steps">
+            <button class="viewer-button" type="button" data-viewer-step="previous">Previous</button>
+            <button class="viewer-button" type="button" data-viewer-step="next">Next</button>
+          </div>
+        </footer>
+      </div>
+    </dialog>
+
+    <script>
+      ;(() => {
+        const projects = window.PORTFOLIO_PROJECTS
+        const categories = ['Product', 'Web', 'Branding', 'Motion', '3D', 'Illustration', 'Print']
+        const frameRatios = ['16 / 10', '4 / 3', '3 / 4', '1 / 1', '16 / 9', '4 / 5', '21 / 9', '3 / 2', '9 / 16']
+        const alternateTones = ['mist', 'fog', 'graphite', 'charcoal', 'ink']
+        const mobile = matchMedia('(max-width: 899px)')
+        const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)')
+
+        const scopeTree = document.querySelector('#scopeTree')
+        const treeScroll = document.querySelector('#treeScroll')
+        const treeStatus = document.querySelector('#treeStatus')
+        const sheetPane = document.querySelector('#sheetPane')
+        const breadcrumbs = document.querySelector('#breadcrumbs')
+        const scopeKicker = document.querySelector('#scopeKicker')
+        const sheetTitle = document.querySelector('#sheetTitle')
+        const scopeCount = document.querySelector('#scopeCount')
+        const projectIntro = document.querySelector('#projectIntro')
+        const contactSheet = document.querySelector('#contactSheet')
+        const viewer = document.querySelector('#viewer')
+        const viewerBody = document.querySelector('#viewerBody')
+        const viewerPosition = document.querySelector('#viewerPosition')
+        const viewerClose = document.querySelector('#viewerClose')
+
+        const expandedCategories = new Set(['Product'])
+        let scope = { type: 'all' }
+        let focusedKey = 'all'
+        let lastProjectId = projects[0].id
+        let viewerItems = []
+        let viewerIndex = 0
+        let viewerOpener = null
+
+        const escapeText = (value) =>
+          String(value).replace(
+            /[&<>'"]/g,
+            (character) =>
+              ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[character],
+          )
+
+        const projectIndex = (project) => projects.indexOf(project)
+        const initials = (project) => project.title.slice(0, 2).toUpperCase()
+        const projectById = (id) => projects.find((project) => project.id === id)
+        const projectsInCategory = (category) =>
+          projects.filter((project) => project.category === category)
+        const keyForScope = (value) => {
+          if (value.type === 'all') return 'all'
+          if (value.type === 'group') return `group:${value.category}`
+          return `project:${value.id}`
+        }
+
+        function isCurrent(kind, value) {
+          if (kind !== scope.type) return false
+          if (kind === 'all') return true
+          if (kind === 'group') return scope.category === value
+          return scope.id === value
+        }
+
+        function renderTree({ restoreFocus = false } = {}) {
+          const groups = categories
+            .map((category) => {
+              const categoryProjects = projectsInCategory(category)
+              const expanded = expandedCategories.has(category)
+              const groupKey = `group:${category}`
+              return `
+                <div class="tree-branch">
+                  <button
+                    class="tree-row tree-row--group"
+                    type="button"
+                    role="treeitem"
+                    aria-level="1"
+                    aria-expanded="${expanded}"
+                    aria-current="${isCurrent('group', category) ? 'page' : 'false'}"
+                    tabindex="${focusedKey === groupKey ? '0' : '-1'}"
+                    data-key="${escapeText(groupKey)}"
+                    data-kind="group"
+                    data-category="${escapeText(category)}"
+                  >
+                    <span class="tree-row__disclosure" aria-hidden="true"><span class="tree-row__caret"></span></span>
+                    <span class="tree-row__name">${escapeText(category)}</span>
+                    <span class="tree-row__meta">${categoryProjects.length}</span>
+                  </button>
+                  <div class="tree-children" role="group" ${expanded ? '' : 'hidden'}>
+                    ${categoryProjects
+                      .map((project) => {
+                        const index = projectIndex(project)
+                        const projectKey = `project:${project.id}`
+                        return `
+                          <button
+                            class="tree-row tree-row--project"
+                            type="button"
+                            role="treeitem"
+                            aria-level="2"
+                            aria-current="${isCurrent('project', project.id) ? 'page' : 'false'}"
+                            tabindex="${focusedKey === projectKey ? '0' : '-1'}"
+                            data-key="${escapeText(projectKey)}"
+                            data-kind="project"
+                            data-id="${escapeText(project.id)}"
+                            data-category="${escapeText(project.category)}"
+                            data-last-selected="${project.id === lastProjectId}"
+                          >
+                            <span class="tree-row__index">${String(index + 1).padStart(2, '0')}</span>
+                            <span class="tree-row__name">${escapeText(project.title)}</span>
+                            <span class="tree-row__meta">${project.year}</span>
+                          </button>
+                        `
+                      })
+                      .join('')}
+                  </div>
+                </div>
+              `
+            })
+            .join('')
+
+          scopeTree.innerHTML = `
+            <button
+              class="tree-row tree-row--all"
+              type="button"
+              role="treeitem"
+              aria-level="1"
+              aria-current="${isCurrent('all') ? 'page' : 'false'}"
+              tabindex="${focusedKey === 'all' ? '0' : '-1'}"
+              data-key="all"
+              data-kind="all"
+            >
+              <span class="tree-row__disclosure" aria-hidden="true">—</span>
+              <span class="tree-row__name">All work</span>
+              <span class="tree-row__meta">${projects.length}</span>
+            </button>
+            ${groups}
+          `
+
+          if (restoreFocus) {
+            requestAnimationFrame(() => scopeTree.querySelector(`[data-key="${CSS.escape(focusedKey)}"]`)?.focus())
+          }
+        }
+
+        function updateTreeSelection() {
+          for (const item of scopeTree.querySelectorAll('[role="treeitem"]')) {
+            const current =
+              (item.dataset.kind === 'all' && scope.type === 'all') ||
+              (item.dataset.kind === 'group' &&
+                scope.type === 'group' &&
+                item.dataset.category === scope.category) ||
+              (item.dataset.kind === 'project' &&
+                scope.type === 'project' &&
+                item.dataset.id === scope.id)
+            item.setAttribute('aria-current', current ? 'page' : 'false')
+            if (item.dataset.kind === 'project') {
+              item.dataset.lastSelected = String(item.dataset.id === lastProjectId)
+            }
+          }
+        }
+
+        function breadcrumbButton(label, nextScope, current = false) {
+          return `<button
+            class="breadcrumb"
+            type="button"
+            data-scope-type="${nextScope.type}"
+            ${nextScope.category ? `data-category="${escapeText(nextScope.category)}"` : ''}
+            ${nextScope.id ? `data-id="${escapeText(nextScope.id)}"` : ''}
+            ${current ? 'aria-current="page"' : ''}
+          >${escapeText(label)}</button>`
+        }
+
+        function renderBreadcrumbs() {
+          const segments = [breadcrumbButton('All work', { type: 'all' }, scope.type === 'all')]
+          if (scope.type === 'group') {
+            segments.push(breadcrumbButton(scope.category, scope, true))
+          }
+          if (scope.type === 'project') {
+            const project = projectById(scope.id)
+            segments.push(breadcrumbButton(project.category, { type: 'group', category: project.category }))
+            segments.push(breadcrumbButton(project.title, scope, true))
+          }
+          breadcrumbs.innerHTML = segments.join('<span class="breadcrumb-separator" aria-hidden="true">→</span>')
+        }
+
+        function projectCell(project) {
+          const index = projectIndex(project)
+          return `
+            <li>
+              <button
+                class="sheet-cell"
+                type="button"
+                data-viewer-index="${viewerItems.findIndex((item) => item.project.id === project.id)}"
+                data-last-selected="${project.id === lastProjectId}"
+                aria-label="Open ${escapeText(project.title)} in the frame viewer"
+              >
+                <span
+                  class="sheet-cell__media"
+                  data-tone="${escapeText(project.tone)}"
+                  style="--media-ratio: ${project.ratio}"
+                >
+                  <span class="sheet-cell__corner sheet-cell__corner--top">${String(index + 1).padStart(2, '0')}</span>
+                  <span class="sheet-cell__mark" aria-hidden="true">${escapeText(initials(project))}</span>
+                  <span class="sheet-cell__corner sheet-cell__corner--bottom">${escapeText(project.category)}</span>
+                </span>
+                <span class="sheet-cell__caption">
+                  <span class="sheet-cell__title">${escapeText(project.title)}</span>
+                  <span class="sheet-cell__meta">${project.year}</span>
+                </span>
+                <span class="sheet-cell__note">${escapeText(project.subtitle)} — ${escapeText(project.client)}</span>
+              </button>
+            </li>
+          `
+        }
+
+        function makeFrames(project) {
+          const base = projectIndex(project)
+          const count = 6 + (base % 4)
+          return Array.from({ length: count }, (_, index) => ({
+            type: 'frame',
+            project,
+            frameNumber: index + 1,
+            title: `${project.title} — frame ${String(index + 1).padStart(2, '0')}`,
+            description: `${project.subtitle}. Frame ${index + 1} of ${count} from the ${project.title} working set.`,
+            ratio: frameRatios[(index + base) % frameRatios.length],
+            tone: index % 3 === 0 ? project.tone : alternateTones[(index + base) % alternateTones.length],
+          }))
+        }
+
+        function frameCell(frame, index) {
+          return `
+            <li>
+              <button
+                class="sheet-cell"
+                type="button"
+                data-viewer-index="${index}"
+                aria-label="Open ${escapeText(frame.title)} in the frame viewer"
+              >
+                <span
+                  class="sheet-cell__media"
+                  data-tone="${escapeText(frame.tone)}"
+                  style="--media-ratio: ${frame.ratio}"
+                >
+                  <span class="sheet-cell__corner sheet-cell__corner--top">${String(index + 1).padStart(2, '0')}</span>
+                  <span class="sheet-cell__mark" aria-hidden="true">${escapeText(initials(frame.project))}</span>
+                  <span class="sheet-cell__corner sheet-cell__corner--bottom">${escapeText(frame.ratio.replaceAll(' ', ''))}</span>
+                </span>
+                <span class="sheet-cell__caption">
+                  <span class="sheet-cell__title">Frame ${String(index + 1).padStart(2, '0')}</span>
+                  <span class="sheet-cell__meta">${escapeText(frame.ratio.replaceAll(' ', ''))}</span>
+                </span>
+              </button>
+            </li>
+          `
+        }
+
+        function projectIntroMarkup(project) {
+          return `
+            <p class="project-intro__lead">${escapeText(project.lead)}</p>
+            <dl class="facts">
+              <div class="fact"><dt>Client</dt><dd>${escapeText(project.client)}</dd></div>
+              <div class="fact"><dt>Role</dt><dd>${escapeText(project.role)}</dd></div>
+              <div class="fact"><dt>Team</dt><dd>${escapeText(project.team)}</dd></div>
+              <div class="fact"><dt>Duration</dt><dd>${escapeText(project.duration)}</dd></div>
+              <div class="fact"><dt>Year</dt><dd>${project.year}</dd></div>
+            </dl>
+          `
+        }
+
+        function renderSheet() {
+          contactSheet.className = 'contact-sheet'
+          projectIntro.hidden = true
+          projectIntro.innerHTML = ''
+
+          if (scope.type === 'all') {
+            viewerItems = projects.map((project) => ({
+              type: 'project',
+              project,
+              title: project.title,
+              description: project.lead,
+              ratio: project.ratio,
+              tone: project.tone,
+            }))
+            scopeKicker.textContent = 'Selected work · 2023–2026'
+            sheetTitle.textContent = 'All work'
+            scopeCount.textContent = `${projects.length} projects`
+            treeStatus.textContent = `${projects.length} projects in scope`
+            contactSheet.setAttribute('aria-label', 'All work contact sheet')
+            contactSheet.innerHTML = projects.map(projectCell).join('')
+          }
+
+          if (scope.type === 'group') {
+            const scopedProjects = projectsInCategory(scope.category)
+            viewerItems = scopedProjects.map((project) => ({
+              type: 'project',
+              project,
+              title: project.title,
+              description: project.lead,
+              ratio: project.ratio,
+              tone: project.tone,
+            }))
+            contactSheet.classList.add('is-group')
+            scopeKicker.textContent = 'Category scope'
+            sheetTitle.textContent = scope.category
+            scopeCount.textContent = `${scopedProjects.length} ${scopedProjects.length === 1 ? 'project' : 'projects'}`
+            treeStatus.textContent = `${scopedProjects.length} ${scope.category} ${scopedProjects.length === 1 ? 'project' : 'projects'} in scope`
+            contactSheet.setAttribute('aria-label', `${scope.category} contact sheet`)
+            contactSheet.innerHTML = scopedProjects.map(projectCell).join('')
+          }
+
+          if (scope.type === 'project') {
+            const project = projectById(scope.id)
+            viewerItems = makeFrames(project)
+            contactSheet.classList.add('is-project')
+            scopeKicker.textContent = `${project.category} · ${project.year} · ${project.subtitle}`
+            sheetTitle.textContent = project.title
+            scopeCount.textContent = `${viewerItems.length} frames`
+            treeStatus.textContent = `${project.title}, ${viewerItems.length} frames in scope`
+            projectIntro.hidden = false
+            projectIntro.innerHTML = projectIntroMarkup(project)
+            contactSheet.setAttribute('aria-label', `${project.title} frame contact sheet`)
+            contactSheet.innerHTML = viewerItems.map(frameCell).join('')
+          }
+        }
+
+        function setScope(nextScope, { scroll = true } = {}) {
+          scope = nextScope
+          if (scope.type === 'project') lastProjectId = scope.id
+          updateTreeSelection()
+          renderBreadcrumbs()
+          renderSheet()
+
+          if (scroll && mobile.matches) {
+            requestAnimationFrame(() =>
+              sheetPane.scrollIntoView({
+                behavior: reducedMotion.matches ? 'auto' : 'smooth',
+                block: 'start',
+              }),
+            )
+          }
+        }
+
+        function visibleTreeItems() {
+          return [...scopeTree.querySelectorAll('[role="treeitem"]')].filter(
+            (item) => !item.closest('[role="group"][hidden]'),
+          )
+        }
+
+        function focusTreeItem(item) {
+          if (!item) return
+          focusedKey = item.dataset.key
+          for (const candidate of scopeTree.querySelectorAll('[role="treeitem"]')) {
+            candidate.tabIndex = candidate === item ? 0 : -1
+          }
+          item.focus()
+          const top = item.offsetTop
+          const bottom = top + item.offsetHeight
+          if (top < treeScroll.scrollTop) treeScroll.scrollTop = top
+          if (bottom > treeScroll.scrollTop + treeScroll.clientHeight) {
+            treeScroll.scrollTop = bottom - treeScroll.clientHeight
+          }
+        }
+
+        function activateTreeItem(item) {
+          focusedKey = item.dataset.key
+          if (item.dataset.kind === 'all') {
+            setScope({ type: 'all' })
+          }
+          if (item.dataset.kind === 'group') {
+            setScope({ type: 'group', category: item.dataset.category })
+          }
+          if (item.dataset.kind === 'project') {
+            setScope({ type: 'project', id: item.dataset.id })
+          }
+        }
+
+        scopeTree.addEventListener('focusin', (event) => {
+          const item = event.target.closest('[role="treeitem"]')
+          if (!item) return
+          focusedKey = item.dataset.key
+          for (const candidate of scopeTree.querySelectorAll('[role="treeitem"]')) {
+            candidate.tabIndex = candidate === item ? 0 : -1
+          }
+        })
+
+        scopeTree.addEventListener('click', (event) => {
+          const item = event.target.closest('[role="treeitem"]')
+          if (!item) return
+          focusedKey = item.dataset.key
+          if (item.dataset.kind === 'group') {
+            const category = item.dataset.category
+            if (expandedCategories.has(category)) expandedCategories.delete(category)
+            else expandedCategories.add(category)
+            renderTree({ restoreFocus: !mobile.matches })
+          }
+          activateTreeItem(item)
+        })
+
+        scopeTree.addEventListener('keydown', (event) => {
+          const item = event.target.closest('[role="treeitem"]')
+          if (!item) return
+          const items = visibleTreeItems()
+          const position = items.indexOf(item)
+
+          if (event.key === 'ArrowDown' || event.key === 'ArrowUp' || event.key === 'Home' || event.key === 'End') {
+            event.preventDefault()
+            const destination = {
+              ArrowDown: Math.min(position + 1, items.length - 1),
+              ArrowUp: Math.max(position - 1, 0),
+              Home: 0,
+              End: items.length - 1,
+            }[event.key]
+            focusTreeItem(items[destination])
+            return
+          }
+
+          if (event.key === 'ArrowRight' && item.dataset.kind === 'group') {
+            event.preventDefault()
+            const category = item.dataset.category
+            if (!expandedCategories.has(category)) {
+              expandedCategories.add(category)
+              renderTree({ restoreFocus: true })
+            } else {
+              const parent = scopeTree.querySelector(`[data-key="${CSS.escape(`group:${category}`)}"]`)
+              const firstChild = parent?.nextElementSibling?.querySelector('[role="treeitem"]')
+              focusTreeItem(firstChild)
+            }
+            return
+          }
+
+          if (event.key === 'ArrowLeft') {
+            if (item.dataset.kind === 'project') {
+              event.preventDefault()
+              focusTreeItem(scopeTree.querySelector(`[data-key="${CSS.escape(`group:${item.dataset.category}`)}"]`))
+              return
+            }
+            if (item.dataset.kind === 'group' && expandedCategories.has(item.dataset.category)) {
+              event.preventDefault()
+              expandedCategories.delete(item.dataset.category)
+              renderTree({ restoreFocus: true })
+              return
+            }
+          }
+
+          if (event.key === 'Enter') {
+            event.preventDefault()
+            activateTreeItem(item)
+          }
+        })
+
+        breadcrumbs.addEventListener('click', (event) => {
+          const button = event.target.closest('[data-scope-type]')
+          if (!button) return
+          const nextScope = { type: button.dataset.scopeType }
+          if (button.dataset.category) nextScope.category = button.dataset.category
+          if (button.dataset.id) nextScope.id = button.dataset.id
+          setScope(nextScope)
+        })
+
+        function paintViewer(index) {
+          const item = viewerItems[index]
+          if (!item) return
+          viewerIndex = index
+          const frameLabel = item.type === 'frame' ? `Frame ${String(item.frameNumber).padStart(2, '0')}` : item.project.category
+          viewerPosition.textContent = `${String(index + 1).padStart(2, '0')} / ${String(viewerItems.length).padStart(2, '0')} — ${item.title}`
+          viewerBody.innerHTML = `
+            <div
+              class="viewer__media"
+              data-tone="${escapeText(item.tone)}"
+              style="--media-ratio: ${item.ratio}"
+              role="img"
+              aria-label="${escapeText(item.title)} placeholder frame"
+            >
+              <span class="viewer__corner viewer__corner--top">${String(index + 1).padStart(2, '0')}</span>
+              <span class="viewer__mark" aria-hidden="true">${escapeText(initials(item.project))}</span>
+              <span class="viewer__corner viewer__corner--bottom">${escapeText(frameLabel)}</span>
+            </div>
+            <div class="viewer__copy">
+              <p class="viewer__kicker">${escapeText(frameLabel)} · ${escapeText(item.project.year)}</p>
+              <h2 class="viewer__title" id="viewerTitle">${escapeText(item.title)}</h2>
+              <p class="viewer__description">${escapeText(item.description)}</p>
+            </div>
+          `
+        }
+
+        function stepViewer(direction) {
+          if (viewerItems.length < 2) return
+          const delta = direction === 'next' ? 1 : -1
+          paintViewer((viewerIndex + delta + viewerItems.length) % viewerItems.length)
+        }
+
+        contactSheet.addEventListener('click', (event) => {
+          const cell = event.target.closest('[data-viewer-index]')
+          if (!cell) return
+          viewerOpener = cell
+          paintViewer(Number(cell.dataset.viewerIndex))
+          viewer.showModal()
+        })
+
+        viewer.addEventListener('click', (event) => {
+          if (event.target === viewer || event.target.closest('#viewerClose')) {
+            viewer.close()
+            return
+          }
+          const step = event.target.closest('[data-viewer-step]')
+          if (step) stepViewer(step.dataset.viewerStep)
+        })
+
+        viewer.addEventListener('keydown', (event) => {
+          if (event.key === 'ArrowRight') {
+            event.preventDefault()
+            stepViewer('next')
+          }
+          if (event.key === 'ArrowLeft') {
+            event.preventDefault()
+            stepViewer('previous')
+          }
+        })
+
+        viewer.addEventListener('close', () => {
+          requestAnimationFrame(() => {
+            if (viewerOpener?.isConnected) viewerOpener.focus()
+          })
+        })
+
+        renderTree()
+        setScope(scope, { scroll: false })
+      })()
+    </script>
+  </body>
+</html>

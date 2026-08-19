@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tag Soup Kitchen</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f7f8;
+        --line: #d8dde3;
+        --text: #17191e;
+        --muted: #60636b;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+        background: var(--bg);
+        color: var(--text);
+      }
+      .wrap {
+        margin: 0 auto;
+        max-width: 1100px;
+        padding: 20px;
+      }
+      h1 { margin: 0; }
+      .muted { color: var(--muted); }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        border: 1px solid var(--line);
+      }
+      th,
+      td {
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        vertical-align: top;
+        padding: 10px 8px;
+      }
+      th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: #eaf0f8;
+      }
+      thead th { font-weight: 700; }
+      a { color: #1f56d6; }
+      .badge {
+        border: 1px solid #cfd5de;
+        border-radius: 999px;
+        padding: 2px 6px;
+        white-space: nowrap;
+        font-size: 11px;
+        text-transform: uppercase;
+      }
+      .badge-live { background: #eaf8ee; color: #0e5f29; border-color: #b7dfbf; }
+      .badge-archive { background: #fff6e7; color: #7a4a00; border-color: #f0d4a7; }
+      .meta {
+        margin: 8px 0 16px;
+        display: grid;
+        gap: 4px;
+      }
+      .footer {
+        margin-top: 16px;
+        color: var(--muted);
+      }
+      code {
+        font-size: 12px;
+        background: #edf2f9;
+        border-radius: 4px;
+        padding: 1px 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <h1>Tag Soup Kitchen (a.k.a. HTML Lab)</h1>
+      <p class="muted">A minimalist long-term archive of every HTML surface.</p>
+      <p class="meta">
+        <span>Entries: <strong>51</strong></span>
+        <span>Generated at: <strong>2026-08-19T06:35:37.860Z</strong></span>
+        <span>Source: <strong>../final-portfolio</strong></span>
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Seq</th>
+            <th>Created</th>
+            <th>State</th>
+            <th>Path</th>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Source</th>
+            <th>Port</th>
+          </tr>
+        </thead>
+        <tbody>
+
+        <tr>
+          <td>0001</td>
+          <td><time datetime="2026-08-18T05:37:53.708Z">2026-08-18</time></td>
+          <td><span class="badge badge-live">live</span></td>
+          <td><a href="./variants/01-editorial-masonry.html">variants/01-editorial-masonry.html</a></td>
+          <td>1 — Editorial masonry</td>
+          <td>Ragged columns, captions on the page, 12px image radii.</td>
+          <td><span class="muted">public/variants/01-editorial-masonry.html</span></td>
+          <td><code>4171</code></td>
+        </tr>
+
+        <tr>
+          <td>0002</td>
+          <td><time datetime="2026-08-18T05:37:53.709Z">2026-08-18</time></td>
+          <td><span class="badge badge-live">live</span></td>
+          <td><a href="./variants/02-case-study-grid.html">variants/02-case-study-grid.html</a></td>
+          <td>2 — Case study grid</td>
+          <td>Three columns, 32px gutters, borderless cards.</td>
+          <td><span class="muted">public/variants/02-case-study-grid.html</span></td>
+          <td><code>4172</code></td>
+        </tr>
+
+        <tr>
+          <td>0003</td>
+          <td><time datetime="2026-08-18T05:37:53.709Z">2026-08-18</time></td>
+          <td><span class="badge badge-live">live</span></td>
+          <td><a href="./variants/03-banded-index.html">variants/03-banded-index.html</a></td>
+          <td>3 — Banded index</td>
+          <td>The archive as a list, mist bands instead of rules.</td>
+          <td><span class="muted">public/variants/03-banded-index.html</span></td>
+          <td><code>4173</code></td>
+        </tr>
+
+        <tr>
+          <td>0004</td>
+          <td><time datetime="2026-08-18T05:37:53.709Z">2026-08-18</time></td>
+          <td><span class="badge badge-live">live</span></td>
+          <td><a href="./variants/04-full-bleed-panels.html">variants/04-full-bleed-panels.html</a></td>
+          <td>4 — Full-bleed panels</td>
+          <td>Equal tiles, no caption chrome, panel as statement.</td>
+          <td><span class="muted">public/variants/04-full-bleed-panels.html</span></td>
+          <td><code>4174</code></td>
+        </tr>
+
+        <tr>
+          <td>0005</td>
+          <td><time datetime="2026-08-18T05:37:53.710Z">2026-08-18</time></td>
+          <td><span class="badge badge-live">live</span></td>
+          <td><a href="./variants/05-chrome-controls.html">variants/05-chrome-controls.html</a></td>
+          <td>5 — Chrome and controls</td>
+          <td>Filters, sort, and subscribe as flat rectangles.</td>
+          <td><span class="muted">public/variants/05-chrome-controls.html</span></td>
+          <td><code>4175</code></td>
+        </tr>
+
+        <tr>
+          <td>0006</td>
+          <td><time datetime="2026-08-18T05:37:53.711Z">2026-08-18</time></td>
+          <td><span class="badge badge-live">live</span></td>
+          <td><a href="./variants/index.html">variants/index.html</a></td>
+          <td>All chapters</td>
+          <td>Every variant on one continuous scroll.</td>
+          <td><span class="muted">public/variants/index.html</span></td>
+          <td><code>4176</code></td>
+        </tr>
+
+        <tr>
+          <td>0007</td>
+          <td><time datetime="2026-08-18T05:40:33.229Z">2026-08-18</time></td>
+          <td><span class="badge badge-live">live</span></td>
+          <td><a href="./design-system.html">design-system.html</a></td>
+          <td>Design system</td>
+          <td>AColorBright tokens, type scale, spacing, and components.</td>
+          <td><span class="muted">public/design-system.html</span></td>
+          <td><code>4177</code></td>
+        </tr>
+
+        <tr>
+          <td>0008</td>
+          <td><time datetime="2026-08-18T06:52:06.646Z">2026-08-18</time></td>
+          <td><span class="badge badge-live">live</span></td>
+          <td><a href="./icons.html">icons.html</a></td>
+          <td>Icon study</td>
+          <td>Five icon directions on the 24-unit grid, with live stroke and container controls.</td>
+          <td><span class="muted">public/icons.html</span></td>
+          <td><code>4187</code></td>
+        </tr>
+
+        <tr>
+          <td>0009</td>
+          <td><time datetime="2026-08-18T07:22:58.525Z">2026-08-18</time></td>
+          <td><span class="badge badge-archive">archive</span></td>
+          <td><a href="./archive/ux-direction-explorations-180826/01-grid-index.html">archive/ux-direction-explorations-180826/01-grid-index.html</a></td>
+          <td>UX direction 1 — Contact sheet grid</td>
+          <td>Accepted. Dense grid, live filters, inline overlay.</td>
+          <td><span class="muted">public/archive/ux-direction-explorations-180826/01-grid-index.html</span></td>
+          <td><code>4192</code></td>
+        </tr>
+
+        <tr>
+          <td>0010</td>
+          <td><time datetime="2026-08-18T07:22:58.530Z">2026-08-18</time></td>
+          <td><span class="badge badge-archive">archive</span></td>
+          <td><a href="./archive/ux-direction-explorations-180826/02-editorial-scroll.html">archive/ux-direction-explorations-180826/02-editorial-scroll.html</a></td>
+          <td>UX direction 2 — Editorial scroll</td>
+          <td>Rejected. One project per screen, scroll-snap, progress rail.</td>
+          <td><span class="muted">public/archive/ux-direction-explorations-180826/02-editorial-scroll.html</span></td>
+          <td><code>4193</code></td>
+        </tr>
+
+        <tr>
+          <td>0011</td>
+          <td><time datetime="2026-08-18T07:22:58.533Z">2026-08-18</time></td>
+          <td><span class="badge badge-archive">archive</span></td>
+          <td><a href="./archive/ux-direction-explorations-180826/03-split-browser.html">archive/ux-direction-explorations-180826/03-split-browser.html</a></td>
+          <td>UX direction 3 — Split browser</td>
+          <td>Accepted. Persistent list beside a live preview pane.</td>
+          <td><span class="muted">public/archive/ux-direction-explorations-180826/03-split-browser.html</span></td>
+          <td><code>4194</code></td>
+        </tr>
+
+        <tr>
+          <td>0012</td>
+          <td><time datetime="2026-08-18T07:22:58.536Z">2026-08-18</time></td>
+          <td><span class="badge badge-archive">archive</span></td>
+          <td><a href="./archive/ux-direction-explorations-180826/04-fullscreen-reel.html">archive/ux-direction-explorations-180826/04-fullscreen-reel.html</a></td>
+          <td>UX direction 4 — Fullscreen reel</td>
+          <td>Rejected. One project per screen, arrow or swipe to advance.</td>
+          <td><span class="muted">public/archive/ux-direction-explorations-180826/04-fullscreen-reel.html</span></td>
+          <td><code>4195</code></td>
+        </tr>
+
+        <tr>
+          <td>0013</td>
+          <td><time datetime="2026-08-18T07:22:58.537Z">2026-08-18</time></td>
+          <td><span class="badge badge-archive">archive</span></td>
+          <td><a href="./archive/ux-direction-explorations-180826/05-command-index.html">archive/ux-direction-explorations-180826/05-command-index.html</a></td>
+          <td>UX direction 5 — Command index</td>
+          <td>Rejected. Keyboard-first index with a command palette.</td>
+          <td><span class="muted">public/archive/ux-direction-explorations-180826/05-command-index.html</span></td>
+          <td><code>4196</code></td>
+        </tr>
+
+        <tr>
+          <td>0014</td>
+          <td><time datetime="2026-08-18T07:22:58.540Z">2026-08-18</time></td>
+          <td><span class="badge badge-archive">archive</span></td>
+          <td><a href="./archive/ux-flow-wireframes-180826/index.html">archive/ux-flow-wireframes-180826/index.html</a></td>
+          <td>UX flows 18.08.26</td>
+          <td>Four low-fidelity flows with a device toggle.</td>
+          <td><span class="muted">public/archive/ux-flow-wireframes-180826/index.html</span></td>
+          <td><code>4197</code></td>
+        </tr>
+
+        <tr>
+          <td>0015</td>
+          <td><time datetime="2026-08-18T07:23:14.886Z">2026-08-18</time></td>
+          <td><span class="badge badge-archive">archive</span></td>
+          <td><a href="./archive/ux-direction-explorations-180826/index.html">archive/ux-direction-explorations-180826/index.html</a></td>
+          <td>UX directions 18.08.26</td>
+          <td>The five-direction review round and its verdicts.</td>
+          <td><span class="muted">public/archive/ux-direction-explorations-180826/index.html</span></td>
+          <td><code>4191</code></td>
+        </tr>
+
+        <tr>
+          <td>0016</td>
+          <td><time datetime="2026-08-18T07:49:48.459Z">2026-08-18</time></td>
+          <td><span class="badge badge-live">live</span></td>
+          <td><a href="./designs/01-contact-sheet.html">designs/01-contact-sheet.html</a></td>
+          <td>Direction 1 — Contact sheet</td>
+          <td>Whole archive on one sheet, filters, density toggle, project overlay.</td>
+          <td><span class="muted">public/designs/01-contact-sheet.html</span></td>
+          <td><code>4181</code></td>
+        </tr>
+
+        <tr>
+          <td>0017</td>
+          <td><time datetime="2026-08-18T07:50:00.694Z">2026-08-18</time></td>
+          <td><span class="badge badge-live">live</span></td>
+          <td><a href="./designs/03-split-browser.html">designs/03-split-browser.html</a></td>
+          <td>Direction 2 — Split browser</td>
+          <td>Persistent index beside a full case study with numbered chapters.</td>
+          <td><span class="muted">public/designs/03-split-browser.html</span></td>
+          <td><code>4182</code></td>
+        </tr>
+
+        <tr>
+          <td>0018</td>
+          <td><time datetime="2026-08-18T07:54:01.478Z">2026-08-18</time></td>
+          <td><span class="badge badge-archive">archive</span></td>
+          <td><a href="./archive/shader-study-180826/index.html">archive/shader-study-180826/index.html</a></td>
+          <td>Shader study 18.08.26</td>
+          <td>Accepted. Five achromatic plates, all five adopted into the portfolio shader lab.</td>
+          <td><span class="muted">public/archive/shader-study-180826/index.html</span></td>
+          <td><code>4198</code></td>
+        </tr>
+
+        <tr>
+          <td>0019</td>
+          <td><time datetime="2026-08-18T08:15:13.049Z">2026-08-18</time></td>
+          <td><span class="badge badge-archive">archive</span></td>
+          <td><a href="./archive/index.html">archive/index.html</a></td>
+          <td>Archive index</td>
+          <td>Every closed round, named subject-DDMMYY.</td>
+          <td><span class="muted">public/archive/index.html</span></td>
+          <td><code>4190</code></td>
+        </tr>
+
+        <tr>
+          <td>0020</td>
+          <td><time datetime="2026-08-18T08:21:57.271Z">2026-08-18</time></td>
+          <td><span class="badge badge-live">live</span></td>
+          <td><a href="./combinations/index.html">combinations/index.html</a></td>
+          <td>Combinations</td>
+          <td>Four ways the contact sheet and the split browser become one surface.</td>
+          <td><span class="muted">public/combinations/index.html</span></td>
+          <td><code>4200</code></td>
+        </tr>
+
+        <tr>
+          <td>0021</td>
+          <td><time datetime="2026-08-18T08:22:31.127Z">2026-08-18</time></td>
+          <td><span class="badge badge-live">live</span></td>
+          <td><a href="./designs/index.html">designs/index.html</a></td>
+          <td>Design directions</td>
+          <td>The two accepted directions, built in the AColorBright system.</td>
+          <td><span class="muted">public/designs/index.html</span></td>
+          <td><code>4180</code></td>
+        </tr>
+
+        <tr>
+          <td>0022</td>
+          <td><time datetime="2026-08-18T08:28:37.944Z">2026-08-18</time></td>
+          <td><span class="badge badge-live">live</span></td>
+          <td><a href="./combinations/02-list-scopes-sheet.html">combinations/02-list-scopes-sheet.html</a></td>
+          <td>Combination 2 — List scopes the sheet</td>
+          <td>Index leads as a scoping tree; the sheet renders whatever is scoped.</td>
+          <td><span class="muted">public/combinations/02-list-scopes-sheet.html</span></td>
+          <td><code>4202</code></td>
+        </tr>
+
+        <tr>
+          <td>0023</td>
+          <td><time datetime="2026-08-18T08:32:30.139Z">2026-08-18</time></td>
+          <td><span class="badge badge-live">live</span></td>
+          <td><a href="./combinations/01-sheet-with-rail.html">combinations/01-sheet-with-rail.html</a></td>
+          <td>Combination 1 — Sheet with rail</td>
+          <td>Sheet leads, index rail is resident, hover and selection sync both ways.</td>
+          <td><span class="muted">public/combinations/01-sheet-with-rail.html</span></td>
+          <td><code>4201</code></td>
+        </tr>
+
+        <tr>
+          <td>0024</td>
+          <td><time datetime="2026-08-18T08:42:10.104Z">2026-08-18</time></td>
+          <td><span class="badge badge-live">live</span></td>
+          <td><a href="./combinations/03-density-dial.html">combinations/03-density-dial.html</a></td>
+          <td>Combination 3 — Density dial</td>
+          <td>One continuum from index rows to contact sheet, anchor preserved.</td>
+          <td><span class="muted">public/combinations/03-density-dial.html</span></td>
+          <td><code>4203</code></td>
+        </tr>
+
+        <tr>
+          <td>0025</td>
+          <td><time datetime="2026-08-18T08:43:40.819Z">2026-08-18</time></td>
+          <td><span class="badge badge-live">live</span></td>
+          <td><a href="./combinations/04-sheet-with-slideover.html">combinations/04-sheet-with-slideover.html</a></td>
+          <td>Combination 4 — Sheet with slide-over</td>
+          <td>Full-bleed sheet; the index is summoned with ⌘K, pinnable into a column.</td>
+          <td><span class="muted">public/combinations/04-sheet-with-slideover.html</span></td>
+          <td><code>4204</code></td>
+        </tr>
+
+        <tr>
+          <td>0026</td>
+          <td><time datetime="2026-08-18T10:08:42.686Z">2026-08-18</time></td>
+          <td><span class="badge badge-live">live</span></td>
+          <td><a href="./masonry/index.html">masonry/index.html</a></td>
+          <td>Masonry study</td>
+          <td>Five masonry treatments over the nine real records pulled from production.</td>
+          <td><span class="muted">public/masonry/index.html</span></td>
+          <td><code>4210</code></td>
+        </tr>
+
+        <tr>
+          <td>0027</td>
+          <td><time datetime="2026-08-18T10:17:23.274Z">2026-08-18</time></td>
+          <td><span class="badge badge-live">live</span></td>
+          <td><a href="./masonry/01-column-masonry.html">masonry/01-column-masonry.html</a></td>
+          <td>Masonry 1 — Column masonry</td>
+          <td>Three CSS columns, natural ratios, nothing cropped.</td>
+          <td><span class="muted">public/masonry/01-column-masonry.html</span></td>
+          <td><code>4211</code></td>
+        </tr>
+
+        <tr>
+          <td>0028</td>
+          <td><time datetime="2026-08-18T10:17:23.275Z">2026-08-18</time></td>
+          <td><span class="badge badge-live">live</span></td>
+          <td><a href="./masonry/02-justified-rows.html">masonry/02-justified-rows.html</a></td>
+          <td>Masonry 2 — Justified rows</td>
+          <td>Rows flush left and right, widths proportional to image ratio.</td>
+          <td><span class="muted">public/masonry/02-justified-rows.html</span></td>
+          <td><code>4212</code></td>
+        </tr>
+
+        <tr>
+          <td>0029</td>
+          <td><time datetime="2026-08-18T10:17:23.275Z">2026-08-18</time></td>
+          <td><span class="badge badge-live">live</span></td>
+          <td><a href="./masonry/03-span-mosaic.html">masonry/03-span-mosaic.html</a></td>
+          <td>Masonry 3 — Span mosaic</td>
+          <td>Six columns on a 96px row module; images crop to their span.</td>
+          <td><span class="muted">public/masonry/03-span-mosaic.html</span></td>
+          <td><code>4213</code></td>
+        </tr>
+
+        <tr>
+          <td>0030</td>
+          <td><time datetime="2026-08-18T10:17:23.276Z">2026-08-18</time></td>
+          <td><span class="badge badge-live">live</span></td>
+          <td><a href="./masonry/04-lead-and-columns.html">masonry/04-lead-and-columns.html</a></td>
+          <td>Masonry 4 — Lead and columns</td>
+          <td>One full-measure lead, then eight records in a dense masonry.</td>
+          <td><span class="muted">public/masonry/04-lead-and-columns.html</span></td>
+          <td><code>4214</code></td>
+        </tr>
+
+        <tr>
+          <td>0031</td>
+          <td><time datetime="2026-08-18T10:17:23.276Z">2026-08-18</time></td>
+          <td><span class="badge badge-live">live</span></td>
+          <td><a href="./masonry/05-spec-rails.html">masonry/05-spec-rails.html</a></td>
+          <td>Masonry 5 — Spec rails</td>
+          <td>Two columns with a banded role, years, and topics rail per record.</td>
+          <td><span class="muted">public/masonry/05-spec-rails.html</span></td>
+          <td><code>4215</code></td>
+        </tr>
+
+        <tr>
+          <td>0032</td>
+          <td><time datetime="2026-08-18T19:11:35.270Z">2026-08-18</time></td>
+          <td><span class="badge badge-live">live</span></td>
+          <td><a href="./name-tokens.html">name-tokens.html</a></td>
+          <td>Name tokens</td>
+          <td>Eight name lockups for David Lafond, drawn in AColorBright and again in Harbour.</td>
+          <td><span class="muted">public/name-tokens.html</span></td>
+          <td><code>4183</code></td>
+        </tr>
+
+        <tr>
+          <td>0033</td>
+          <td><time datetime="2026-08-18T19:12:01.552Z">2026-08-18</time></td>
+          <td><span class="badge badge-live">live</span></td>
+          <td><a href="./nav-variants.html">nav-variants.html</a></td>
+          <td>Top nav variants</td>
+          <td>Six product-designer nav bars built in the Harbour Manrope system.</td>
+          <td><span class="muted">public/nav-variants.html</span></td>
+          <td><code>4184</code></td>
+        </tr>
+
+        <tr>
+          <td>0034</td>
+          <td><time datetime="2026-08-19T02:12:33.669Z">2026-08-19</time></td>
+          <td><span class="badge badge-live">live</span></td>
+          <td><a href="./below-gallery-ux.html">below-gallery-ux.html</a></td>
+          <td>Below gallery + footer — 5 UX</td>
+          <td>Ledger, counter, split desk, plates, margin rail — plus the HAIRLINE system legend.</td>
+          <td><span class="muted">public/below-gallery-ux.html</span></td>
+          <td><code>4223</code></td>
+        </tr>
+
+        <tr>
+          <td>0035</td>
+          <td><time datetime="2026-08-19T02:47:50.258Z">2026-08-19</time></td>
+          <td><span class="badge badge-live">live</span></td>
+          <td><a href="./flip-testimonials.html">flip-testimonials.html</a></td>
+          <td>Flip testimonials — 5 layouts</td>
+          <td>Band, quad, rows, deck, and tilt treatments of the two-sided testimonial card.</td>
+          <td><span class="muted">public/flip-testimonials.html</span></td>
+          <td><code>4222</code></td>
+        </tr>
+
+        <tr>
+          <td>0036</td>
+          <td><time datetime="2026-08-19T03:00:24.836Z">2026-08-19</time></td>
+          <td><span class="badge badge-live">live</span></td>
+          <td><a href="./flip-band.html">flip-band.html</a></td>
+          <td>Flip band — dark</td>
+          <td>Small tilt-then-flip cards on two opposing drift bands, in the davidlafond.xyz palette.</td>
+          <td><span class="muted">public/flip-band.html</span></td>
+          <td><code>4221</code></td>
+        </tr>
+
+        <tr>
+          <td>0037</td>
+          <td><time datetime="2026-08-19T03:11:12.235Z">2026-08-19</time></td>
+          <td><span class="badge badge-live">live</span></td>
+          <td><a href="./testimonials-band.html">testimonials-band.html</a></td>
+          <td>Testimonials — flip band</td>
+          <td>Real testimonials from david-room-portfolio as drifting flip cards, dressed in the AAA Paper tokens.</td>
+          <td><span class="muted">public/testimonials-band.html</span></td>
+          <td><code>4220</code></td>
+        </tr>
+
+        <tr>
+          <td>0038</td>
+          <td><time datetime="2026-08-19T03:16:52.817Z">2026-08-19</time></td>
+          <td><span class="badge badge">standalone</span></td>
+          <td><a href="./card-click-ux.html">card-click-ux.html</a></td>
+          <td>Click on a card — 5 UX explorations (deployed design language)</td>
+          <td>Click on a card — 5 UX explorations (deployed design language) /* ============================================================ TOKENS — lifted verbatim from the</td>
+          <td><span class="muted">card-click-ux.html</span></td>
+          <td>-</td>
+        </tr>
+
+        <tr>
+          <td>0039</td>
+          <td><time datetime="2026-08-19T03:40:35.659Z">2026-08-19</time></td>
+          <td><span class="badge badge">standalone</span></td>
+          <td><a href="./project-info-components.html">project-info-components.html</a></td>
+          <td>Project info — modular panel components (split stage)</td>
+          <td>Project info — modular panel components (split stage) /* ============================================================ TOKENS — deployed site (src/styles.css :ro</td>
+          <td><span class="muted">project-info-components.html</span></td>
+          <td>-</td>
+        </tr>
+
+        <tr>
+          <td>0040</td>
+          <td><time datetime="2026-08-19T04:07:48.430Z">2026-08-19</time></td>
+          <td><span class="badge badge">standalone</span></td>
+          <td><a href="./widget-responsive-states.html">widget-responsive-states.html</a></td>
+          <td>Widget responsive states</td>
+          <td>Responsive states of the hero profile + widget cluster, rendered at multiple true viewport widths with no cropped widgets.</td>
+          <td><span class="muted">public/widget-responsive-states.html</span></td>
+          <td>-</td>
+        </tr>
+
+        <tr>
+          <td>0041</td>
+          <td><time datetime="2026-08-19T04:39:46.746Z">2026-08-19</time></td>
+          <td><span class="badge badge">standalone</span></td>
+          <td><a href="./card-motions.html">card-motions.html</a></td>
+          <td>Card motion — five avenues</td>
+          <td>Card motion — five avenues @property --angle { syntax: &quot; &quot;; initial-value: 0deg; inherits: false; } :root { --paper: #ffffff; --ink: #111111; --muted: #8a8a8a; </td>
+          <td><span class="muted">public/card-motions.html</span></td>
+          <td>-</td>
+        </tr>
+
+        <tr>
+          <td>0042</td>
+          <td><time datetime="2026-08-19T04:51:48.922Z">2026-08-19</time></td>
+          <td><span class="badge badge-live">live</span></td>
+          <td><a href="./distance-widget.html">distance-widget.html</a></td>
+          <td>Distance widget — 9 variations</td>
+          <td>Time-until-we-are-in-the-same-room widget: same city, drive, or flight to YUL — system TRANSIT.</td>
+          <td><span class="muted">public/distance-widget.html</span></td>
+          <td><code>4225</code></td>
+        </tr>
+
+        <tr>
+          <td>0043</td>
+          <td><time datetime="2026-08-19T04:53:20.348Z">2026-08-19</time></td>
+          <td><span class="badge badge-live">live</span></td>
+          <td><a href="./ascii-hover.html">ascii-hover.html</a></td>
+          <td>ASCII hover micro-interactions</td>
+          <td>Nine hover/toggle specimens rendered as ASCII computational fields, plus a power latch — system PHOSPHOR.</td>
+          <td><span class="muted">public/ascii-hover.html</span></td>
+          <td><code>4224</code></td>
+        </tr>
+
+        <tr>
+          <td>0044</td>
+          <td><time datetime="2026-08-19T04:57:04.137Z">2026-08-19</time></td>
+          <td><span class="badge badge">standalone</span></td>
+          <td><a href="./widget-project-states.html">widget-project-states.html</a></td>
+          <td>Hero + project cards — responsive states</td>
+          <td>Responsive states of the hero (profile + widgets) shown in relationship with the filter bar and project card grid below, at multiple true viewport widths.</td>
+          <td><span class="muted">public/widget-project-states.html</span></td>
+          <td>-</td>
+        </tr>
+
+        <tr>
+          <td>0045</td>
+          <td><time datetime="2026-08-19T05:15:16.062Z">2026-08-19</time></td>
+          <td><span class="badge badge">standalone</span></td>
+          <td><a href="./portfolio-3d.html">portfolio-3d.html</a></td>
+          <td>Portfolio — 3D object explorations</td>
+          <td>Portfolio — 3D object explorations :root { --paper: #ffffff; --ink: #111111; --muted: #8a8a8a; --hairline: #e6e6e6; --chip: #f2f2f2; --accent: #2f6bff; --sans: </td>
+          <td><span class="muted">public/portfolio-3d.html</span></td>
+          <td>-</td>
+        </tr>
+
+        <tr>
+          <td>0046</td>
+          <td><time datetime="2026-08-19T05:39:10.590Z">2026-08-19</time></td>
+          <td><span class="badge badge-live">live</span></td>
+          <td><a href="./micro-interactions.html">micro-interactions.html</a></td>
+          <td>Micro-interaction system — 10 demos</td>
+          <td>Motion tokens plus ten micro-interactions built on the live portfolio&#39;s own components, palette and copy — system MOTION/HAIRLINE.</td>
+          <td><span class="muted">public/micro-interactions.html</span></td>
+          <td><code>4226</code></td>
+        </tr>
+
+        <tr>
+          <td>0047</td>
+          <td><time datetime="2026-08-19T05:41:53.496Z">2026-08-19</time></td>
+          <td><span class="badge badge-live">live</span></td>
+          <td><a href="./distance-widgets-v2.html">distance-widgets-v2.html</a></td>
+          <td>Distance widget — stub · arc · globe</td>
+          <td>Round 2: the three keepers rebuilt in the shipped widget language — 284×134 flight slot, 280×280 map slot, .tilt motion, green freshness dot.</td>
+          <td><span class="muted">public/distance-widgets-v2.html</span></td>
+          <td><code>4227</code></td>
+        </tr>
+
+        <tr>
+          <td>0048</td>
+          <td><time datetime="2026-08-19T05:59:11.129Z">2026-08-19</time></td>
+          <td><span class="badge badge-live">live</span></td>
+          <td><a href="./hub.html">hub.html</a></td>
+          <td>Hub</td>
+          <td>This catalogue — every local surface and its port.</td>
+          <td><span class="muted">public/hub.html</span></td>
+          <td><code>4170</code></td>
+        </tr>
+
+        <tr>
+          <td>0049</td>
+          <td><time datetime="2026-08-19T06:01:38.741Z">2026-08-19</time></td>
+          <td><span class="badge badge-live">live</span></td>
+          <td><a href="./scroll-ring.html">scroll-ring.html</a></td>
+          <td>Filter ring as position tracker — 6 mechanics</td>
+          <td>The black circle in front of the filter pills drains to empty at the footer, ported from davidlafond.xyz — system BRIM.</td>
+          <td><span class="muted">public/scroll-ring.html</span></td>
+          <td><code>4228</code></td>
+        </tr>
+
+        <tr>
+          <td>0050</td>
+          <td><time datetime="2026-08-19T06:06:30.916Z">2026-08-19</time></td>
+          <td><span class="badge badge">standalone</span></td>
+          <td><a href="./reself-vision.html">reself-vision.html</a></td>
+          <td>Re:Self — creative vision &amp;amp; video plan</td>
+          <td>Re:Self — creative vision &amp;amp; video plan /* ============ tokens (deployed site) ============ */ :root{ --paper:#FFFFFF; --ink:#111111; --muted:#8A8A8A; --mute</td>
+          <td><span class="muted">reself-vision.html</span></td>
+          <td>-</td>
+        </tr>
+
+        <tr>
+          <td>0051</td>
+          <td><time datetime="2026-08-19T06:13:42.335Z">2026-08-19</time></td>
+          <td><span class="badge badge-live">live</span></td>
+          <td><a href="./hidecs2/index.html">hidecs2/index.html</a></td>
+          <td>HIDECS 2 — subdomain build</td>
+          <td>The hidecs2.davidlafond.xyz project page: CSS-3D reenactment machine whose screen is the live project record, drawn with HTML-in-canvas when the browser has it.</td>
+          <td><span class="muted">public/hidecs2/index.html</span></td>
+          <td><code>4229</code></td>
+        </tr>
+        </tbody>
+      </table>
+      <p class="footer">Ledger file: <a href="./archive-ledger.json">archive-ledger.json</a></p>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Below the gallery + footer — 5 UX explorations (System: HAIRLINE)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Homemade+Apple&family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   SYSTEM: HAIRLINE
+   Derived ONLY from two sources:
+     (a) the signature card  — 3-band surface, r12 shell / r10 controls /
+         r999 pills, 1px #E6E6E6 hairlines, #F2F2F2 action band,
+         Homemade Apple 40/56 mark, IBM Plex Mono 10-11px @ .06em
+     (b) the AAA frame       — 1436 canvas, 24px edge, 12px gutter,
+         4 x 338 media grid, r12 #EEEEEE media, 38px/18px pills,
+         70px control bar, white ground, EMPTY 671px footer slot
+   Consequences of the source material, kept as hard rules:
+     - strictly achromatic (neither source contains any chroma)
+     - every division is a 1px hairline, never a shadow
+     - only three radii exist: 12 / 10 / 999
+     - meta type is mono + uppercase + .06em, never sans
+     - handwriting is an accent, never a UI face
+   ============================================================ */
+:root{
+  /* ground + ink (observed) */
+  --hl-paper:#FFFFFF;
+  --hl-ink:#111111;
+  --hl-line:#E6E6E6;   /* hairline */
+  --hl-band:#F2F2F2;   /* action band */
+  --hl-fill:#EEEEEE;   /* media block */
+  --hl-mute:#8A8A8A;   /* observed grey — meta only */
+  --hl-mute-2:#6B6B6B; /* derived darker grey: AA-safe secondary prose */
+
+  /* families (observed) */
+  --hl-hand:"Homemade Apple", cursive;
+  --hl-mono:"IBM Plex Mono", ui-monospace, monospace;
+  --hl-ui:"Manrope", system-ui, sans-serif;
+
+  /* scale anchored on observed 10 / 11 / 13 / 14 / 40 */
+  --t-micro:10px;
+  --t-meta:11px;
+  --t-tab:13px;
+  --t-ui:14px;
+  --t-lead:18px;
+  --t-sub:24px;
+  --t-hand:40px;
+  --t-wordmark:64px;
+
+  /* radii (observed, exhaustive) */
+  --r-band:12px;
+  --r-ctl:10px;
+  --r-pill:999px;
+
+  /* rhythm (observed steps) */
+  --edge:24px;
+  --gut:12px;
+  --s4:4px;  --s8:8px;   --s12:12px; --s14:14px;
+  --s16:16px;--s18:18px; --s24:24px; --s32:32px; --s40:40px;
+
+  --canvas:1436px;
+}
+*{box-sizing:border-box;}
+html{ -webkit-text-size-adjust:100%; }
+body{
+  margin:0; background:#DDDDDD;
+  font-family:var(--hl-ui); font-weight:500; color:var(--hl-ink);
+  font-synthesis:none; -webkit-font-smoothing:antialiased;
+}
+:where(a){color:inherit;text-decoration:none;}
+:where(button,input){font:inherit;color:inherit;}
+:where(a,button,input,summary):focus-visible{
+  outline:2px solid var(--hl-ink); outline-offset:3px; border-radius:2px;
+}
+
+/* ---------- primitives ---------- */
+.meta{
+  font-family:var(--hl-mono); font-weight:400; font-size:var(--t-meta);
+  letter-spacing:.06em; text-transform:uppercase; color:var(--hl-mute);
+}
+.meta--micro{font-size:var(--t-micro);}
+.meta--ink{color:var(--hl-ink);}
+.mark{font-family:var(--hl-hand); font-weight:400; color:var(--hl-ink); line-height:1.35;}
+.rule{height:1px;background:var(--hl-line);border:0;margin:0;}
+
+/* three-band surface — the signature card's anatomy, generalised */
+.plate{
+  display:flex; flex-direction:column;
+  background:var(--hl-paper);
+  border:1px solid var(--hl-line); border-radius:var(--r-band);
+  overflow:clip;
+}
+.plate__head{
+  display:flex; align-items:center; gap:var(--s4);
+  padding:var(--s14) var(--s16);
+  border-bottom:1px solid var(--hl-line);
+}
+.plate__body{padding:var(--s32) var(--s40);}
+.plate__foot{
+  display:flex; align-items:center; justify-content:space-between; gap:var(--s16);
+  padding:var(--s14) var(--s16);
+  background:var(--hl-band); border-top:1px solid var(--hl-line);
+}
+
+.pill{
+  display:inline-flex; align-items:center; justify-content:center;
+  height:38px; padding-inline:var(--s18); border-radius:var(--r-pill);
+  font-size:var(--t-tab); font-weight:600; color:var(--hl-ink);
+  background:transparent; border:0; cursor:pointer;
+}
+.pill--on{background:var(--hl-ink); color:var(--hl-paper);}
+.pill--line{border:1px solid var(--hl-line);}
+
+.btn{
+  display:inline-flex; align-items:center; justify-content:center;
+  height:40px; border-radius:var(--r-ctl);
+  font-size:var(--t-ui); font-weight:600; cursor:pointer; border:0;
+}
+.btn--solid{background:var(--hl-ink); color:var(--hl-paper); padding-inline:var(--s24);}
+.btn--ghost{background:var(--hl-paper); color:var(--hl-ink); border:1px solid var(--hl-line); padding-inline:var(--s18);}
+
+.media{background:var(--hl-fill); border-radius:var(--r-band);}
+
+/* signing field: baseline rule under handwriting (from the card's pad) */
+.sign-field{
+  display:flex; align-items:flex-end; width:100%;
+  padding:0 var(--s4) var(--s14);
+  background:transparent; border:0; border-bottom:1px solid var(--hl-line);
+  font-family:var(--hl-hand); font-size:28px; line-height:1.4; color:var(--hl-ink);
+}
+.sign-field::placeholder{color:var(--hl-mute); opacity:1;}
+.sign-field:focus{outline:0; border-bottom-color:var(--hl-ink); border-bottom-width:2px;}
+.sign-field:focus-visible{outline:0;}
+
+/* ---------- page chrome (not part of the system) ---------- */
+.doc{max-width:1484px;margin:0 auto;padding:40px 24px 96px;}
+.doc__title{font-size:28px;font-weight:800;letter-spacing:-.03em;margin:0 0 6px;}
+.doc__note{max-width:70ch;margin:0;color:var(--hl-mute-2);font-size:14px;line-height:22px;}
+.spec{
+  display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 18px;
+  margin:56px 0 12px;
+}
+.spec__id{font-family:var(--hl-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#444;}
+.spec__name{font-size:20px;font-weight:800;letter-spacing:-.02em;}
+.spec__why{font-size:13px;line-height:20px;color:var(--hl-mute-2);flex:1 1 420px;min-width:280px;}
+.canvas{
+  width:var(--canvas); background:var(--hl-paper);
+  overflow:clip; /* mirrors AAA's overflow:clip */
+}
+.scroller{overflow-x:auto;padding-bottom:8px;}
+
+/* ---------- gallery tail (context, from AAA's feed) ---------- */
+.gallery-tail{
+  display:grid; grid-template-columns:repeat(4,1fr); gap:var(--gut);
+  align-items:start; padding:0 var(--edge) 37px;
+}
+.gallery-tail .media{height:160px;}
+.gallery-tail .media:nth-child(2){height:120px;}
+.gallery-tail .media:nth-child(3){height:190px;}
+.gallery-tail .media:nth-child(4){height:140px;}
+.gallery-cap{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:var(--s16) var(--edge);
+}
+
+/* =========================================================
+   V1 — LEDGER
+   ========================================================= */
+.v1-ledger{margin:0 var(--edge) var(--s40);}
+.ledger-row{
+  display:grid; grid-template-columns:64px 1fr 320px 132px;
+  align-items:center; gap:var(--s24);
+  padding:var(--s16) var(--s16);
+  border-top:1px solid var(--hl-line);
+}
+.ledger-row--head{border-top:0;}
+.ledger-row .mark{font-size:22px;}
+.v1-sign{
+  display:grid;grid-template-columns:64px 1fr auto;align-items:end;gap:var(--s24);
+  padding:var(--s24) var(--s16);
+  background:var(--hl-band);border-top:1px solid var(--hl-line);
+}
+.v1-foot{
+  display:flex;align-items:center;justify-content:space-between;gap:var(--s24);
+  padding:var(--s24) var(--edge);
+  border-top:1px solid var(--hl-line);
+}
+.v1-foot nav{display:flex;gap:var(--s8);}
+
+/* =========================================================
+   V2 — COUNTER
+   ========================================================= */
+.v2-wrap{display:flex;flex-direction:column;align-items:center;gap:var(--s24);padding:64px var(--edge) var(--s40);}
+.v2-count{font-family:var(--hl-mono);font-weight:500;font-size:72px;line-height:1;letter-spacing:-.02em;}
+.v2-plate{width:900px;}
+.v2-pad{
+  display:flex;flex-direction:column;justify-content:flex-end;
+  height:230px;padding:var(--s32) var(--s40) var(--s24);gap:var(--s12);
+}
+.marquee{
+  position:relative;width:100%;overflow:clip;
+  border-top:1px solid var(--hl-line);border-bottom:1px solid var(--hl-line);
+  padding:var(--s18) 0;
+}
+.marquee__track{display:flex;gap:56px;width:max-content;animation:slide 38s linear infinite;}
+.marquee .mark{font-size:26px;white-space:nowrap;}
+@keyframes slide{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@media (prefers-reduced-motion:reduce){
+  .marquee__track{animation:none;}
+}
+.v2-foot{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:var(--gut);
+  padding:var(--s40) var(--edge);
+  background:var(--hl-band);border-top:1px solid var(--hl-line);
+}
+.v2-foot__col{display:flex;flex-direction:column;gap:var(--s12);}
+.v2-foot__col a{font-size:var(--t-ui);font-weight:500;}
+
+/* =========================================================
+   V3 — SPLIT DESK
+   ========================================================= */
+.v3-grid{
+  display:grid;grid-template-columns:1fr 452px;gap:64px;
+  padding:64px var(--edge) var(--s40);align-items:start;
+}
+.v3-quote{padding:0 0 var(--s24);}
+.v3-quote + .v3-quote{border-top:1px solid var(--hl-line);padding-top:var(--s24);}
+.v3-quote p{margin:0 0 var(--s12);font-size:var(--t-lead);line-height:28px;letter-spacing:-.01em;}
+.v3-attr{display:flex;align-items:center;gap:var(--s12);}
+.v3-rail{position:sticky;top:var(--s24);}
+.v3-foot{
+  display:flex;align-items:center;justify-content:space-between;gap:var(--s24);
+  padding:var(--s18) var(--edge);border-top:1px solid var(--hl-line);
+}
+
+/* =========================================================
+   V4 — PLATES (native disclosure)
+   ========================================================= */
+.v4-stack{display:flex;flex-direction:column;gap:var(--gut);padding:64px var(--edge) var(--s40);}
+.v4-plate summary{
+  display:flex;align-items:center;justify-content:space-between;gap:var(--s16);
+  padding:var(--s14) var(--s16);cursor:pointer;list-style:none;
+}
+.v4-plate summary::-webkit-details-marker{display:none;}
+.v4-plate[open] summary{border-bottom:1px solid var(--hl-line);}
+.v4-sign{display:flex;align-items:center;gap:var(--s8);}
+.v4-glyph{
+  width:22px;height:22px;display:grid;place-items:center;
+  border:1px solid var(--hl-line);border-radius:var(--r-pill);
+  font-family:var(--hl-mono);font-size:var(--t-micro);color:var(--hl-mute);
+}
+.v4-body{padding:var(--s24) var(--s16) var(--s32);}
+.v4-two{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--gut) var(--s32);}
+.v4-line{display:flex;align-items:baseline;justify-content:space-between;gap:var(--s16);padding:var(--s14) 0;border-top:1px solid var(--hl-line);}
+.v4-foot-plate{
+  display:grid;grid-template-columns:1fr auto;align-items:center;gap:var(--s24);
+  padding:var(--s24) var(--s16);
+  background:var(--hl-band);border:1px solid var(--hl-line);border-radius:var(--r-band);
+}
+
+/* =========================================================
+   V5 — MARGIN RAIL
+   ========================================================= */
+.v5-grid{
+  display:grid;grid-template-columns:1fr 338px;gap:56px;
+  padding:64px var(--edge) var(--s40);align-items:start;
+}
+.v5-note{display:grid;grid-template-columns:56px 1fr;gap:var(--s24);padding:var(--s24) 0;border-top:1px solid var(--hl-line);}
+.v5-note p{margin:0;font-size:var(--t-lead);line-height:28px;letter-spacing:-.01em;}
+.v5-note .meta{margin-top:6px;display:block;}
+.v5-rail{position:sticky;top:var(--s24);display:flex;flex-direction:column;gap:var(--gut);}
+.v5-stat{display:flex;align-items:baseline;justify-content:space-between;padding:var(--s12) 0;border-top:1px solid var(--hl-line);}
+.v5-stat b{font-family:var(--hl-mono);font-weight:500;font-size:var(--t-ui);}
+.v5-foot{
+  padding:var(--s40) var(--edge) var(--s24);
+  background:var(--hl-band);border-top:1px solid var(--hl-line);
+}
+.v5-wordmark{font-family:var(--hl-hand);font-size:var(--t-wordmark);line-height:1.25;margin:0 0 var(--s32);}
+.v5-legal{display:flex;align-items:center;justify-content:space-between;gap:var(--s24);border-top:1px solid var(--hl-line);padding-top:var(--s16);}
+.v5-legal nav{display:flex;gap:var(--s24);}
+
+/* ---------- system legend ---------- */
+.legend{background:var(--hl-paper);border:1px solid var(--hl-line);border-radius:var(--r-band);padding:var(--s32) var(--s40);margin:32px 0 8px;}
+.legend h2{font-size:var(--t-sub);font-weight:800;letter-spacing:-.02em;margin:0 0 var(--s24);}
+.legend__grid{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s32);}
+.sw{display:flex;flex-direction:column;gap:var(--s8);}
+.sw__chip{height:56px;border-radius:var(--r-ctl);border:1px solid var(--hl-line);}
+.legend__row{display:flex;flex-wrap:wrap;gap:var(--s24);align-items:end;margin-top:var(--s32);padding-top:var(--s24);border-top:1px solid var(--hl-line);}
+</style>
+</head>
+<body>
+<div class="doc">
+
+  <h1 class="doc__title">Below the gallery + footer — 5 UX explorations</h1>
+  <p class="doc__note">
+    New system, <strong>HAIRLINE</strong>, reverse-engineered from two objects only: the signature card and the AAA frame.
+    Nothing from the previous token set is used — no accent colour, no 56px display scale, no widget radius.
+    Both sources are entirely achromatic and divide space with 1px rules, so those became the system's two hard laws.
+    AAA's footer is an empty 671px slot, so each variant proposes a footer as well as the below-gallery zone.
+  </p>
+
+  <!-- ================= SYSTEM LEGEND ================= -->
+  <section class="legend" aria-labelledby="sys">
+    <h2 id="sys">System: HAIRLINE</h2>
+    <div class="legend__grid">
+      <div class="sw"><div class="sw__chip" style="background:#FFFFFF"></div><span class="meta">paper · #FFFFFF</span></div>
+      <div class="sw"><div class="sw__chip" style="background:#111111"></div><span class="meta">ink · #111111</span></div>
+      <div class="sw"><div class="sw__chip" style="background:#F2F2F2"></div><span class="meta">band · #F2F2F2</span></div>
+      <div class="sw"><div class="sw__chip" style="background:#EEEEEE"></div><span class="meta">media · #EEEEEE</span></div>
+    </div>
+    <div class="legend__row">
+      <span class="mark" style="font-size:40px">Signature 40px</span>
+      <span style="font-size:24px;font-weight:800;letter-spacing:-.02em">Manrope 24 / 800</span>
+      <span style="font-size:18px;font-weight:500">Lead 18 / 28</span>
+      <span class="meta">mono meta 11 · .06em</span>
+      <span class="meta meta--micro">mono micro 10</span>
+    </div>
+    <div class="legend__row">
+      <span class="pill pill--on">pill 38 · r999</span>
+      <span class="pill pill--line">pill outline</span>
+      <span class="btn btn--solid">solid 40 · r10</span>
+      <span class="btn btn--ghost">ghost 40 · r10</span>
+      <span class="media" style="width:120px;height:40px"></span>
+      <span class="meta">grid 4 × 338 · gutter 12 · edge 24</span>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       V1 — LEDGER
+       ============================================================ -->
+  <div class="spec">
+    <span class="spec__id">V1</span>
+    <span class="spec__name">Ledger</span>
+    <span class="spec__why">The guestbook as a public record. Signing is a row you add to a table, so social proof and the input share one structure. Best if you want the count to feel earned and browsable.</span>
+  </div>
+  <div class="scroller">
+  <div class="canvas">
+    <div class="gallery-tail"><div class="media"></div><div class="media"></div><div class="media"></div><div class="media"></div></div>
+    <div class="gallery-cap"><span class="meta">end of gallery · 36 pieces</span><span class="meta">1,204 signatures</span></div>
+    <hr class="rule">
+
+    <section class="v1-ledger" aria-labelledby="v1h">
+      <div class="ledger-row ledger-row--head">
+        <span class="meta meta--micro">no.</span>
+        <span class="meta meta--micro">signed by</span>
+        <span class="meta meta--micro">mark</span>
+        <span class="meta meta--micro">date</span>
+      </div>
+      <h2 id="v1h" class="meta" hidden>Guestbook ledger</h2>
+      <div class="ledger-row"><span class="meta">1204</span><span style="font-size:var(--t-ui);font-weight:600">Maya Okonkwo</span><span class="mark">Maya Okonkwo</span><span class="meta">18 aug 2026</span></div>
+      <div class="ledger-row"><span class="meta">1203</span><span style="font-size:var(--t-ui);font-weight:600">Rui Tanaka</span><span class="mark">Rui Tanaka</span><span class="meta">17 aug 2026</span></div>
+      <div class="ledger-row"><span class="meta">1202</span><span style="font-size:var(--t-ui);font-weight:600">Ellis Ward</span><span class="mark">Ellis Ward</span><span class="meta">17 aug 2026</span></div>
+      <div class="ledger-row"><span class="meta">1201</span><span style="font-size:var(--t-ui);font-weight:600">Nadia Haddad</span><span class="mark">Nadia Haddad</span><span class="meta">16 aug 2026</span></div>
+
+      <form class="v1-sign" action="/guestbook" method="POST">
+        <span class="meta">1205</span>
+        <div>
+          <label for="v1-name" class="meta meta--ink" style="display:block;margin-bottom:10px">Your name</label>
+          <input id="v1-name" name="name" class="sign-field" type="text" placeholder="sign here" required aria-describedby="v1-help">
+          <span id="v1-help" class="meta meta--micro" style="display:block;margin-top:10px">Appears publicly as the next row.</span>
+        </div>
+        <button class="btn btn--solid" type="submit">Add to ledger</button>
+      </form>
+    </section>
+
+    <footer class="v1-foot">
+      <nav aria-label="Footer"><a class="pill pill--line" href="#">Work</a><a class="pill pill--line" href="#">Studio</a><a class="pill pill--line" href="#">Journal</a><a class="pill pill--line" href="#">Contact</a></nav>
+      <span class="meta">updated hourly · toronto</span>
+    </footer>
+  </div>
+  </div>
+
+  <!-- ============================================================
+       V2 — COUNTER
+       ============================================================ -->
+  <div class="spec">
+    <span class="spec__id">V2</span>
+    <span class="spec__name">Counter</span>
+    <span class="spec__why">One job below the fold: sign. A mono counter carries the proof, the card is the only interactive object, and past marks scroll past as ambient evidence. Highest conversion, least to read.</span>
+  </div>
+  <div class="scroller">
+  <div class="canvas">
+    <div class="gallery-tail"><div class="media"></div><div class="media"></div><div class="media"></div><div class="media"></div></div>
+    <hr class="rule">
+
+    <section class="v2-wrap" aria-labelledby="v2h">
+      <span class="meta">you are visitor 4,187</span>
+      <div class="v2-count">1,204</div>
+      <h2 id="v2h" style="margin:0;font-size:var(--t-sub);font-weight:800;letter-spacing:-.02em">people have signed this page</h2>
+
+      <form class="plate v2-plate" action="/guestbook" method="POST">
+        <div class="plate__head">
+          <button class="pill pill--on" type="button" aria-pressed="true">Draw</button>
+          <button class="pill" type="button" aria-pressed="false">Type</button>
+        </div>
+        <div class="v2-pad">
+          <label for="v2-name" class="meta meta--ink">Your name</label>
+          <input id="v2-name" name="name" class="sign-field" type="text" placeholder="sign above the line" required aria-describedby="v2-help" style="font-size:var(--t-hand);line-height:56px">
+          <span id="v2-help" class="meta meta--micro">Pointer, finger or keyboard — all land on the wall.</span>
+        </div>
+        <div class="plate__foot">
+          <span class="meta">no account needed</span>
+          <span style="display:flex;gap:var(--s8)">
+            <button class="btn btn--ghost" type="reset">Clear</button>
+            <button class="btn btn--solid" type="submit">Add signature</button>
+          </span>
+        </div>
+      </form>
+    </section>
+
+    <div class="marquee" aria-label="Recent signatures">
+      <div class="marquee__track">
+        <span class="mark">Maya Okonkwo</span><span class="mark">Jonas Thorne</span><span class="mark">Ana Reyes</span><span class="mark">Theo Walsh</span><span class="mark">Sofia Lund</span><span class="mark">Marco Diaz</span>
+        <span class="mark">Maya Okonkwo</span><span class="mark">Jonas Thorne</span><span class="mark">Ana Reyes</span><span class="mark">Theo Walsh</span><span class="mark">Sofia Lund</span><span class="mark">Marco Diaz</span>
+      </div>
+    </div>
+
+    <footer class="v2-foot">
+      <div class="v2-foot__col"><span class="meta meta--micro">index</span><a href="#">Work</a><a href="#">Studio</a><a href="#">Journal</a></div>
+      <div class="v2-foot__col"><span class="meta meta--micro">elsewhere</span><a href="#">Are.na</a><a href="#">Read.cv</a><a href="#">Email</a></div>
+      <div class="v2-foot__col"><span class="meta meta--micro">guestbook</span><a href="#">All 1,204 marks</a><a href="#">Sign the page</a></div>
+      <div class="v2-foot__col" style="align-items:flex-end;text-align:right"><span class="meta meta--micro">since 2019</span><span class="mark" style="font-size:28px">David Lafond</span></div>
+    </footer>
+  </div>
+  </div>
+
+  <!-- ============================================================
+       V3 — SPLIT DESK
+       ============================================================ -->
+  <div class="spec">
+    <span class="spec__id">V3</span>
+    <span class="spec__name">Split desk</span>
+    <span class="spec__why">Proof on the left, the pen on the right. The card sticks while quotes scroll, so the ask stays reachable the whole time you are being convinced. Best if testimonials must do real work.</span>
+  </div>
+  <div class="scroller">
+  <div class="canvas">
+    <div class="gallery-tail"><div class="media"></div><div class="media"></div><div class="media"></div><div class="media"></div></div>
+    <hr class="rule">
+
+    <div class="v3-grid">
+      <section aria-labelledby="v3h">
+        <h2 id="v3h" style="margin:0 0 var(--s24);font-size:var(--t-sub);font-weight:800;letter-spacing:-.02em">What it's like to work together</h2>
+        <div class="v3-quote">
+          <p>He redrew our onboarding in a week and activation jumped. Two years later it is still the flow we ship against.</p>
+          <div class="v3-attr"><span style="font-size:var(--t-ui);font-weight:600">Maya Okonkwo</span><span class="meta">head of product, cadence</span></div>
+        </div>
+        <div class="v3-quote">
+          <p>The calmest hands in a redesign I have worked with. Ships, documents, and is never precious about cutting his own darlings.</p>
+          <div class="v3-attr"><span style="font-size:var(--t-ui);font-weight:600">Priya Nair</span><span class="meta">design director, northwind</span></div>
+        </div>
+        <div class="v3-quote">
+          <p>He treats typography like it is load-bearing, because it is. Our brand finally reads like one voice.</p>
+          <div class="v3-attr"><span style="font-size:var(--t-ui);font-weight:600">Idris Bello</span><span class="meta">brand lead, halcyon</span></div>
+        </div>
+      </section>
+
+      <div class="v3-rail">
+        <form class="plate" action="/guestbook" method="POST">
+          <div class="plate__head">
+            <span class="meta">leave a mark</span>
+          </div>
+          <div class="plate__body" style="padding:var(--s24) var(--s24) var(--s32);display:flex;flex-direction:column;gap:var(--s12)">
+            <label for="v3-name" class="meta meta--ink">Your name</label>
+            <input id="v3-name" name="name" class="sign-field" type="text" placeholder="your name" required aria-describedby="v3-help">
+            <span id="v3-help" class="meta meta--micro">Joins 1,204 others below the gallery.</span>
+          </div>
+          <div class="plate__foot">
+            <span class="meta">1,204 signed</span>
+            <button class="btn btn--solid" type="submit">Sign</button>
+          </div>
+        </form>
+        <div class="plate" style="border-radius:var(--r-band)">
+          <div class="plate__body" style="padding:var(--s24);display:flex;flex-wrap:wrap;gap:var(--s16) var(--s24)">
+            <span class="mark" style="font-size:22px">Ana Reyes</span>
+            <span class="mark" style="font-size:19px">Theo Walsh</span>
+            <span class="mark" style="font-size:24px">Rui Tanaka</span>
+            <span class="mark" style="font-size:20px">Clara Boon</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="v3-foot">
+      <span class="mark" style="font-size:26px">David Lafond</span>
+      <nav aria-label="Footer" style="display:flex;gap:var(--s24)"><a class="meta meta--ink" href="#">Work</a><a class="meta meta--ink" href="#">Studio</a><a class="meta meta--ink" href="#">Journal</a><a class="meta meta--ink" href="#">Contact</a></nav>
+      <span class="meta">toronto · updated hourly</span>
+    </footer>
+  </div>
+  </div>
+
+  <!-- ============================================================
+       V4 — PLATES
+       ============================================================ -->
+  <div class="spec">
+    <span class="spec__id">V4</span>
+    <span class="spec__name">Plates</span>
+    <span class="spec__why">Everything below the gallery becomes the same three-band object, collapsed by default via native disclosure. The page stays short, the footer is just the last plate. Best for a dense portfolio that should not feel long.</span>
+  </div>
+  <div class="scroller">
+  <div class="canvas">
+    <div class="gallery-tail"><div class="media"></div><div class="media"></div><div class="media"></div><div class="media"></div></div>
+    <hr class="rule">
+
+    <div class="v4-stack">
+      <details class="plate v4-plate" open>
+        <summary>
+          <span class="v4-sign"><span class="v4-glyph">01</span><span style="font-size:var(--t-ui);font-weight:600">Kind words</span></span>
+          <span class="meta">42 reviews</span>
+        </summary>
+        <div class="v4-body">
+          <div class="v4-two">
+            <div><p style="margin:0;font-size:var(--t-ui);line-height:22px">He redrew our onboarding in a week and activation jumped.</p><span class="meta" style="display:block;margin-top:8px">maya okonkwo</span></div>
+            <div><p style="margin:0;font-size:var(--t-ui);line-height:22px">The calmest hands in a redesign I have worked with.</p><span class="meta" style="display:block;margin-top:8px">priya nair</span></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="plate v4-plate">
+        <summary>
+          <span class="v4-sign"><span class="v4-glyph">02</span><span style="font-size:var(--t-ui);font-weight:600">Tools</span></span>
+          <span class="meta">6 in rotation</span>
+        </summary>
+        <div class="v4-body">
+          <div class="v4-line"><span style="font-size:var(--t-ui);font-weight:600">Paper</span><span class="meta">interface &amp; systems</span></div>
+          <div class="v4-line"><span style="font-size:var(--t-ui);font-weight:600">Spline</span><span class="meta">3d scenes</span></div>
+          <div class="v4-line"><span style="font-size:var(--t-ui);font-weight:600">Cursor</span><span class="meta">code &amp; handoff</span></div>
+        </div>
+      </details>
+
+      <details class="plate v4-plate" open>
+        <summary>
+          <span class="v4-sign"><span class="v4-glyph">03</span><span style="font-size:var(--t-ui);font-weight:600">Guestbook</span></span>
+          <span class="meta">1,204 signed</span>
+        </summary>
+        <form class="v4-body" action="/guestbook" method="POST" style="display:flex;flex-direction:column;gap:var(--s12)">
+          <label for="v4-name" class="meta meta--ink">Your name</label>
+          <div style="display:flex;align-items:flex-end;gap:var(--s16)">
+            <input id="v4-name" name="name" class="sign-field" type="text" placeholder="sign here" required aria-describedby="v4-help">
+            <button class="btn btn--solid" type="submit" style="flex-shrink:0">Add signature</button>
+          </div>
+          <span id="v4-help" class="meta meta--micro">Shown with the date you signed.</span>
+          <div style="display:flex;flex-wrap:wrap;gap:var(--s16) var(--s24);margin-top:var(--s16);padding-top:var(--s16);border-top:1px solid var(--hl-line)">
+            <span class="mark" style="font-size:20px">Maya Okonkwo</span><span class="mark" style="font-size:22px">Jonas Thorne</span><span class="mark" style="font-size:19px">Ana Reyes</span><span class="mark" style="font-size:21px">Sofia Lund</span>
+          </div>
+        </form>
+      </details>
+
+      <footer class="v4-foot-plate">
+        <nav aria-label="Footer" style="display:flex;gap:var(--s8);flex-wrap:wrap"><a class="pill pill--line" href="#">Work</a><a class="pill pill--line" href="#">Studio</a><a class="pill pill--line" href="#">Journal</a><a class="pill pill--line" href="#">Contact</a></nav>
+        <span class="meta">toronto · since 2019</span>
+      </footer>
+    </div>
+  </div>
+  </div>
+
+  <!-- ============================================================
+       V5 — MARGIN RAIL
+       ============================================================ -->
+  <div class="spec">
+    <span class="spec__id">V5</span>
+    <span class="spec__name">Margin rail</span>
+    <span class="spec__why">Editorial: notes run wide, a narrow rail holds the pen and the numbers, and the footer pays off with the handwriting at wordmark scale. Most personal, least product-like.</span>
+  </div>
+  <div class="scroller">
+  <div class="canvas">
+    <div class="gallery-tail"><div class="media"></div><div class="media"></div><div class="media"></div><div class="media"></div></div>
+    <hr class="rule">
+
+    <div class="v5-grid">
+      <section aria-labelledby="v5h">
+        <h2 id="v5h" style="margin:0 0 var(--s16);font-size:var(--t-sub);font-weight:800;letter-spacing:-.02em">Notes from the people in it</h2>
+        <div class="v5-note"><span class="meta">01</span><div><p>He redrew our onboarding in a week and activation jumped. I still send new designers to study how he thinks.</p><span class="meta">maya okonkwo · cadence</span></div></div>
+        <div class="v5-note"><span class="meta">02</span><div><p>Ships, documents, and never precious about killing his own darlings.</p><span class="meta">priya nair · northwind</span></div></div>
+        <div class="v5-note"><span class="meta">03</span><div><p>He treats typography like it is load-bearing, because it is.</p><span class="meta">idris bello · halcyon</span></div></div>
+      </section>
+
+      <aside class="v5-rail" aria-label="Sign and stats">
+        <form class="plate" action="/guestbook" method="POST">
+          <div class="plate__head"><span class="meta">the guestbook</span></div>
+          <div class="plate__body" style="padding:var(--s24);display:flex;flex-direction:column;gap:var(--s12)">
+            <label for="v5-name" class="meta meta--ink">Your name</label>
+            <input id="v5-name" name="name" class="sign-field" type="text" placeholder="sign here" required aria-describedby="v5-help">
+            <span id="v5-help" class="meta meta--micro">One line, no account.</span>
+          </div>
+          <div class="plate__foot"><span class="meta">1,204 signed</span><button class="btn btn--solid" type="submit">Sign</button></div>
+        </form>
+        <div>
+          <div class="v5-stat"><span class="meta">signatures</span><b>1,204</b></div>
+          <div class="v5-stat"><span class="meta">reviews</span><b>42</b></div>
+          <div class="v5-stat"><span class="meta">pieces shown</span><b>36</b></div>
+        </div>
+      </aside>
+    </div>
+
+    <footer class="v5-foot">
+      <p class="v5-wordmark">Thanks for looking — sign the book.</p>
+      <div class="v5-legal">
+        <nav aria-label="Footer"><a class="meta meta--ink" href="#">Work</a><a class="meta meta--ink" href="#">Studio</a><a class="meta meta--ink" href="#">Journal</a><a class="meta meta--ink" href="#">Contact</a></nav>
+        <span class="meta">david lafond · toronto · 2026</span>
+      </div>
+    </footer>
+  </div>
+  </div>
+
+</div>
+</body>
+</html>

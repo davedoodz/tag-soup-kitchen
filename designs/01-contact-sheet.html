@@ -1,0 +1,803 @@
+<!doctype html>
+<html lang="en" data-design-id="hifi-01-contact-sheet" data-design-title="Contact sheet — AColorBright">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="The accepted contact-sheet direction, built out in the AColorBright design system."
+    />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 44'%3E%3Cpath d='M0 44V0h27.5C38.82 0 48 9.18 48 20.5V44H33.5V22c0-4.14-3.36-7.5-7.5-7.5H14.5V44H0Z'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="../shared/acolorbright.css" />
+    <link rel="stylesheet" href="../shared/hifi.css" />
+    <link rel="stylesheet" href="../shared/review.css" />
+    <script src="../shared/projects.js"></script>
+    <script src="../shared/review.js" defer></script>
+    <title>Contact sheet — David Lafond Designs</title>
+    <style>
+      .masthead {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+        align-items: end;
+        gap: var(--spacing-64);
+        padding: 96px var(--spacing-32) var(--spacing-32);
+      }
+
+      .masthead__statement {
+        max-width: 20ch;
+        margin: 0;
+        font-size: var(--text-display);
+        font-weight: 400;
+        line-height: var(--leading-display);
+      }
+
+      .masthead__note {
+        margin: 0;
+        color: var(--color-graphite);
+        font-size: var(--text-body);
+        line-height: var(--leading-body);
+      }
+
+      .masthead__note b,
+      .masthead__hint {
+        color: var(--color-ink-black);
+        font-weight: 400;
+      }
+
+      .controls {
+        position: sticky;
+        z-index: 5;
+        top: 0;
+        display: grid;
+        grid-template-columns: minmax(240px, 320px) minmax(0, 1fr) auto;
+        align-items: center;
+        gap: var(--spacing-24);
+        padding: var(--spacing-16) var(--spacing-32);
+        border-block: 1px solid var(--line);
+        background: var(--color-paper);
+      }
+
+      .controls__group {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-16);
+      }
+
+      .controls__count {
+        color: var(--color-graphite);
+        font-size: var(--text-caption);
+        font-variant-numeric: tabular-nums;
+        line-height: var(--leading-caption);
+        text-align: right;
+      }
+
+      .sheet {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: var(--spacing-64) var(--spacing-32);
+        margin: 0;
+        padding: var(--spacing-64) var(--spacing-32) 0;
+        list-style: none;
+      }
+
+      .sheet--dense {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: var(--spacing-32) var(--spacing-24);
+        padding-top: var(--spacing-32);
+      }
+
+      .cell {
+        display: block;
+        width: 100%;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        cursor: pointer;
+        font: inherit;
+        letter-spacing: inherit;
+        text-align: left;
+      }
+
+      .cell .cover {
+        transition: filter 220ms var(--ease);
+      }
+
+      .cell:hover .cover,
+      .cell:focus-visible .cover {
+        filter: contrast(0.88) brightness(1.04);
+      }
+
+      .cell__caption {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: baseline;
+        gap: var(--spacing-16);
+        margin-top: var(--spacing-16);
+      }
+
+      .cell__title {
+        margin: 0;
+        font-size: var(--text-body);
+        font-weight: 400;
+        line-height: var(--leading-body);
+      }
+
+      .cell__year {
+        color: var(--color-ash);
+        font-size: var(--text-caption);
+        font-variant-numeric: tabular-nums;
+        line-height: var(--leading-caption);
+      }
+
+      .cell__description {
+        margin: 12px 0 0;
+        color: var(--color-graphite);
+        font-size: var(--text-body-sm);
+        line-height: var(--leading-body-sm);
+      }
+
+      .sheet--dense .cell__description {
+        display: none;
+      }
+
+      .empty {
+        padding: 96px var(--spacing-32);
+        border-top: 1px solid var(--line);
+      }
+
+      .empty__title {
+        margin: 0;
+        font-size: var(--text-heading);
+        font-weight: 400;
+        line-height: var(--leading-heading);
+      }
+
+      .empty__body {
+        max-width: 44ch;
+        margin: var(--spacing-16) 0 0;
+        color: var(--color-graphite);
+        font-size: var(--text-body);
+        line-height: var(--leading-body);
+      }
+
+      .colophon {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: var(--spacing-16);
+        margin-top: 96px;
+        padding: var(--spacing-32);
+        border-top: 1px solid var(--line);
+        color: var(--color-graphite);
+        font-size: var(--text-body-sm);
+      }
+
+      /* Project overlay */
+
+      .viewer {
+        width: min(1200px, calc(100vw - var(--spacing-64)));
+        max-width: none;
+        max-height: none;
+        height: min(880px, calc(100dvh - var(--spacing-64)));
+        padding: 0;
+        border: 0;
+        border-radius: var(--radius-images);
+        background: var(--color-paper);
+        color: var(--color-ink-black);
+      }
+
+      .viewer::backdrop {
+        background: rgb(26 26 26 / 62%);
+      }
+
+      .viewer__shell {
+        display: grid;
+        height: 100%;
+        grid-template-rows: auto minmax(0, 1fr) auto;
+      }
+
+      .viewer__bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--spacing-16);
+        padding: var(--spacing-16) var(--spacing-24);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .viewer__position {
+        color: var(--color-graphite);
+        font-size: var(--text-caption);
+        font-variant-numeric: tabular-nums;
+        line-height: var(--leading-caption);
+      }
+
+      .viewer__body {
+        overflow-y: auto;
+        padding: var(--spacing-32);
+        overscroll-behavior: contain;
+      }
+
+      .viewer__spread {
+        display: grid;
+        grid-template-areas:
+          'media intro'
+          'chapters aside';
+        grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
+        gap: var(--spacing-32) var(--spacing-64);
+      }
+
+      .viewer__media {
+        grid-area: media;
+      }
+
+      .viewer__intro {
+        grid-area: intro;
+      }
+
+      .viewer__chapters {
+        grid-area: chapters;
+      }
+
+      .viewer__title {
+        margin: 0;
+        font-size: var(--text-heading);
+        font-weight: 400;
+        line-height: var(--leading-heading);
+      }
+
+      .viewer__kicker {
+        margin: 0 0 var(--spacing-16);
+        color: var(--color-graphite);
+        font-size: var(--text-caption);
+        line-height: var(--leading-caption);
+      }
+
+      .viewer__lead {
+        max-width: 46ch;
+        margin: var(--spacing-24) 0 0;
+        font-size: var(--text-body);
+        line-height: var(--leading-body);
+      }
+
+      .viewer__section + .viewer__section {
+        margin-top: var(--spacing-32);
+      }
+
+      .viewer__section h3 {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0 0 12px;
+        font-size: var(--text-body);
+        font-weight: 400;
+        line-height: var(--leading-body);
+      }
+
+      .viewer__section p {
+        max-width: 60ch;
+        margin: 0;
+        color: var(--color-graphite);
+        font-size: var(--text-body-sm);
+        line-height: var(--leading-body-sm);
+      }
+
+      .badge {
+        display: grid;
+        width: 24px;
+        height: 24px;
+        flex: 0 0 24px;
+        place-items: center;
+        border-radius: 50%;
+        background: var(--color-pure-black);
+        color: var(--color-paper);
+        font-size: var(--text-caption);
+        line-height: 1;
+      }
+
+      .viewer__aside {
+        display: grid;
+        align-content: start;
+        gap: var(--spacing-32);
+        grid-area: aside;
+      }
+
+      .viewer__foot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--spacing-16);
+        padding: var(--spacing-16) var(--spacing-24);
+        border-top: 1px solid var(--line);
+      }
+
+      .viewer__steps {
+        display: flex;
+        gap: var(--spacing-8);
+      }
+
+      @media (max-width: 1023px) {
+        .masthead {
+          grid-template-columns: 1fr;
+          align-items: start;
+          gap: var(--spacing-32);
+          padding-top: var(--spacing-64);
+        }
+
+        .masthead__statement {
+          max-width: 26ch;
+          font-size: var(--text-heading);
+          line-height: var(--leading-heading);
+        }
+
+        .sheet,
+        .sheet--dense {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .viewer__spread {
+          grid-template-areas:
+            'media'
+            'intro'
+            'chapters'
+            'aside';
+          grid-template-columns: 1fr;
+          gap: var(--spacing-32);
+        }
+      }
+
+      @media (max-width: 640px) {
+        .masthead {
+          padding: var(--spacing-32) var(--spacing-16);
+        }
+
+        .controls {
+          grid-template-columns: 1fr;
+          gap: 12px;
+          padding: 12px var(--spacing-16);
+        }
+
+        .controls__count {
+          text-align: left;
+        }
+
+        .sheet,
+        .sheet--dense {
+          grid-template-columns: 1fr;
+          gap: var(--spacing-32);
+          padding-inline: var(--spacing-16);
+        }
+
+        .sheet--dense .cell__description {
+          display: block;
+        }
+
+        .colophon,
+        .empty {
+          padding-inline: var(--spacing-16);
+        }
+
+        .viewer {
+          width: 100vw;
+          height: calc(100dvh - var(--review-bar-height, 0px));
+          border-radius: 0;
+        }
+
+        .viewer__body {
+          padding: var(--spacing-16);
+        }
+
+        .viewer__title {
+          font-size: var(--text-subheading);
+          line-height: var(--leading-subheading);
+        }
+
+        .masthead__hint,
+        #viewerHint {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <svg hidden aria-hidden="true">
+      <symbol id="icon-search" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="6.5" />
+        <path d="M15.8 15.8l4.7 4.7" />
+      </symbol>
+      <symbol id="icon-close" viewBox="0 0 24 24">
+        <path d="M5.5 5.5l13 13" />
+        <path d="M18.5 5.5l-13 13" />
+      </symbol>
+      <symbol id="icon-grid" viewBox="0 0 24 24">
+        <rect x="3.5" y="3.5" width="7" height="7" />
+        <rect x="13.5" y="3.5" width="7" height="7" />
+        <rect x="3.5" y="13.5" width="7" height="7" />
+        <rect x="13.5" y="13.5" width="7" height="7" />
+      </symbol>
+      <symbol id="icon-list" viewBox="0 0 24 24">
+        <path d="M3.5 6.5h2" />
+        <path d="M9 6.5h11.5" />
+        <path d="M3.5 12h2" />
+        <path d="M9 12h11.5" />
+        <path d="M3.5 17.5h2" />
+        <path d="M9 17.5h11.5" />
+      </symbol>
+      <symbol id="icon-arrow-left" viewBox="0 0 24 24">
+        <path d="M20.5 12h-17" />
+        <path d="M10.5 5l-7 7 7 7" />
+      </symbol>
+      <symbol id="icon-arrow-right" viewBox="0 0 24 24">
+        <path d="M3.5 12h17" />
+        <path d="M13.5 5l7 7-7 7" />
+      </symbol>
+      <symbol id="icon-menu" viewBox="0 0 24 24">
+        <path d="M3.5 6.5h17" />
+        <path d="M3.5 12h17" />
+        <path d="M3.5 17.5h17" />
+      </symbol>
+    </svg>
+
+    <header class="topbar">
+      <div class="topbar__identity">
+        <span class="topbar__wordmark">David Lafond Designs</span>
+        <span class="topbar__context">Contact sheet — direction 1 of 2</span>
+      </div>
+      <div class="topbar__actions">
+        <a class="topbar__link" href="index.html">Directions</a>
+        <a class="topbar__link" href="03-split-browser.html">Split browser</a>
+        <a class="topbar__link" href="../archive/index.html">Archive</a>
+        <button class="icon-frame" type="button" aria-label="Menu">
+          <svg class="icon" aria-hidden="true"><use href="#icon-menu" /></svg>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <section class="masthead">
+        <h1 class="masthead__statement">Twelve projects, one sheet, nothing hidden behind a click.</h1>
+        <p class="masthead__note">
+          Product, brand, motion, print. Filter by discipline or type a name — the sheet answers as
+          you type, and any cell opens the full case without leaving the page.
+          <b class="masthead__hint">Press / to search.</b>
+        </p>
+      </section>
+
+      <div class="controls">
+        <div class="field">
+          <svg class="icon icon--16" aria-hidden="true"><use href="#icon-search" /></svg>
+          <input
+            class="field__input"
+            id="search"
+            type="search"
+            placeholder="Project or discipline"
+            autocomplete="off"
+            spellcheck="false"
+            aria-label="Filter projects"
+          />
+        </div>
+        <div class="chips" id="chips" role="group" aria-label="Filter by discipline"></div>
+        <div class="controls__group">
+          <p class="controls__count" id="count" aria-live="polite">12 of 12</p>
+          <button
+            class="icon-frame"
+            id="density"
+            type="button"
+            aria-pressed="false"
+            aria-label="Switch to dense sheet"
+          >
+            <svg class="icon" aria-hidden="true"><use href="#icon-grid" /></svg>
+          </button>
+        </div>
+      </div>
+
+      <ul class="sheet" id="sheet"></ul>
+
+      <section class="empty" id="empty" hidden>
+        <h2 class="empty__title">Nothing under that name</h2>
+        <p class="empty__body">
+          Try a discipline instead — product, branding, web, motion, print, 3D, illustration — or
+          clear the field to see the whole sheet again.
+        </p>
+      </section>
+
+      <footer class="colophon">
+        <span>David Lafond Designs — selected work, 2023–2026.</span>
+        <span>AColorBright: one weight, six sizes, no colour.</span>
+      </footer>
+    </main>
+
+    <dialog class="viewer" id="viewer" aria-labelledby="viewerTitle">
+      <div class="viewer__shell">
+        <header class="viewer__bar">
+          <p class="viewer__position" id="viewerPosition"></p>
+          <button class="icon-frame" id="viewerClose" type="button" aria-label="Close project">
+            <svg class="icon" aria-hidden="true"><use href="#icon-close" /></svg>
+          </button>
+        </header>
+        <div class="viewer__body" id="viewerBody"></div>
+        <footer class="viewer__foot">
+          <p class="viewer__position" id="viewerHint">← → to move through the sheet</p>
+          <div class="viewer__steps">
+            <button class="button button--outlined button--icon" type="button" data-step="previous" aria-label="Previous project">
+              <svg class="icon" aria-hidden="true"><use href="#icon-arrow-left" /></svg>
+            </button>
+            <button class="button button--outlined button--icon" type="button" data-step="next" aria-label="Next project">
+              <svg class="icon" aria-hidden="true"><use href="#icon-arrow-right" /></svg>
+            </button>
+          </div>
+        </footer>
+      </div>
+    </dialog>
+
+    <script>
+      ;(() => {
+        const projects = window.PORTFOLIO_PROJECTS
+        const sheet = document.querySelector('#sheet')
+        const chips = document.querySelector('#chips')
+        const search = document.querySelector('#search')
+        const count = document.querySelector('#count')
+        const empty = document.querySelector('#empty')
+        const density = document.querySelector('#density')
+        const viewer = document.querySelector('#viewer')
+        const viewerBody = document.querySelector('#viewerBody')
+        const viewerPosition = document.querySelector('#viewerPosition')
+
+        const disciplines = ['All', ...new Set(projects.map((project) => project.category))]
+
+        let discipline = 'All'
+        let visible = projects.map((_, index) => index)
+        let openIndex = -1
+        let opener = null
+
+        const escapeText = (value) =>
+          value.replace(
+            /[&<>'"]/g,
+            (character) =>
+              ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[character],
+          )
+
+        const initials = (project) => project.title.slice(0, 2).toUpperCase()
+
+        function coverMarkup(project, index, { ratio = project.ratio, rule = '48px' } = {}) {
+          return `
+            <div
+              class="cover cover--${project.tone}"
+              style="--cover-ratio: ${ratio}; --cover-rule: ${rule}"
+              role="img"
+              aria-label="${escapeText(project.title)} — ${escapeText(project.subtitle)}"
+            >
+              <span class="cover__index">${String(index + 1).padStart(2, '0')}</span>
+              <span class="cover__mark" aria-hidden="true">${escapeText(initials(project))}</span>
+              <span class="cover__note">${escapeText(project.category)}</span>
+            </div>
+          `
+        }
+
+        function renderChips() {
+          chips.innerHTML = disciplines
+            .map(
+              (name) =>
+                `<button class="chip" type="button" data-discipline="${escapeText(name)}" aria-pressed="${
+                  name === discipline
+                }">${escapeText(name)}</button>`,
+            )
+            .join('')
+        }
+
+        function renderSheet() {
+          sheet.innerHTML = visible
+            .map((index) => {
+              const project = projects[index]
+              return `
+                <li>
+                  <button class="cell" type="button" data-index="${index}">
+                    ${coverMarkup(project, index, { ratio: '4 / 3', rule: '56px' })}
+                    <span class="cell__caption">
+                      <span class="cell__title">${escapeText(project.title)}</span>
+                      <span class="cell__year">${project.year}</span>
+                    </span>
+                    <span class="cell__description">${escapeText(project.subtitle)} — ${escapeText(
+                      project.client,
+                    )}</span>
+                  </button>
+                </li>
+              `
+            })
+            .join('')
+
+          count.textContent = `${visible.length} of ${projects.length}`
+          empty.hidden = visible.length !== 0
+          sheet.hidden = visible.length === 0
+        }
+
+        function filter() {
+          const query = search.value.trim().toLocaleLowerCase()
+          visible = projects
+            .map((project, index) => ({ project, index }))
+            .filter(({ project }) => {
+              const haystack =
+                `${project.title} ${project.subtitle} ${project.category} ${project.client}`.toLocaleLowerCase()
+              const matchesQuery = haystack.includes(query)
+              const matchesDiscipline = discipline === 'All' || project.category === discipline
+              return matchesQuery && matchesDiscipline
+            })
+            .map(({ index }) => index)
+
+          renderSheet()
+        }
+
+        function viewerMarkup(project, index) {
+          const chapters = [
+            ['Problem', project.problem],
+            ['Approach', project.approach],
+            ['Outcome', project.outcome],
+          ]
+
+          return `
+            <div class="viewer__spread">
+              <div class="viewer__media">
+                ${coverMarkup(project, index, { ratio: '16 / 10', rule: '64px' })}
+              </div>
+              <div class="viewer__intro">
+                <p class="viewer__kicker">${escapeText(project.category)} — ${project.year}</p>
+                <h2 class="viewer__title" id="viewerTitle">${escapeText(project.title)}</h2>
+                <p class="viewer__lead">${escapeText(project.lead)}</p>
+              </div>
+              <div class="viewer__chapters">
+                ${chapters
+                  .map(
+                    ([heading, body], position) => `
+                      <div class="viewer__section">
+                        <h3><span class="badge">${position + 1}</span>${heading}</h3>
+                        <p>${escapeText(body)}</p>
+                      </div>
+                    `,
+                  )
+                  .join('')}
+              </div>
+              <div class="viewer__aside">
+                <dl class="facts">
+                  <div class="fact"><dt>Client</dt><dd>${escapeText(project.client)}</dd></div>
+                  <div class="fact"><dt>Discipline</dt><dd>${escapeText(project.subtitle)}</dd></div>
+                  <div class="fact"><dt>Role</dt><dd>${escapeText(project.role)}</dd></div>
+                  <div class="fact"><dt>Team</dt><dd>${escapeText(project.team)}</dd></div>
+                  <div class="fact"><dt>Duration</dt><dd>${escapeText(project.duration)}</dd></div>
+                </dl>
+                <ul class="metrics">
+                  ${project.metrics
+                    .map(
+                      (metric) => `
+                        <li class="metric">
+                          <p class="metric__value">${escapeText(metric.value)}</p>
+                          <p class="metric__label">${escapeText(metric.label)}</p>
+                        </li>
+                      `,
+                    )
+                    .join('')}
+                </ul>
+              </div>
+            </div>
+          `
+        }
+
+        function paintViewer(index) {
+          const project = projects[index]
+          const position = visible.indexOf(index)
+          openIndex = index
+          viewerBody.innerHTML = viewerMarkup(project, index)
+          viewerPosition.textContent = `${String(position + 1).padStart(2, '0')} / ${String(
+            visible.length,
+          ).padStart(2, '0')} — ${project.title}`
+          viewerBody.scrollTop = 0
+        }
+
+        function openViewer(index, trigger) {
+          opener = trigger ?? null
+          paintViewer(index)
+          viewer.showModal()
+        }
+
+        function stepViewer(direction) {
+          if (visible.length < 2) return
+          const position = visible.indexOf(openIndex)
+          const delta = direction === 'next' ? 1 : -1
+          paintViewer(visible[(position + delta + visible.length) % visible.length])
+        }
+
+        chips.addEventListener('click', (event) => {
+          const chip = event.target.closest('[data-discipline]')
+          if (!chip) return
+          discipline = chip.dataset.discipline
+          for (const button of chips.querySelectorAll('.chip')) {
+            button.setAttribute('aria-pressed', String(button === chip))
+          }
+          filter()
+        })
+
+        search.addEventListener('input', filter)
+        search.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && search.value) {
+            event.preventDefault()
+            search.value = ''
+            filter()
+          }
+        })
+
+        density.addEventListener('click', () => {
+          const dense = sheet.classList.toggle('sheet--dense')
+          density.setAttribute('aria-pressed', String(dense))
+          density.setAttribute('aria-label', dense ? 'Switch to comfortable sheet' : 'Switch to dense sheet')
+          density.innerHTML = `<svg class="icon" aria-hidden="true"><use href="#icon-${
+            dense ? 'list' : 'grid'
+          }" /></svg>`
+        })
+
+        sheet.addEventListener('click', (event) => {
+          const cell = event.target.closest('[data-index]')
+          if (!cell) return
+          openViewer(Number(cell.dataset.index), cell)
+        })
+
+        sheet.addEventListener('keydown', (event) => {
+          const cell = event.target.closest('[data-index]')
+          if (!cell) return
+          const cells = [...sheet.querySelectorAll('[data-index]')]
+          const columns = Math.max(
+            1,
+            Math.round(sheet.clientWidth / cells[0].getBoundingClientRect().width),
+          )
+          const moves = { ArrowRight: 1, ArrowLeft: -1, ArrowDown: columns, ArrowUp: -columns }
+          const move = moves[event.key]
+          if (move === undefined) return
+          event.preventDefault()
+          const next = cells[Math.min(Math.max(cells.indexOf(cell) + move, 0), cells.length - 1)]
+          next?.focus()
+        })
+
+        viewer.addEventListener('click', (event) => {
+          if (event.target === viewer || event.target.closest('#viewerClose')) {
+            viewer.close()
+            return
+          }
+          const step = event.target.closest('[data-step]')
+          if (step) stepViewer(step.dataset.step)
+        })
+
+        viewer.addEventListener('keydown', (event) => {
+          if (event.key === 'ArrowRight') {
+            event.preventDefault()
+            stepViewer('next')
+          }
+          if (event.key === 'ArrowLeft') {
+            event.preventDefault()
+            stepViewer('previous')
+          }
+        })
+
+        viewer.addEventListener('close', () => {
+          requestAnimationFrame(() => {
+            const target =
+              sheet.querySelector(`[data-index="${openIndex}"]`) ??
+              (opener?.isConnected ? opener : null)
+            target?.focus()
+          })
+        })
+
+        addEventListener('keydown', (event) => {
+          if (event.key !== '/' || viewer.open) return
+          const tag = document.activeElement?.tagName
+          if (tag === 'INPUT' || tag === 'TEXTAREA') return
+          event.preventDefault()
+          search.focus()
+          search.select()
+        })
+
+        renderChips()
+        renderSheet()
+      })()
+    </script>
+  </body>
+</html>

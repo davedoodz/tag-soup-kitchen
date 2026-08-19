@@ -1,0 +1,11 @@
+{
+  "name": "tag-soup-kitchen",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build-archive.mjs",
+    "sync": "node scripts/build-archive.mjs",
+    "serve": "node scripts/serve.mjs"
+  }
+}

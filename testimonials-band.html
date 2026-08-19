@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Testimonials — drifting flip band (AAA styling, real quotes)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================
+   Band A mechanics (from davidlafond.xyz) dressed in AAA's system.
+   Mechanics kept: perspective 1200px on the card, preserve-3d flipper,
+     transform .62s cubic-bezier(.22,1,.36,1), absolute faces with
+     backface-visibility:hidden, back at rotateY(180deg), clipped
+     viewport over a wide track that drifts on its own and can be
+     dragged / swiped / scrolled sideways.
+   Styling swapped to AAA's Paper tokens: white ground, #111 ink,
+     #E6E6E6 hairlines, #F2F2F2 chip, #8A8A8A muted, Manrope only,
+     radius 12, 24px edge, 12px gutter, .12em caps meta.
+   Content is the real testimonial data from david-room-portfolio,
+     folded exactly like the site does: first paragraph on the front,
+     the rest on the back.
+   ========================================================== */
+:root{
+  --paper:#FFFFFF;
+  --ink:#111111;
+  --muted:#8A8A8A;
+  --muted-ink:#6B6B6B;      /* derived: AA-safe secondary prose on white */
+  --hairline:#E6E6E6;
+  --chip:#F2F2F2;
+
+  --sans:"Manrope",system-ui,sans-serif;
+
+  --r-card:12px;
+  --r-pill:999px;
+  --r-ctl:10px;
+
+  --edge:24px;
+  --gut:12px;
+
+  --persp:1200px;
+  --flip:transform .62s cubic-bezier(.22,1,.36,1);
+  --lift:transform .38s cubic-bezier(.33,1,.68,1);
+
+  --w:300px;
+  --h:380px;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:var(--sans);font-weight:500;
+  -webkit-font-smoothing:antialiased;font-synthesis:none;
+}
+:where(button,a){font:inherit;color:inherit;background:none;border:0;}
+:where(button,a):focus-visible{outline:2px solid var(--ink);outline-offset:3px;border-radius:4px;}
+
+.eyebrow{
+  font-family:var(--sans);font-weight:600;font-size:11px;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
+}
+.section{padding:64px 0 72px;}
+.section__head{padding:0 var(--edge);display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:28px;}
+.section__title{margin:6px 0 0;font-size:32px;font-weight:800;letter-spacing:-.03em;line-height:40px;}
+.section__note{max-width:44ch;margin:0;font-size:14px;line-height:22px;color:var(--muted-ink);}
+
+/* ---------------- band ---------------- */
+.band{
+  overflow-x:auto;overflow-y:hidden;
+  overscroll-behavior-x:contain;
+  scrollbar-width:none;cursor:grab;
+  padding:14px 0 18px;
+  mask-image:linear-gradient(to right,transparent 0,#000 80px,#000 calc(100% - 80px),transparent 100%);
+}
+.band::-webkit-scrollbar{display:none;}
+.band.is-dragging{cursor:grabbing;}
+.band__track{display:flex;gap:var(--gut);width:max-content;padding-inline:var(--edge);margin:0;list-style:none;}
+.cell{position:relative;flex-shrink:0;}
+
+/* ---------------- card ---------------- */
+.flip{
+  position:relative;display:block;
+  width:var(--w);height:var(--h);
+  perspective:var(--persp);
+  transition:var(--lift);
+  translate:0;rotate:0deg;scale:1;
+  padding:0;text-align:left;cursor:pointer;
+}
+.flip__inner{
+  display:block;position:relative;width:100%;height:100%;
+  transform-style:preserve-3d;
+  transition:var(--flip);
+  transform:rotateY(0deg);
+  border-radius:var(--r-card);
+}
+.flip__face{
+  position:absolute;inset:0;
+  backface-visibility:hidden;
+  border-radius:var(--r-card);
+  background:var(--paper);
+  border:1px solid var(--hairline);
+  padding:22px;
+  display:flex;flex-direction:column;justify-content:space-between;gap:16px;
+  transition:box-shadow .38s cubic-bezier(.33,1,.68,1),border-color .3s;
+}
+.flip__face--back{transform:rotateY(180deg);background:var(--chip);border-color:transparent;}
+.flip:hover .flip__inner{transform:rotateY(10deg) rotateX(-4deg);}
+.flip[aria-pressed="true"] .flip__inner,
+.flip[aria-pressed="true"]:hover .flip__inner{transform:rotateY(180deg);}
+.flip:hover{scale:1.02;}
+.flip:hover .flip__face{box-shadow:0 16px 40px rgba(17,17,17,.10);border-color:#D8D8D8;}
+
+.q{margin:0;font-size:13px;line-height:19.5px;letter-spacing:-.01em;color:var(--ink);}
+.q--front{
+  flex:1;min-height:0;overflow:hidden;
+  display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:11;
+}
+.back__scroll{
+  flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;
+  display:flex;flex-direction:column;gap:10px;
+}
+.back__scroll .q{color:var(--muted-ink);}
+
+.who{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.who--tight{gap:8px;}
+.pfp{
+  width:40px;height:40px;flex-shrink:0;border-radius:var(--r-pill);
+  object-fit:cover;background:var(--chip);
+}
+.pfp--ini{
+  display:grid;place-items:center;width:32px;height:32px;
+  border:1px solid var(--hairline);background:var(--paper);
+  font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--muted);
+}
+.who__txt{display:grid;gap:2px;min-width:0;}
+.nm{font-size:14px;font-weight:700;letter-spacing:-.01em;}
+.rl{font-size:11px;font-weight:500;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* profile link is a sibling of the button, never nested inside it */
+.profile{
+  position:absolute;top:12px;right:12px;z-index:2;
+  width:28px;height:28px;display:grid;place-items:center;
+  border:1px solid var(--hairline);border-radius:var(--r-pill);
+  background:var(--paper);color:var(--muted);
+  font-size:13px;line-height:1;text-decoration:none;
+}
+.profile:hover{color:var(--ink);border-color:var(--ink);}
+
+.hint{padding:16px var(--edge) 0;display:flex;gap:18px;flex-wrap:wrap;}
+
+@media (prefers-reduced-motion:reduce){
+  .flip__inner{transition:none;transform:none!important;}
+  .flip__face{transition:opacity .2s ease;}
+  .flip__face--back{transform:none;opacity:0;}
+  .flip[aria-pressed="true"] .flip__face--front{opacity:0;}
+  .flip[aria-pressed="true"] .flip__face--back{opacity:1;}
+  .flip:hover{scale:1;}
+}
+</style>
+</head>
+<body>
+<section class="section" aria-labelledby="th">
+  <div class="section__head">
+    <div>
+      <span class="eyebrow">what people say</span>
+      <h2 class="section__title" id="th">Kind words from people I've worked with</h2>
+    </div>
+    <p class="section__note">
+      The band drifts on its own — grab it, swipe it, or scroll sideways to move through it by hand.
+      Click a card to turn it over: the opening is on the front, the rest of the note on the back.
+    </p>
+  </div>
+
+  <div class="band" data-band data-dir="rtl-visual" data-speed="0.32" aria-label="Testimonials">
+    <ul class="band__track" data-track>
+      <li class="cell">
+        <button class="flip" type="button" aria-pressed="false">
+          <span class="flip__inner">
+            <span class="flip__face flip__face--front">
+              <span class="eyebrow">Tekuma Urban Innovation</span>
+              <p class="q q--front">David’s drive for innovation is rare. Many people claim to think outside the box, but few truly possess the skill set to stand out. I know this firsthand; I’ve often been called “weird” for my creative process, and it’s rare to find someone who just gets it—but David does.</p>
+              <span class="who">
+                <img class="pfp" src="assets/pfp/marwan.jpeg" alt="" width="40" height="40" loading="lazy" decoding="async">
+                <span class="who__txt"><span class="nm">Marwan Abou Dib</span><span class="rl">CEO, Tekuma Urban Innovation</span></span>
+              </span>
+            </span>
+            <span class="flip__face flip__face--back">
+              <span class="eyebrow">continued</span>
+              <span class="back__scroll"><p class="q">That ability alone is a special kind of talent.</p></span>
+              <span class="who who--tight">
+                <span class="pfp pfp--ini">MA</span>
+                <span class="who__txt"><span class="nm">Marwan Abou Dib</span><span class="rl">Tekuma Urban Innovation</span></span>
+              </span>
+            </span>
+          </span>
+        </button>
+        <a class="profile" href="https://www.linkedin.com/in/marwanaboudib/" target="_blank" rel="noopener noreferrer" aria-label="Open the profile of Marwan Abou Dib in a new tab">↗</a>
+      </li>
+      <li class="cell">
+        <button class="flip" type="button" aria-pressed="false">
+          <span class="flip__inner">
+            <span class="flip__face flip__face--front">
+              <span class="eyebrow">Pumba</span>
+              <p class="q q--front">I had the opportunity to work with David through the PM Lab program at MIT, where he demonstrated strong leadership, communication skills, and a user-centric approach to product management and design. He effectively led the project, ensuring alignment while delivering well-structured, high-quality designs focused on user needs.</p>
+              <span class="who">
+                <img class="pfp" src="assets/pfp/ofek.jpeg" alt="" width="40" height="40" loading="lazy" decoding="async">
+                <span class="who__txt"><span class="nm">Ofek Zucker</span><span class="rl">CEO, Pumba</span></span>
+              </span>
+            </span>
+            <span class="flip__face flip__face--back">
+              <span class="eyebrow">continued</span>
+              <span class="back__scroll"><p class="q">David’s ability to translate requirements into intuitive, user-friendly solutions, along with his strategic and collaborative mindset, made a significant impact. He would be a valuable asset to any team.</p></span>
+              <span class="who who--tight">
+                <span class="pfp pfp--ini">OZ</span>
+                <span class="who__txt"><span class="nm">Ofek Zucker</span><span class="rl">Pumba</span></span>
+              </span>
+            </span>
+          </span>
+        </button>
+        <a class="profile" href="https://www.linkedin.com/in/ofekzucker/" target="_blank" rel="noopener noreferrer" aria-label="Open the profile of Ofek Zucker in a new tab">↗</a>
+      </li>
+      <li class="cell">
+        <button class="flip" type="button" aria-pressed="false">
+          <span class="flip__inner">
+            <span class="flip__face flip__face--front">
+              <span class="eyebrow">Tekuma Urban Innovation</span>
+              <p class="q q--front">We had the pleasure of working with David for a few years, part-time during his university semesters and full-time over the summers. It might have been a challenge for most, as he was at times working across time zones, and mostly remote, meeting in-person only a few times.</p>
+              <span class="who">
+                <img class="pfp" src="assets/pfp/naomi.jpeg" alt="" width="40" height="40" loading="lazy" decoding="async">
+                <span class="who__txt"><span class="nm">Naomi Hebert</span><span class="rl">Partner, Tekuma Urban Innovation</span></span>
+              </span>
+            </span>
+            <span class="flip__face flip__face--back">
+              <span class="eyebrow">continued</span>
+              <span class="back__scroll"><p class="q">Yet, he truly shined: self-managed and proactive, a real team player, and eager to learn. David was an important member across many of our projects. He has a strong sense of critical thinking, curiosity, and determination. I look forward to seeing what he ventures into next, and our whole team will be rooting for him.</p></span>
+              <span class="who who--tight">
+                <span class="pfp pfp--ini">NH</span>
+                <span class="who__txt"><span class="nm">Naomi Hebert</span><span class="rl">Tekuma Urban Innovation</span></span>
+              </span>
+            </span>
+          </span>
+        </button>
+        <a class="profile" href="https://www.linkedin.com/in/naomi-hebert-763aa64a/" target="_blank" rel="noopener noreferrer" aria-label="Open the profile of Naomi Hebert in a new tab">↗</a>
+      </li>
+      <li class="cell">
+        <button class="flip" type="button" aria-pressed="false">
+          <span class="flip__inner">
+            <span class="flip__face flip__face--front">
+              <span class="eyebrow">MIT DesignX</span>
+              <p class="q q--front">My most direct professional experience with David was during a master planning competition in Saudi Arabia in 2022. The project was remarkable in both its scale and complexity, requiring a high level of coordination and presenting a true challenge for the entire team.</p>
+              <span class="who">
+                <img class="pfp" src="assets/pfp/dennis.jpeg" alt="" width="40" height="40" loading="lazy" decoding="async">
+                <span class="who__txt"><span class="nm">Dennis Frenchman</span><span class="rl">Founder and Chair, MIT DesignX</span></span>
+              </span>
+            </span>
+            <span class="flip__face flip__face--back">
+              <span class="eyebrow">continued</span>
+              <span class="back__scroll"><p class="q">Throughout the project, David stood out for his ability to work seamlessly with our team and a diverse group of external experts. His skill in navigating this multidisciplinary environment while developing innovative design solutions was particularly impressive.</p><p class="q">I’m certain that David’s curiosity, team spirit, and strong work ethic would make him a valuable asset to any creative project.</p></span>
+              <span class="who who--tight">
+                <span class="pfp pfp--ini">DF</span>
+                <span class="who__txt"><span class="nm">Dennis Frenchman</span><span class="rl">MIT DesignX</span></span>
+              </span>
+            </span>
+          </span>
+        </button>
+        <a class="profile" href="https://lcau.mit.edu/people/dennis-frenchman" target="_blank" rel="noopener noreferrer" aria-label="Open the profile of Dennis Frenchman in a new tab">↗</a>
+      </li>
+      <li class="cell">
+        <button class="flip" type="button" aria-pressed="false">
+          <span class="flip__inner">
+            <span class="flip__face flip__face--front">
+              <span class="eyebrow">Tekuma</span>
+              <p class="q q--front">I&#x27;ve had the pleasure of working closely with David on several large-scale master planning projects, and I am continually impressed by his strong design instinct. As an urban designer, David consistently brings innovative and creative solutions to every project we undertake together.</p>
+              <span class="who">
+                <img class="pfp" src="assets/pfp/wenchi.jpeg" alt="" width="40" height="40" loading="lazy" decoding="async">
+                <span class="who__txt"><span class="nm">Wenchi Yang</span><span class="rl">Senior Project Manager, Tekuma</span></span>
+              </span>
+            </span>
+            <span class="flip__face flip__face--back">
+              <span class="eyebrow">continued</span>
+              <span class="back__scroll"><p class="q">David&#x27;s collaborative and engaging nature shines through in both team interactions and client meetings. His exceptional ability to understand and translate client needs into effective design solutions fosters a positive and productive working environment.</p><p class="q">What truly sets David apart is his potential to become a strong leader. His visionary approach and dedication to creating sustainable urban master plans are qualities that will undoubtedly propel him forward in his career. His contributions have been invaluable, and I am excited to see the amazing achievements that lie ahead for him.</p></span>
+              <span class="who who--tight">
+                <span class="pfp pfp--ini">WY</span>
+                <span class="who__txt"><span class="nm">Wenchi Yang</span><span class="rl">Tekuma</span></span>
+              </span>
+            </span>
+          </span>
+        </button>
+        <a class="profile" href="https://www.linkedin.com/in/wenchi-yang/" target="_blank" rel="noopener noreferrer" aria-label="Open the profile of Wenchi Yang in a new tab">↗</a>
+      </li>
+      <li class="cell">
+        <button class="flip" type="button" aria-pressed="false">
+          <span class="flip__inner">
+            <span class="flip__face flip__face--front">
+              <span class="eyebrow">Crebit (a16z Speedrun)</span>
+              <p class="q q--front">Also, any chance I could get a copy of your portfolio to show my co-founder what a cracked designer you are. No worries if not!</p>
+              <span class="who">
+                <img class="pfp" src="assets/pfp/jensen.jpeg" alt="" width="40" height="40" loading="lazy" decoding="async">
+                <span class="who__txt"><span class="nm">Jensen Coonradt</span><span class="rl">CEO, Crebit (a16z Speedrun)</span></span>
+              </span>
+            </span>
+            <span class="flip__face flip__face--back">
+              <span class="eyebrow">who said it</span>
+              <span class="back__scroll"><p class="q">CEO, Crebit (a16z Speedrun)</p></span>
+              <span class="who who--tight">
+                <span class="pfp pfp--ini">JC</span>
+                <span class="who__txt"><span class="nm">Jensen Coonradt</span><span class="rl">Crebit (a16z Speedrun)</span></span>
+              </span>
+            </span>
+          </span>
+        </button>
+        <a class="profile" href="https://www.linkedin.com/in/jcoonradt/" target="_blank" rel="noopener noreferrer" aria-label="Open the profile of Jensen Coonradt in a new tab">↗</a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="hint">
+    <span class="eyebrow">drag · swipe · scroll sideways</span>
+    <span class="eyebrow">click to flip</span>
+    <span class="eyebrow">hover to hold</span>
+  </div>
+</section>
+
+<script>
+function syncFaces(card){
+  const flipped = card.getAttribute("aria-pressed") === "true";
+  const front = card.querySelector(".flip__face--front");
+  const back  = card.querySelector(".flip__face--back");
+  [[front, flipped], [back, !flipped]].forEach(([face, hidden]) => {
+    face.inert = hidden;
+    face.setAttribute("aria-hidden", String(hidden));
+  });
+  const who = card.querySelector(".nm").textContent;
+  card.setAttribute("aria-label", (flipped ? "Hide the rest of" : "Read the rest of") + " the note from " + who);
+}
+
+document.querySelectorAll("[data-band]").forEach((band) => {
+  const track = band.querySelector("[data-track]");
+
+  /* duplicate the set once so the drift can loop seamlessly */
+  const originals = [...track.children];
+  originals.forEach(syncFaces.bind(null));
+  originals.forEach((li) => {
+    const clone = li.cloneNode(true);
+    clone.setAttribute("aria-hidden", "true");
+    clone.querySelectorAll("button,a").forEach((el) => { el.tabIndex = -1; });
+    track.append(clone);
+  });
+  track.querySelectorAll(".flip").forEach(syncFaces);
+
+  const half = () => track.scrollWidth / 2;
+  if (band.dataset.dir === "rtl-visual") band.scrollLeft = half();
+
+  let paused = false, resumeTimer = 0;
+  const speed = Number(band.dataset.speed) || 0.3;
+  const dir = band.dataset.dir === "rtl-visual" ? -1 : 1;
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)");
+
+  /* own float accumulator: scrollLeft rounds on read, so += 0.32 would stall */
+  let pos = band.scrollLeft;
+  const resync = () => { pos = band.scrollLeft; };
+
+  const step = () => {
+    if (!paused && !reduce.matches && !band.matches(":hover") && !band.contains(document.activeElement)) {
+      pos += dir * speed;
+      if (pos <= 0) pos += half();
+      else if (pos >= half()) pos -= half();
+      band.scrollLeft = pos;
+    }
+    requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+
+  band.addEventListener("wheel", () => {
+    paused = true; resync();
+    clearTimeout(resumeTimer);
+    resumeTimer = setTimeout(() => { paused = false; }, 700);
+  }, {passive:true});
+
+  let down = false, startX = 0, startLeft = 0, moved = 0;
+  band.addEventListener("pointerdown", (e) => {
+    if (e.target.closest(".profile")) return;
+    down = true; paused = true; moved = 0;
+    startX = e.clientX; startLeft = band.scrollLeft;
+    band.classList.add("is-dragging");
+  });
+  band.addEventListener("pointermove", (e) => {
+    if (!down) return;
+    const dx = e.clientX - startX;
+    moved = Math.max(moved, Math.abs(dx));
+    band.scrollLeft = startLeft - dx;
+  });
+  const release = () => {
+    if (!down) return;
+    down = false; paused = false; resync();
+    band.classList.remove("is-dragging");
+  };
+  band.addEventListener("pointerup", release);
+  band.addEventListener("pointercancel", release);
+  band.addEventListener("pointerleave", release);
+
+  band.addEventListener("click", (e) => {
+    if (e.target.closest(".profile")) return;
+    const card = e.target.closest(".flip");
+    if (!card || moved > 6) return;
+    card.setAttribute("aria-pressed", card.getAttribute("aria-pressed") === "true" ? "false" : "true");
+    syncFaces(card);
+  });
+});
+</script>
+</body>
+</html>

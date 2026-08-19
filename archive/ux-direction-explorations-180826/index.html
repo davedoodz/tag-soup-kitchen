@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Five portfolio UX directions to explore, accept, reject, or comment on."
+    />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 44'%3E%3Cpath d='M0 44V0h27.5C38.82 0 48 9.18 48 20.5V44H33.5V22c0-4.14-3.36-7.5-7.5-7.5H14.5V44H0Z'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="../../shared/acolorbright.css" />
+    <title>UX direction explorations — 18.08.26</title>
+    <style>
+      .verdict {
+        color: var(--color-graphite);
+      }
+
+      .verdict[data-verdict='accepted'],
+      .verdict[data-verdict='rejected'] {
+        color: var(--color-ink-black);
+      }
+
+      .hub-row__note {
+        grid-column: 2 / -1;
+        color: var(--color-graphite);
+        font-size: var(--text-caption);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header class="nav">
+        <span class="nav__wordmark">David Lafond Designs</span>
+        <div class="nav__actions">
+          <a class="nav__link" href="../../hub.html">Hub</a>
+          <a class="nav__link" href="../index.html">Archive</a>
+          <span aria-hidden="true" class="nav__menu">
+            <span></span>
+            <span></span>
+            <span></span>
+          </span>
+        </div>
+      </header>
+
+      <section class="hero hero--compact">
+        <h1 class="hero__statement">
+          Archived 18.08.26. Five ways the portfolio could behave, reviewed in one sitting: the
+          contact sheet grid and the split browser were accepted, the other three were not.
+        </h1>
+        <p class="hero__meta">
+          Kept as a record of the round rather than as live work. Every direction still runs, still
+          shows the same twelve placeholder projects, and still writes verdicts to
+          feedback/reviews.json while “npm run sites” is running.
+        </p>
+      </section>
+
+      <section class="chapter">
+        <h2 class="chapter__heading"><span class="chapter__badge">1</span>Directions</h2>
+        <ul class="hub-list">
+          <li class="hub-row">
+            <span class="caption">01</span>
+            <span><a href="01-grid-index.html">Contact sheet grid</a></span>
+            <span class="hub-row__description">
+              Dense uniform grid, live filters, inline overlay. Optimises for scanning a large body
+              of work fast.
+            </span>
+            <span class="hub-row__port"><a href="http://localhost:4192/">4192</a></span>
+          </li>
+          <li class="hub-row">
+            <span class="caption">02</span>
+            <span><a href="02-editorial-scroll.html">Editorial scroll</a></span>
+            <span class="hub-row__description">
+              One project per screen, oversized type, scroll-snap. Optimises for narrative and
+              impact over speed.
+            </span>
+            <span class="hub-row__port"><a href="http://localhost:4193/">4193</a></span>
+          </li>
+          <li class="hub-row">
+            <span class="caption">03</span>
+            <span><a href="03-split-browser.html">Split browser</a></span>
+            <span class="hub-row__description">
+              Persistent list beside a preview pane. Optimises for comparison and repeat visits.
+            </span>
+            <span class="hub-row__port"><a href="http://localhost:4194/">4194</a></span>
+          </li>
+          <li class="hub-row">
+            <span class="caption">04</span>
+            <span><a href="04-fullscreen-reel.html">Fullscreen reel</a></span>
+            <span class="hub-row__description">
+              One project owns the screen, arrow or swipe to advance. Optimises for presenting live.
+            </span>
+            <span class="hub-row__port"><a href="http://localhost:4195/">4195</a></span>
+          </li>
+          <li class="hub-row">
+            <span class="caption">05</span>
+            <span><a href="05-command-index.html">Command index</a></span>
+            <span class="hub-row__description">
+              Keyboard-first searchable index with a command palette. Optimises for depth and
+              recall.
+            </span>
+            <span class="hub-row__port"><a href="http://localhost:4196/">4196</a></span>
+          </li>
+          <li class="hub-row">
+            <span class="caption">06</span>
+            <span><a href="../ux-flow-wireframes-180826/index.html">UX flows — wireframes</a></span>
+            <span class="hub-row__description">
+              Four low-fidelity flows behind these directions, with a device toggle.
+            </span>
+            <span class="hub-row__port"><a href="http://localhost:4197/">4197</a></span>
+          </li>
+        </ul>
+      </section>
+
+      <section class="chapter">
+        <h2 class="chapter__heading"><span class="chapter__badge">2</span>Your decisions</h2>
+        <p class="chapter__body">
+          Live from feedback/reviews.json. Nothing here yet means nothing has been judged yet.
+        </p>
+        <ul class="hub-list" id="decisions"></ul>
+      </section>
+
+      <footer class="footer">
+        David Lafond Designs — archived review round, 18.08.26.
+        <a href="../index.html">Back to the archive</a>.
+      </footer>
+    </div>
+
+    <script>
+      const board = document.getElementById('decisions')
+
+      const fallback = () => {
+        const entries = {}
+        for (let index = 0; index < localStorage.length; index += 1) {
+          const key = localStorage.key(index)
+          if (!key?.startsWith('design-review:')) continue
+          try {
+            entries[key.slice('design-review:'.length)] = JSON.parse(localStorage.getItem(key))
+          } catch {
+            /* ignore malformed entry */
+          }
+        }
+        return entries
+      }
+
+      const render = (entries, source) => {
+        const rows = Object.entries(entries)
+        if (rows.length === 0) {
+          board.innerHTML =
+            '<li class="hub-row"><span class="caption">—</span><span>No verdicts yet</span><span class="hub-row__description">Open a direction and use the bar at the bottom.</span><span class="hub-row__port"></span></li>'
+          return
+        }
+
+        board.innerHTML = rows
+          .map(([id, entry], index) => {
+            const verdict = entry.verdict ?? 'no verdict'
+            const comment = entry.comment ? `“${entry.comment}”` : '—'
+            return `<li class="hub-row">
+              <span class="caption">${String(index + 1).padStart(2, '0')}</span>
+              <span>${entry.title ?? id}</span>
+              <span class="hub-row__description">${comment}</span>
+              <span class="hub-row__port verdict" data-verdict="${entry.verdict ?? ''}">${verdict}</span>
+            </li>`
+          })
+          .join('')
+
+        const note = document.createElement('li')
+        note.className = 'hub-row'
+        note.innerHTML = `<span class="caption"></span><span class="hub-row__note">Source: ${source}</span>`
+        board.append(note)
+      }
+
+      fetch('/api/review')
+        .then((response) => (response.ok ? response.json() : Promise.reject(response.status)))
+        .then((entries) => render(entries, 'feedback/reviews.json'))
+        .catch(() => render(fallback(), 'this browser (review API not running)'))
+    </script>
+  </body>
+</html>
