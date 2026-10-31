@@ -1,13 +1,3 @@
-<pre>
-   ┌───┐┌───┐┌───┐   ┌─┐┌─┐┌─┐┌─┐
-   │&lt;t&gt;││&lt;a&gt;││&lt;g&gt;│   │s││o││u││p│
-   └───┘└───┘└───┘   └─┘└─┘└─┘└─┘
-        ░░░░░░░░░░░░░░░░░░░░░░
-        ░  K I T C H E N  ░
-        ░░░░░░░░░░░░░░░░░░░░░░
-   stir ⟶ simmer ⟶ serve ⟶ archive
-</pre>
-
 # Tag Soup Kitchen
 
 A minimalist long-term archive of every HTML surface I've ever shipped — design explorations, UX prototypes, motion studies, and finished project snapshots, all kept as plain, self-contained HTML files so they still render in ten years with zero dependencies.
